@@ -11,7 +11,7 @@ import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 
-import java.time.Instant;
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -19,10 +19,10 @@ import java.util.Map;
 @Slf4j
 @RestController
 @RequestMapping("/films")
-public class FilmController {
+public abstract class FilmController {
     private final Map<Integer, Film> films = new HashMap<>();
     final int maxDescriptionLength = 200;
-    final Instant minReleaseDate = Instant.parse("1985-12-28");
+    final LocalDate minReleaseDate = LocalDate.of(1895,12,28);
 
 
     @GetMapping
@@ -39,10 +39,10 @@ public class FilmController {
                 return "Фильм с таким названием уже есть в списке.";
             }
         }
-        if (film.getDuration().toMinutes() <= 0) {
+        if (film.getDuration() <= 0) {
            return "Продолжительность фильма должна быть положительным числом.";
         }
-        if (film.getDescription().length() > maxDescriptionLength) {
+        if (film.getDescription().length() >= maxDescriptionLength) {
             return "Максимальная длина описания не должна превышать 200 символов.";
         }
         if (film.getReleaseDate().isBefore(minReleaseDate)) {
