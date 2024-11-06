@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.controller;
 
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -22,7 +23,7 @@ import java.util.Map;
 public abstract class FilmController {
     private final Map<Integer, Film> films = new HashMap<>();
     final int maxDescriptionLength = 200;
-    final LocalDate minReleaseDate = LocalDate.of(1895,12,28);
+    final LocalDate minReleaseDate = LocalDate.of(1895, 12, 28);
 
 
     @GetMapping
@@ -40,7 +41,7 @@ public abstract class FilmController {
             }
         }
         if (film.getDuration() <= 0) {
-           return "Продолжительность фильма должна быть положительным числом.";
+            return "Продолжительность фильма должна быть положительным числом.";
         }
         if (film.getDescription().length() >= maxDescriptionLength) {
             return "Максимальная длина описания не должна превышать 200 символов.";
@@ -52,17 +53,18 @@ public abstract class FilmController {
     }
 
     @PostMapping
-    public Film addFilm(@RequestBody Film film) {
+    public Film addFilm(@Valid @RequestBody Film film) {
         if (!filmValidator(film).equals("true")) {
             log.error(filmValidator(film));
             throw new ValidationException(filmValidator(film));
         }
-
-        film.setId(getNextId());
+        if (film.getId() == null) {
+            film.setId(getNextId());
+        }
         films.put(film.getId(), film);
         log.info("Добавлен новыйфильм {}", film.getName());
 
-    return film;
+        return film;
     }
 
     private int getNextId() {
@@ -75,7 +77,7 @@ public abstract class FilmController {
     }
 
     @PutMapping
-    public Film updateFilm(@RequestBody Film newFilm) {
+    public Film updateFilm(@Valid @RequestBody Film newFilm) {
         if (newFilm.getId() == null) {
             log.error("id должен быть указан.");
             throw new ValidationException("id должен быть указан.");
@@ -86,7 +88,9 @@ public abstract class FilmController {
                 throw new ValidationException(filmValidator(newFilm));
             }
             Film oldFilm = films.get(newFilm.getId());
-            oldFilm.setDescription(newFilm.getDescription());
+            if (newFilm.getDescription() != null) {
+                oldFilm.setDescription(newFilm.getDescription());
+            }
             oldFilm.setName(newFilm.getName());
             oldFilm.setReleaseDate(newFilm.getReleaseDate());
             oldFilm.setDuration(newFilm.getDuration());

@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.controller;
 
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -11,7 +12,6 @@ import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 
-import java.time.Instant;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.HashMap;
@@ -64,7 +64,7 @@ public class UserController {
     }
 
     @PostMapping
-    public User addUser(@RequestBody User user) {
+    public User addUser(@Valid @RequestBody User user) {
         if (!userValidator(user).equals("true")) {
             log.error(userValidator(user));
             throw new ValidationException(userValidator(user));
@@ -74,7 +74,9 @@ public class UserController {
             log.warn("Имя не передано, его заменит логин.");
         }
 
-        user.setId(getNextId());
+        if (user.getId() == null) {
+            user.setId(getNextId());
+        }
         users.put(user.getId(), user);
         log.info("Создан новый пользователь.");
 
@@ -82,7 +84,7 @@ public class UserController {
     }
 
     @PutMapping
-    public User updateUser(@RequestBody User newUser) {
+    public User updateUser(@Valid @RequestBody User newUser) {
         if (newUser.getId() == null) {
             log.error("Id не куказан.");
             throw new ValidationException("Id должен быть указан");
@@ -94,7 +96,11 @@ public class UserController {
             }
 
             User oldUser = users.get(newUser.getId());
-            oldUser.setName(newUser.getName());
+            if (newUser.getName() != null) {
+                oldUser.setName(newUser.getName());
+            } else {
+                oldUser.setName(newUser.getLogin());
+            }
             oldUser.setBirthday(newUser.getBirthday());
             oldUser.setLogin(newUser.getLogin());
             oldUser.setEmail(newUser.getEmail());
