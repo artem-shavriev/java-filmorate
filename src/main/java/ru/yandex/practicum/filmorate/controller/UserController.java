@@ -12,6 +12,7 @@ import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -37,12 +38,17 @@ public class UserController {
             }
         }
         if (user.getEmail().indexOf("@") < 0) {
-            return "Электронная почта должна должна содержать @";
+            return "Электронная почта должна содержать @";
         }
         if (user.getLogin() == null || user.getLogin().isBlank() || user.getLogin().indexOf(' ') >= 0) {
             return "Логин не может быть пустым и содержать пробелы.";
         }
-        if (user.getBirthday().isAfter(Instant.now())) {
+        for (User u: users.values()) {
+            if (u.getLogin().equals(user.getLogin())) {
+                return "Такой логин уже существует.";
+            }
+        }
+        if (user.getBirthday().isAfter(LocalDate.now())) {
             return "Дата рождения не может быть в будущем.";
         }
         return "true";
@@ -70,7 +76,7 @@ public class UserController {
 
         user.setId(getNextId());
         users.put(user.getId(), user);
-        log.info("Создан новый польхователь.");
+        log.info("Создан новый пользователь.");
 
         return user;
     }

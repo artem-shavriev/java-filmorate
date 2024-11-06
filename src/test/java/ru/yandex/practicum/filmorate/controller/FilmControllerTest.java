@@ -3,12 +3,14 @@ package ru.yandex.practicum.filmorate.controller;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -150,5 +152,36 @@ public class FilmControllerTest {
 
         assertEquals(2, filmController.getFilms().size(),
                 "Фильм не добавлен из за граничного значения длительности 1 минута.");
+    }
+
+    @Test
+    public void shouldUpdateFilm() {
+        Film filmForUpdate = new Film();
+        filmForUpdate.setId(1);
+        filmForUpdate.setName("UpdateNew film");
+        filmForUpdate.setReleaseDate(LocalDate.of(2022, 9, 9));
+        filmForUpdate.setDescription("Update Description of new film");
+        filmForUpdate.setDuration(125);
+        Film update = filmController.updateFilm(filmForUpdate);
+
+        assertEquals("UpdateNew film", update.getName(), "Название фильма не обновлено.");
+        assertEquals("Update Description of new film", update.getDescription(),
+                "Описание фильма не обновлено.");
+        assertEquals(125, update.getDuration(), "Длительность фильма не обновлена.");
+        assertEquals(LocalDate.of(2022, 9, 9), update.getReleaseDate(),
+                "Дата выхода фильма не обновлена.");
+    }
+
+    @Test
+    public void shouldNotUpdateFilmWthNonExistentId() {
+        Film filmForUpdate = new Film();
+        filmForUpdate.setId(11);
+        filmForUpdate.setName("UpdateNew film");
+        filmForUpdate.setReleaseDate(LocalDate.of(2024, 9, 9));
+        filmForUpdate.setDescription("Description of new film");
+        filmForUpdate.setDuration(120);
+
+        assertThrows(NotFoundException.class, () -> filmController.updateFilm(filmForUpdate),
+                "Исключение не было выброшено из-за несуществующего id.");
     }
 }
