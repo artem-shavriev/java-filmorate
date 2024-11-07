@@ -72,7 +72,7 @@ public class FilmControllerTest {
         testFilm.setDuration(130);
 
         assertThrows(ValidationException.class, () -> filmController.addFilm(testFilm),
-                "Должно выбрасываться исключение валидации из-за отсутствия названия.");
+                "Исключение валидации из-за отсутствия названия не выброшено.");
 
         Film testFilm2 = new Film();
         testFilm.setReleaseDate(LocalDate.of(2020, 2, 2));
@@ -80,7 +80,7 @@ public class FilmControllerTest {
         testFilm.setDuration(130);
 
         assertThrows(ValidationException.class, () -> filmController.addFilm(testFilm2),
-                "Должно выбрасываться исключение валидации из-за отсутствия названия.");
+                "Исключение валидации из-за отсутствия названия не выброшено.");
     }
 
     @Test
@@ -94,7 +94,7 @@ public class FilmControllerTest {
         testFilm.setDuration(130);
 
         assertThrows(ValidationException.class, () -> filmController.addFilm(testFilm),
-                "Должно выбрасываться исключение валидации из-за описания более 200 символов.");
+                "Исключение валидации из-за описания более 200 символов не выброшено.");
 
         Film testFilm2 = new Film();
         testFilm2.setName("Test film2");
@@ -118,7 +118,7 @@ public class FilmControllerTest {
         testFilm.setDuration(130);
 
         assertThrows(ValidationException.class, () -> filmController.addFilm(testFilm),
-                "Должно выбрасываться исключение валидации из-за даты выхода.");
+                "Исключение валидации из-за некорректной даты выхода не выброшено.");
 
         Film testFilm2 = new Film();
         testFilm2.setName("New film 2");
@@ -128,7 +128,7 @@ public class FilmControllerTest {
         filmController.addFilm(testFilm2);
 
         assertEquals(2, filmController.getFilms().size(),
-                "Фильм не добавлен из за граничного значения даты выхода.");
+                "Фильм не добавлен из-за граничного значения даты выхода.");
     }
 
     @Test
@@ -140,7 +140,16 @@ public class FilmControllerTest {
         testFilm.setDuration(-1);
 
         assertThrows(ValidationException.class, () -> filmController.addFilm(testFilm),
-                "Должно выбрасываться исключение валидации из-за отрицательной длительности.");
+                "Исключение валидации из-за отрицательной длительности не выброшено.");
+
+        Film testFilm3 = new Film();
+        testFilm3.setName("Test film");
+        testFilm3.setReleaseDate(LocalDate.of(2024, 2, 2));
+        testFilm3.setDescription("Description of Test film");
+        testFilm3.setDuration(0);
+
+        assertThrows(ValidationException.class, () -> filmController.addFilm(testFilm),
+                "Исключение валидации из-за длительности в 0 минут не выброшено.");
 
         Film testFilm2 = new Film();
         testFilm2.setName("Test film2");
@@ -150,13 +159,13 @@ public class FilmControllerTest {
         filmController.addFilm(testFilm2);
 
         assertEquals(2, filmController.getFilms().size(),
-                "Фильм не добавлен из за граничного значения длительности 1 минута.");
+                "Фильм не добавлен из-за граничного значения длительности 1 минута.");
     }
 
     @Test
     public void shouldUpdateFilm() {
         Film filmForUpdate = new Film();
-        filmForUpdate.setId(1);
+        filmForUpdate.setId(1l);
         filmForUpdate.setName("UpdateNew film");
         filmForUpdate.setReleaseDate(LocalDate.of(2022, 9, 9));
         filmForUpdate.setDescription("Update Description of new film");
@@ -174,13 +183,13 @@ public class FilmControllerTest {
     @Test
     public void shouldNotUpdateFilmWthNonExistentId() {
         Film filmForUpdate = new Film();
-        filmForUpdate.setId(11);
+        filmForUpdate.setId(11l);
         filmForUpdate.setName("UpdateNew film");
         filmForUpdate.setReleaseDate(LocalDate.of(2024, 9, 9));
         filmForUpdate.setDescription("Description of new film");
         filmForUpdate.setDuration(120);
 
         assertThrows(NotFoundException.class, () -> filmController.updateFilm(filmForUpdate),
-                "Исключение не было выброшено из-за несуществующего id.");
+                "Исключение из-за несуществующего id не было выброшено.");
     }
 }

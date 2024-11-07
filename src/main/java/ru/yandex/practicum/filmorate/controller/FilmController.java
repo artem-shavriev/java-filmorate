@@ -1,6 +1,5 @@
 package ru.yandex.practicum.filmorate.controller;
 
-import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -21,13 +20,14 @@ import java.util.Map;
 @RestController
 @RequestMapping("/films")
 public abstract class FilmController {
-    private final Map<Integer, Film> films = new HashMap<>();
+    private final Map<Long, Film> films = new HashMap<>();
     final int maxDescriptionLength = 200;
     final LocalDate minReleaseDate = LocalDate.of(1895, 12, 28);
 
 
     @GetMapping
     public Collection<Film> getFilms() {
+        log.info("Получен список фильмов.");
         return films.values();
     }
 
@@ -53,7 +53,7 @@ public abstract class FilmController {
     }
 
     @PostMapping
-    public Film addFilm(@Valid @RequestBody Film film) {
+    public Film addFilm(@RequestBody Film film) {
         if (!filmValidator(film).equals("true")) {
             log.error(filmValidator(film));
             throw new ValidationException(filmValidator(film));
@@ -62,22 +62,22 @@ public abstract class FilmController {
             film.setId(getNextId());
         }
         films.put(film.getId(), film);
-        log.info("Добавлен новыйфильм {}", film.getName());
+        log.info("Добавлен новыйфильм {} с id: {}", film.getName(), film.getId());
 
         return film;
     }
 
-    private int getNextId() {
-        int currentMaxId = films.keySet()
+    private long getNextId() {
+        long currentMaxId = films.keySet()
                 .stream()
-                .mapToInt(id -> id)
+                .mapToLong(id -> id)
                 .max()
                 .orElse(0);
         return ++currentMaxId;
     }
 
     @PutMapping
-    public Film updateFilm(@Valid @RequestBody Film newFilm) {
+    public Film updateFilm(@RequestBody Film newFilm) {
         if (newFilm.getId() == null) {
             log.error("id должен быть указан.");
             throw new ValidationException("id должен быть указан.");
@@ -94,7 +94,7 @@ public abstract class FilmController {
             oldFilm.setName(newFilm.getName());
             oldFilm.setReleaseDate(newFilm.getReleaseDate());
             oldFilm.setDuration(newFilm.getDuration());
-            log.info("Фильм был обновлен.");
+            log.info("Фильм {} был обновлен.", oldFilm.getName());
             return oldFilm;
         }
         log.error("Фильм с id = {} не найден", newFilm.getId());

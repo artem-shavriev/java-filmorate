@@ -1,6 +1,5 @@
 package ru.yandex.practicum.filmorate.controller;
 
-import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -21,10 +20,11 @@ import java.util.Map;
 @RestController
 @RequestMapping("/users")
 public class UserController {
-    private final Map<Integer, User> users = new HashMap<>();
+    private final Map<Long, User> users = new HashMap<>();
 
     @GetMapping
     public Collection<User> getUsers() {
+        log.info("Получен список пользователей.");
         return users.values();
     }
 
@@ -54,37 +54,37 @@ public class UserController {
         return "true";
     }
 
-    private int getNextId() {
-        int currentMaxId = users.keySet()
+    private long getNextId() {
+        long currentMaxId = users.keySet()
                 .stream()
-                .mapToInt(id -> id)
+                .mapToLong(id -> id)
                 .max()
                 .orElse(0);
         return ++currentMaxId;
     }
 
     @PostMapping
-    public User addUser(@Valid @RequestBody User user) {
+    public User addUser(@RequestBody User user) {
         if (!userValidator(user).equals("true")) {
             log.error(userValidator(user));
             throw new ValidationException(userValidator(user));
         }
         if (user.getName() == null || user.getName().isBlank()) {
             user.setName(user.getLogin());
-            log.warn("Имя не передано, его заменит логин.");
+            log.warn("Имя не передано, его заменит логин пользователя.");
         }
 
         if (user.getId() == null) {
             user.setId(getNextId());
         }
         users.put(user.getId(), user);
-        log.info("Создан новый пользователь.");
+        log.info("Создан новый пользователь c id: {}", user.getId());
 
         return user;
     }
 
     @PutMapping
-    public User updateUser(@Valid @RequestBody User newUser) {
+    public User updateUser(@RequestBody User newUser) {
         if (newUser.getId() == null) {
             log.error("Id не куказан.");
             throw new ValidationException("Id должен быть указан");
@@ -99,12 +99,13 @@ public class UserController {
             if (newUser.getName() != null) {
                 oldUser.setName(newUser.getName());
             } else {
+                log.info("Логин добвален в качестве имени пользователя.");
                 oldUser.setName(newUser.getLogin());
             }
             oldUser.setBirthday(newUser.getBirthday());
             oldUser.setLogin(newUser.getLogin());
             oldUser.setEmail(newUser.getEmail());
-            log.info("Добавлен новый пользователь.");
+            log.info("Пользователь c id: {} обновлен", oldUser.getId());
 
             return oldUser;
         }
