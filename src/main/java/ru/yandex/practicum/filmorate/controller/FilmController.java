@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.controller;
 
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -19,11 +20,10 @@ import java.util.Map;
 @Slf4j
 @RestController
 @RequestMapping("/films")
-public abstract class FilmController {
+public class FilmController {
     private final Map<Long, Film> films = new HashMap<>();
     final int maxDescriptionLength = 200;
     final LocalDate minReleaseDate = LocalDate.of(1895, 12, 28);
-
 
     @GetMapping
     public Collection<Film> getFilms() {
@@ -53,7 +53,7 @@ public abstract class FilmController {
     }
 
     @PostMapping
-    public Film addFilm(@RequestBody Film film) {
+    public Film addFilm(@Valid @RequestBody Film film) {
         if (!filmValidator(film).equals("true")) {
             log.error(filmValidator(film));
             throw new ValidationException(filmValidator(film));
@@ -77,7 +77,7 @@ public abstract class FilmController {
     }
 
     @PutMapping
-    public Film updateFilm(@RequestBody Film newFilm) {
+    public Film updateFilm(@Valid @RequestBody Film newFilm) {
         if (newFilm.getId() == null) {
             log.error("id должен быть указан.");
             throw new ValidationException("id должен быть указан.");
