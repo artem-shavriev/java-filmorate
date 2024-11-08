@@ -165,7 +165,7 @@ public class FilmControllerTest {
     @Test
     public void shouldUpdateFilm() {
         Film filmForUpdate = new Film();
-        filmForUpdate.setId(1l);
+        filmForUpdate.setId(1L);
         filmForUpdate.setName("UpdateNew film");
         filmForUpdate.setReleaseDate(LocalDate.of(2022, 9, 9));
         filmForUpdate.setDescription("Update Description of new film");
@@ -183,7 +183,7 @@ public class FilmControllerTest {
     @Test
     public void shouldNotUpdateFilmWthNonExistentId() {
         Film filmForUpdate = new Film();
-        filmForUpdate.setId(11l);
+        filmForUpdate.setId(11L);
         filmForUpdate.setName("UpdateNew film");
         filmForUpdate.setReleaseDate(LocalDate.of(2024, 9, 9));
         filmForUpdate.setDescription("Description of new film");

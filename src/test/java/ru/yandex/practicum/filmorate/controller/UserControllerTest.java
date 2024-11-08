@@ -141,7 +141,7 @@ public class UserControllerTest {
     @Test
     public void shouldUpdateUser() {
         User updateUser = new User();
-        updateUser.setId(1l);
+        updateUser.setId(1L);
         updateUser.setName("Update User");
         updateUser.setEmail("@UpdateUser1.com");
         updateUser.setLogin("UpdateUserLogin");
@@ -159,7 +159,7 @@ public class UserControllerTest {
     @Test
     public void shouldNotUpdateUserWthNonExistentId() {
         User updateUser = new User();
-        updateUser.setId(11l);
+        updateUser.setId(11L);
         updateUser.setName("Update User");
         updateUser.setEmail("@UpdateUser1.com");
         updateUser.setLogin("UpdateUserLogin");
