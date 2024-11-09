@@ -22,7 +22,7 @@ import java.util.Map;
 @RequestMapping("/films")
 public class FilmController extends IdGenerator {
     private final Map<Long, Film> films = new HashMap<>();
-    private final static LocalDate MIN_RELEASE_DATE = LocalDate.of(1895, 12, 28);
+    private static LocalDate MIN_RELEASE_DATE = LocalDate.of(1895, 12, 28);
 
     @GetMapping
     public Collection<Film> getFilms() {
