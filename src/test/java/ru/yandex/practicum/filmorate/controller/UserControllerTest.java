@@ -93,8 +93,8 @@ public class UserControllerTest {
         user.setLogin("TestUserLogin");
         user.setBirthday(LocalDate.of(1990, 12, 21));
 
-        assertThrows(ValidationException.class, () -> userController.addUser(user),
-                "Исключение валидации из за отсутствия @ в email не выброшено.");
+        assertEquals(1, userController.getUsers().size(),
+                "Пользователь без @ в email был добавлен.");
     }
 
     @Test

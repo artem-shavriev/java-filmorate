@@ -20,10 +20,9 @@ import java.util.Map;
 @Slf4j
 @RestController
 @RequestMapping("/films")
-public class FilmController {
+public class FilmController extends IdGenerator {
     private final Map<Long, Film> films = new HashMap<>();
-    final int maxDescriptionLength = 200;
-    final LocalDate minReleaseDate = LocalDate.of(1895, 12, 28);
+    private final LocalDate MIN_RELEASE_DATE = LocalDate.of(1895, 12, 28);
 
     @GetMapping
     public Collection<Film> getFilms() {
@@ -31,49 +30,31 @@ public class FilmController {
         return films.values();
     }
 
-    public String filmValidator(Film film) {
+    private void filmValidator(Film film) {
         if (film.getName() == null || film.getName().isBlank()) {
-            return "Название фильма не может быть пустым.";
+            log.error("Название фильма не может быть пустым.");
+            throw new ValidationException("Название фильма не может быть пустым.");
         }
         for (Film f : films.values()) {
             if (f.getName().equals(film.getName())) {
-                return "Фильм с таким названием уже есть в списке.";
+                throw new ValidationException("Фильм с таким названием уже есть в списке.");
             }
         }
-        if (film.getDuration() <= 0) {
-            return "Продолжительность фильма должна быть положительным числом.";
+        if (film.getReleaseDate().isBefore(MIN_RELEASE_DATE)) {
+            throw new ValidationException("Дата релиза должна быть не раньше 28 декабря 1895 года");
         }
-        if (film.getDescription().length() >= maxDescriptionLength) {
-            return "Максимальная длина описания не должна превышать 200 символов.";
-        }
-        if (film.getReleaseDate().isBefore(minReleaseDate)) {
-            return "Дата релиза должна быть не раньше 28 декабря 1895 года";
-        }
-        return "true";
     }
 
     @PostMapping
     public Film addFilm(@Valid @RequestBody Film film) {
-        if (!filmValidator(film).equals("true")) {
-            log.error(filmValidator(film));
-            throw new ValidationException(filmValidator(film));
-        }
+        filmValidator(film);
         if (film.getId() == null) {
-            film.setId(getNextId());
+            film.setId(getNextId(films));
         }
         films.put(film.getId(), film);
         log.info("Добавлен новыйфильм {} с id: {}", film.getName(), film.getId());
 
         return film;
-    }
-
-    private long getNextId() {
-        long currentMaxId = films.keySet()
-                .stream()
-                .mapToLong(id -> id)
-                .max()
-                .orElse(0);
-        return ++currentMaxId;
     }
 
     @PutMapping
@@ -83,10 +64,7 @@ public class FilmController {
             throw new ValidationException("id должен быть указан.");
         }
         if (films.containsKey(newFilm.getId())) {
-            if (!filmValidator(newFilm).equals("true")) {
-                log.error(filmValidator(newFilm));
-                throw new ValidationException(filmValidator(newFilm));
-            }
+            filmValidator(newFilm);
             Film oldFilm = films.get(newFilm.getId());
             if (newFilm.getDescription() != null) {
                 oldFilm.setDescription(newFilm.getDescription());

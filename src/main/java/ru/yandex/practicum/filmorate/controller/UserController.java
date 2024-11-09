@@ -12,7 +12,6 @@ import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 
-import java.time.LocalDate;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -20,7 +19,7 @@ import java.util.Map;
 @Slf4j
 @RestController
 @RequestMapping("/users")
-public class UserController {
+public class UserController extends IdGenerator {
     private final Map<Long, User> users = new HashMap<>();
 
     @GetMapping
@@ -29,54 +28,34 @@ public class UserController {
         return users.values();
     }
 
-    public String userValidator(User user) {
+    public void userValidator(User user) {
         if (user.getEmail() == null || user.getEmail().isBlank()) {
-            return "Электронная почта должна быть указана.";
+            throw new ValidationException("Электронная почта должна быть указана.");
         }
         for (User u : users.values()) {
             if (u.getEmail().equals(user.getEmail())) {
-                return "Электронная почта уже используется";
+                throw new ValidationException("Электронная почта уже используется");
             }
         }
-        if (user.getEmail().indexOf("@") < 0) {
-            return "Электронная почта должна содержать @";
-        }
         if (user.getLogin() == null || user.getLogin().isBlank() || user.getLogin().indexOf(' ') >= 0) {
-            return "Логин не может быть пустым и содержать пробелы.";
+            throw new ValidationException("Логин не может быть пустым и содержать пробелы.");
         }
         for (User u: users.values()) {
             if (u.getLogin().equals(user.getLogin())) {
-                return "Такой логин уже существует.";
+                throw new ValidationException("Такой логин уже существует.");
             }
-        }
-        if (user.getBirthday().isAfter(LocalDate.now())) {
-            return "Дата рождения не может быть в будущем.";
-        }
-        return "true";
-    }
-
-    private long getNextId() {
-        long currentMaxId = users.keySet()
-                .stream()
-                .mapToLong(id -> id)
-                .max()
-                .orElse(0);
-        return ++currentMaxId;
-    }
-
-    @PostMapping
-    public User addUser(@Valid @RequestBody User user) {
-        if (!userValidator(user).equals("true")) {
-            log.error(userValidator(user));
-            throw new ValidationException(userValidator(user));
         }
         if (user.getName() == null || user.getName().isBlank()) {
             user.setName(user.getLogin());
             log.warn("Имя не передано, его заменит логин пользователя.");
         }
+    }
 
+    @PostMapping
+    public User addUser(@Valid @RequestBody User user) {
+        userValidator(user);
         if (user.getId() == null) {
-            user.setId(getNextId());
+            user.setId(getNextId(users));
         }
         users.put(user.getId(), user);
         log.info("Создан новый пользователь c id: {}", user.getId());
@@ -91,18 +70,10 @@ public class UserController {
             throw new ValidationException("Id должен быть указан");
         }
         if (users.containsKey(newUser.getId())) {
-            if (!userValidator(newUser).equals("true")) {
-                log.error(userValidator(newUser));
-                throw new ValidationException(userValidator(newUser));
-            }
-
+            userValidator(newUser);
             User oldUser = users.get(newUser.getId());
-            if (newUser.getName() != null) {
-                oldUser.setName(newUser.getName());
-            } else {
-                log.info("Логин добвален в качестве имени пользователя.");
-                oldUser.setName(newUser.getLogin());
-            }
+
+            oldUser.setName(newUser.getName());
             oldUser.setBirthday(newUser.getBirthday());
             oldUser.setLogin(newUser.getLogin());
             oldUser.setEmail(newUser.getEmail());

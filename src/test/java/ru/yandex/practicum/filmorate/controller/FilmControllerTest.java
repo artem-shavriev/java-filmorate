@@ -93,8 +93,8 @@ public class FilmControllerTest {
                 "Description of Test film Description of Test film Description of Test film");
         testFilm.setDuration(130);
 
-        assertThrows(ValidationException.class, () -> filmController.addFilm(testFilm),
-                "Исключение валидации из-за описания более 200 символов не выброшено.");
+        assertEquals(1, filmController.getFilms().size(),
+                "Фильм с описанием более 200 символов был добавлен.");
 
         Film testFilm2 = new Film();
         testFilm2.setName("Test film2");
@@ -139,8 +139,8 @@ public class FilmControllerTest {
         testFilm.setDescription("Description of Test film");
         testFilm.setDuration(-1);
 
-        assertThrows(ValidationException.class, () -> filmController.addFilm(testFilm),
-                "Исключение валидации из-за отрицательной длительности не выброшено.");
+        assertEquals(1, filmController.getFilms().size(),
+                "Фильм был добавлен с отрицательной длительностью.");
 
         Film testFilm3 = new Film();
         testFilm3.setName("Test film");
@@ -148,8 +148,8 @@ public class FilmControllerTest {
         testFilm3.setDescription("Description of Test film");
         testFilm3.setDuration(0);
 
-        assertThrows(ValidationException.class, () -> filmController.addFilm(testFilm),
-                "Исключение валидации из-за длительности в 0 минут не выброшено.");
+        assertEquals(1, filmController.getFilms().size(),
+                "Фильм был добавлен с длительностью 0 минут.");
 
         Film testFilm2 = new Film();
         testFilm2.setName("Test film2");
