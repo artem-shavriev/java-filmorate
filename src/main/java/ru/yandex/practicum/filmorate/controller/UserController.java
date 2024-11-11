@@ -29,16 +29,10 @@ public class UserController extends IdGenerator {
     }
 
     public void userValidator(User user) {
-        if (user.getEmail() == null || user.getEmail().isBlank()) {
-            throw new ValidationException("Электронная почта должна быть указана.");
-        }
         for (User u : users.values()) {
             if (u.getEmail().equals(user.getEmail())) {
                 throw new ValidationException("Электронная почта уже используется");
             }
-        }
-        if (user.getLogin() == null || user.getLogin().isBlank() || user.getLogin().indexOf(' ') >= 0) {
-            throw new ValidationException("Логин не может быть пустым и содержать пробелы.");
         }
         for (User u: users.values()) {
             if (u.getLogin().equals(user.getLogin())) {

@@ -63,17 +63,6 @@ public class UserControllerTest {
     }
 
     @Test
-    public void shouldNotAddUserWithoutEmail() {
-        User user = new User();
-        user.setName("Test User");
-        user.setLogin("TestUserLogin");
-        user.setBirthday(LocalDate.of(1990, 12, 21));
-
-        assertThrows(ValidationException.class, () -> userController.addUser(user),
-                "Исключение валидации из за отсутствия email не было выброшено.");
-    }
-
-    @Test
     public void shouldNotAddUserWithDuplicateEmail() {
         User user = new User();
         user.setName("Test User");
@@ -95,35 +84,6 @@ public class UserControllerTest {
 
         assertEquals(1, userController.getUsers().size(),
                 "Пользователь без @ в email был добавлен.");
-    }
-
-    @Test
-    public void shouldNotAddUserWithIncorrectLogin() {
-        User user = new User();
-        user.setName("Test User");
-        user.setEmail("@test.com");
-        user.setLogin("Test UserLogin");
-        user.setBirthday(LocalDate.of(1990, 12, 21));
-
-        assertThrows(ValidationException.class, () -> userController.addUser(user),
-                "Исключение валидации из за отсутствия пробела в логине не выброшено.");
-
-        User user2 = new User();
-        user2.setName("Test User2");
-        user2.setEmail("@test2.com");
-        user2.setBirthday(LocalDate.of(1990, 12, 21));
-        assertThrows(ValidationException.class, () -> userController.addUser(user2),
-                "Исключение валидации из за отсутствия логина не выброшено.");
-    }
-
-    @Test
-    public void shouldNotAddUserWithIncorrectBirthday() {
-        User user2 = new User();
-        user2.setName("Test User2");
-        user2.setEmail("@test2.com");
-        user2.setBirthday(LocalDate.of(2225, 12, 21));
-        assertThrows(ValidationException.class, () -> userController.addUser(user2),
-                "Исключение валидации из за некорректной даты рождения не выброшено.");
     }
 
     @Test

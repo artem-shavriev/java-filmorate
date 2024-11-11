@@ -22,7 +22,7 @@ import java.util.Map;
 @RequestMapping("/films")
 public class FilmController extends IdGenerator {
     private final Map<Long, Film> films = new HashMap<>();
-    private static LocalDate MIN_RELEASE_DATE = LocalDate.of(1895, 12, 28);
+    private static final LocalDate MIN_RELEASE_DATE = LocalDate.of(1895, 12, 28);
 
     @GetMapping
     public Collection<Film> getFilms() {
@@ -31,10 +31,6 @@ public class FilmController extends IdGenerator {
     }
 
     private void filmValidator(Film film) {
-        if (film.getName() == null || film.getName().isBlank()) {
-            log.error("Название фильма не может быть пустым.");
-            throw new ValidationException("Название фильма не может быть пустым.");
-        }
         for (Film f : films.values()) {
             if (f.getName().equals(film.getName())) {
                 throw new ValidationException("Фильм с таким названием уже есть в списке.");

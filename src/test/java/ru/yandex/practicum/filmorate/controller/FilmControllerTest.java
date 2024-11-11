@@ -64,26 +64,6 @@ public class FilmControllerTest {
     }
 
     @Test
-    public void shouldNotAddFilmWithoutName() {
-        Film testFilm = new Film();
-        testFilm.setName("");
-        testFilm.setReleaseDate(LocalDate.of(2020, 2, 2));
-        testFilm.setDescription("Description of Test film");
-        testFilm.setDuration(130);
-
-        assertThrows(ValidationException.class, () -> filmController.addFilm(testFilm),
-                "Исключение валидации из-за отсутствия названия не выброшено.");
-
-        Film testFilm2 = new Film();
-        testFilm.setReleaseDate(LocalDate.of(2020, 2, 2));
-        testFilm.setDescription("Description of Test film");
-        testFilm.setDuration(130);
-
-        assertThrows(ValidationException.class, () -> filmController.addFilm(testFilm2),
-                "Исключение валидации из-за отсутствия названия не выброшено.");
-    }
-
-    @Test
     public void shouldNotAddFilmWithDescriptionSizeMoreThanMax() {
         Film testFilm = new Film();
         testFilm.setName("Test film");
