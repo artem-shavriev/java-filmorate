@@ -13,7 +13,6 @@ import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Optional;
 import java.util.TreeMap;
 
 @Slf4j
@@ -23,7 +22,7 @@ public class FilmService {
     private final InMemoryFilmStorage inMemoryFilmStorage;
     private final InMemoryUserStorage inMemoryUserStorage;
 
-    public Film likeThisFilm(Long filmId, Long userId) {
+    public Film likeFilm(Long filmId, Long userId) {
         HashMap<Long, Film> films = (HashMap<Long, Film>) inMemoryFilmStorage.getFilms();
         HashMap<Long, User> users = (HashMap<Long, User>) inMemoryUserStorage.getUsers();
 
@@ -71,12 +70,11 @@ public class FilmService {
         return films.get(filmId);
     }
 
-    public List<Film> getPopularFilms(Optional<Integer> count) {
+    public List<Film> getPopularFilms(int count) {
         HashMap<Long, Film> films = (HashMap<Long, Film>) inMemoryFilmStorage.getFilms();
         List<Film> sortedFilmsByLikes = new ArrayList<>();
         List<Film> listOfPopularFilms = new ArrayList<>();
         TreeMap<Integer, Long> SortedMapOfFilmsLikes = new TreeMap<>();
-        final int DEFAULT_LIST_SIZE = 10;
 
         for (Film film : films.values()) {
             SortedMapOfFilmsLikes.put(film.getLikesFromUsers().size(), film.getId());
@@ -86,23 +84,18 @@ public class FilmService {
             sortedFilmsByLikes.add(films.get(id));
         }
 
-        if (count.isEmpty()) {
-            if (sortedFilmsByLikes.size() <= 10) {
-                for (int i = 0; i <= sortedFilmsByLikes.size(); i++) {
-                    listOfPopularFilms.add(sortedFilmsByLikes.get(i));
-                }
-            } else {
-                for (int i = 0; i <= DEFAULT_LIST_SIZE; i++) {
-                    listOfPopularFilms.add(sortedFilmsByLikes.get(i));
-                }
+        if (sortedFilmsByLikes.size() <= count) {
+            for (int i = sortedFilmsByLikes.size() - 1; i >= 0; i--) {
+                listOfPopularFilms.add(sortedFilmsByLikes.get(i));
             }
         } else {
-            for (int i = 0; i <= count.get(); i++) {
+            for (int i = count - 1; i >= 0; i--) {
                 listOfPopularFilms.add(sortedFilmsByLikes.get(i));
             }
         }
 
-    return listOfPopularFilms;
+        log.info("Список наиболее популярных фильмов сформирован. Длина списка: {}", count);
+        return listOfPopularFilms;
     }
 }
 
