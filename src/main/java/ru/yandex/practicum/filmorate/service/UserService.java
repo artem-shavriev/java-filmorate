@@ -17,7 +17,7 @@ import java.util.Set;
 @Service
 @RequiredArgsConstructor
 public class UserService {
-    InMemoryUserStorage inMemoryUserStorage;
+    private final InMemoryUserStorage inMemoryUserStorage;
 
     public User addFriend(Long userId, Long friendId) {
         HashMap<Long, User> users = (HashMap<Long, User>) inMemoryUserStorage.getUsers();
