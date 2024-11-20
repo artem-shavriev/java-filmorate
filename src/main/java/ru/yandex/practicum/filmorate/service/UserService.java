@@ -38,4 +38,30 @@ public class UserService {
 
         return users.get(friendId);
     }
+
+    public User deleteFriend(Long userId, Long friendId) {
+        HashMap<Long, User> users = (HashMap<Long, User>) inMemoryUserStorage.getUsers();
+
+        if (!users.keySet().contains(userId)) {
+            log.error("userId не найден.");
+            throw new NotFoundException("userId не найден.");
+        }
+        if (!users.keySet().contains(friendId)) {
+            log.error("friendId не найден.");
+            throw new NotFoundException("friendId не найден.");
+        }
+
+        if (!users.get(userId).getFriendsId().contains(friendId)) {
+            log.error("Этого пользователя нет в друзьях.");
+            throw new DuplicateException("Этого пользователя нет в друзьях.");
+        }
+        users.get(userId).getFriendsId().remove(friendId);
+        users.get(friendId).getFriendsId().remove(userId);
+        log.trace("Пользователи c id: {} и {} удалены из друзей у друг друга.", friendId, userId);
+
+        return users.get(friendId);
+    }
+
+
 }
+
