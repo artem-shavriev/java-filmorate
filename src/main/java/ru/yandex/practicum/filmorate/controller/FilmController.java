@@ -15,7 +15,7 @@ import java.util.Collection;
 @RestController
 @RequestMapping("/films")
 public class FilmController {
-    InMemoryFilmStorage inMemoryFilmStorage = new InMemoryFilmStorage();
+    InMemoryFilmStorage inMemoryFilmStorage;
 
     @GetMapping
     public Collection<Film> getFilms() {
