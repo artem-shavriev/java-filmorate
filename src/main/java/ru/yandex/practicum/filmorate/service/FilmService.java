@@ -75,13 +75,13 @@ public class FilmService {
 
         List<Film> sortedFilmsByLikes = new ArrayList<>();
         List<Film> listOfPopularFilms = new ArrayList<>();
-        TreeMap<Integer, Long> SortedMapOfFilmsLikes = new TreeMap<>();
+        TreeMap<Integer, Long> sortedMapOfFilmsLikes = new TreeMap<>();
 
         for (Film film : films.values()) {
-            SortedMapOfFilmsLikes.put(film.getLikesFromUsers().size(), film.getId());
+            sortedMapOfFilmsLikes.put(film.getLikesFromUsers().size(), film.getId());
         }
 
-        for (Long id : SortedMapOfFilmsLikes.values()) {
+        for (Long id : sortedMapOfFilmsLikes.values()) {
             sortedFilmsByLikes.add(films.get(id));
         }
 
