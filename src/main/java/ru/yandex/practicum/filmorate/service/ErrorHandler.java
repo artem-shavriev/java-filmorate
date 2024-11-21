@@ -30,6 +30,7 @@ public class ErrorHandler {
     public ErrorResponse handleNotValidException(final ValidationException e) {
         return new ErrorResponse(e.getMessage());
     }
+
     @ExceptionHandler
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public ErrorResponse handleNotFoundToDeleteException(final NotFoundToDeleteException e) {
