@@ -82,10 +82,10 @@ public class UserService {
 
         List<Long> friendsId = users.get(userId).getFriendsId();
 
-        for(Long id: friendsId) {
+        for (Long id: friendsId) {
             friendsList.add(users.get(id));
         }
-        log.info("Список друзей пользователя с id {} сформирован.", userId );
+        log.info("Список друзей пользователя с id {} сформирован.", userId);
         return friendsList;
     }
 
@@ -105,7 +105,7 @@ public class UserService {
         List<User> otherUserfriendsList = getFriends(otherId);
         userfriendsList.retainAll(otherUserfriendsList);
 
-        log.info("Список общих друзей пользователей с id: {} и {} сформирован.", userId, otherId );
+        log.info("Список общих друзей пользователей с id: {} и {} сформирован.", userId, otherId);
         return userfriendsList;
     }
 }
