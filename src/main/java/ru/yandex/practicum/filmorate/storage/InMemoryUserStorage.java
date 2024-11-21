@@ -1,5 +1,7 @@
 package ru.yandex.practicum.filmorate.storage;
 
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
@@ -14,20 +16,29 @@ import java.util.Map;
 @Slf4j
 @Component
 public class InMemoryUserStorage extends IdGenerator implements UserStorage {
-    private final Map<Long, User> users = new HashMap<>();
+    private final HashMap<Long, User> usersMap = new HashMap<>();
+
+    public HashMap<Long, User> getUsersMap() {
+        return usersMap;
+    }
 
     public Collection<User> getUsers() {
         log.info("Получен список пользователей.");
-        return users.values();
+        return usersMap.values();
+    }
+
+    public Collection<Long> getUsersIds() {
+        log.info("Получен список id пользователей.");
+        return usersMap.keySet();
     }
 
     public void userValidator(User user) {
-        for (User u : users.values()) {
+        for (User u : usersMap.values()) {
             if (u.getEmail().equals(user.getEmail())) {
                 throw new ValidationException("Электронная почта уже используется");
             }
         }
-        for (User u: users.values()) {
+        for (User u: usersMap.values()) {
             if (u.getLogin().equals(user.getLogin())) {
                 throw new ValidationException("Такой логин уже существует.");
             }
@@ -41,9 +52,9 @@ public class InMemoryUserStorage extends IdGenerator implements UserStorage {
     public User addUser(User user) {
         userValidator(user);
         if (user.getId() == null) {
-            user.setId(getNextId(users));
+            user.setId(getNextId(usersMap));
         }
-        users.put(user.getId(), user);
+        usersMap.put(user.getId(), user);
         log.info("Создан новый пользователь c id: {}", user.getId());
 
         return user;
@@ -54,14 +65,18 @@ public class InMemoryUserStorage extends IdGenerator implements UserStorage {
             log.error("Id не куказан.");
             throw new ValidationException("Id должен быть указан");
         }
-        if (users.containsKey(newUser.getId())) {
+        if (usersMap.containsKey(newUser.getId())) {
             userValidator(newUser);
-            User oldUser = users.get(newUser.getId());
+            User oldUser = usersMap.get(newUser.getId());
 
             oldUser.setName(newUser.getName());
             oldUser.setBirthday(newUser.getBirthday());
-            oldUser.setLogin(newUser.getLogin());
-            oldUser.setEmail(newUser.getEmail());
+            if (!newUser.getLogin().equals(oldUser.getLogin())) {
+                oldUser.setLogin(newUser.getLogin());
+            }
+            if (!newUser.getEmail().equals(oldUser.getEmail())) {
+                oldUser.setEmail(newUser.getEmail());
+            }
             log.info("Пользователь c id: {} обновлен", oldUser.getId());
 
             return oldUser;

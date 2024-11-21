@@ -23,8 +23,8 @@ public class FilmService {
     private final InMemoryUserStorage inMemoryUserStorage;
 
     public Film likeFilm(Long filmId, Long userId) {
-        HashMap<Long, Film> films = (HashMap<Long, Film>) inMemoryFilmStorage.getFilms();
-        HashMap<Long, User> users = (HashMap<Long, User>) inMemoryUserStorage.getUsers();
+        HashMap<Long, Film> films = inMemoryFilmStorage.getFilmsMap();
+        HashMap<Long, User> users = inMemoryUserStorage.getUsersMap();
 
         if (!films.containsKey(filmId)) {
             log.error("Фильм с id: {} не существует.", filmId);
@@ -47,8 +47,8 @@ public class FilmService {
     }
 
     public Film deleteLikeFromFilm(Long filmId, Long userId) {
-        HashMap<Long, Film> films = (HashMap<Long, Film>) inMemoryFilmStorage.getFilms();
-        HashMap<Long, User> users = (HashMap<Long, User>) inMemoryUserStorage.getUsers();
+        HashMap<Long, Film> films = inMemoryFilmStorage.getFilmsMap();
+        HashMap<Long, User> users = inMemoryUserStorage.getUsersMap();
 
         if (!films.containsKey(filmId)) {
             log.error("Фильм с id: {} не найден.", filmId);
@@ -62,7 +62,7 @@ public class FilmService {
 
         if (!films.get(filmId).getLikesFromUsers().contains(userId)) {
             log.error("Пользовтель с id: {} еще не лайкал фильм с id: {}.", userId, filmId);
-            throw new DuplicateException("Данный пользовтаель еще не лайкал этот фильм.");
+            throw new NotFoundException("Данный пользовтаель еще не лайкал этот фильм.");
         }
         films.get(filmId).getLikesFromUsers().remove(userId);
         log.info("Лайк пользовтеля с id {} фильму с id {} был удален.", userId, filmId);
@@ -71,7 +71,8 @@ public class FilmService {
     }
 
     public List<Film> getPopularFilms(int count) {
-        HashMap<Long, Film> films = (HashMap<Long, Film>) inMemoryFilmStorage.getFilms();
+        HashMap<Long, Film> films = inMemoryFilmStorage.getFilmsMap();
+
         List<Film> sortedFilmsByLikes = new ArrayList<>();
         List<Film> listOfPopularFilms = new ArrayList<>();
         TreeMap<Integer, Long> SortedMapOfFilmsLikes = new TreeMap<>();

@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.DuplicateException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
+import ru.yandex.practicum.filmorate.exception.NotFoundToDeleteException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
 
@@ -20,8 +21,7 @@ public class UserService {
     private final InMemoryUserStorage inMemoryUserStorage;
 
     public User addFriend(Long userId, Long friendId) {
-        HashMap<Long, User> users = (HashMap<Long, User>) inMemoryUserStorage.getUsers();
-
+        HashMap<Long, User> users = inMemoryUserStorage.getUsersMap();
         if (!users.containsKey(userId)) {
             log.error("userId не найден.");
             throw new NotFoundException("userId не найден.");
@@ -43,12 +43,13 @@ public class UserService {
     }
 
     public User deleteFriend(Long userId, Long friendId) {
-        HashMap<Long, User> users = (HashMap<Long, User>) inMemoryUserStorage.getUsers();
+        HashMap<Long, User> users = inMemoryUserStorage.getUsersMap();
 
         if (!users.containsKey(userId)) {
             log.error("userId не существует.");
             throw new NotFoundException("userId не найден.");
         }
+
         if (!users.containsKey(friendId)) {
             log.error("friendId не существует.");
             throw new NotFoundException("friendId не найден.");
@@ -56,7 +57,7 @@ public class UserService {
 
         if (!users.get(userId).getFriendsId().contains(friendId)) {
             log.error("Этого пользователя нет в друзьях.");
-            throw new DuplicateException("Этого пользователя нет в друзьях.");
+            throw new NotFoundToDeleteException("Этого пользователя нет в друзьях.");
         }
         users.get(userId).getFriendsId().remove(friendId);
         users.get(friendId).getFriendsId().remove(userId);
@@ -66,7 +67,7 @@ public class UserService {
     }
 
     public List<User> getFriends(Long userId) {
-        HashMap<Long, User> users = (HashMap<Long, User>) inMemoryUserStorage.getUsers();
+        HashMap<Long, User> users = inMemoryUserStorage.getUsersMap();
 
         if (!users.containsKey(userId)) {
             log.error("Переданный userId не существует.");
@@ -80,7 +81,7 @@ public class UserService {
             throw new NotFoundException("У пользовтеля пустой список друзей.");
         }
 
-        Set<Long> friendsId = users.get(userId).getFriendsId();
+        List<Long> friendsId = users.get(userId).getFriendsId();
 
         for(Long id: friendsId) {
             friendsList.add(users.get(id));
@@ -90,7 +91,7 @@ public class UserService {
     }
 
     public List<User> commonFriends(Long userId, Long otherId) {
-        HashMap<Long, User> users = (HashMap<Long, User>) inMemoryUserStorage.getUsers();
+        HashMap<Long, User> users = inMemoryUserStorage.getUsersMap();
 
         if (!users.containsKey(userId)) {
             log.error("Данного userId не существует.");

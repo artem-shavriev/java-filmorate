@@ -1,5 +1,8 @@
 package ru.yandex.practicum.filmorate.storage;
 
+import lombok.Data;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
@@ -15,21 +18,25 @@ import java.util.Map;
 @Slf4j
 @Component
 public class InMemoryFilmStorage extends IdGenerator implements FilmStorage {
-    private final Map<Long, Film> films = new HashMap<>();
+    private final HashMap<Long, Film> filmsMap = new HashMap<>();
     private static final LocalDate MIN_RELEASE_DATE = LocalDate.of(1895, 12, 28);
+
+    public HashMap<Long, Film> getFilmsMap() {
+        return filmsMap;
+    }
 
     public Collection<Film> getFilms() {
         log.info("Получен список фильмов.");
-        return films.values();
+        return filmsMap.values();
     }
 
     public Film addFilm(Film film) {
         filmValidator(film);
         if (film.getId() == null) {
-            film.setId(getNextId(films));
+            film.setId(getNextId(filmsMap));
         }
-        films.put(film.getId(), film);
-        log.info("Добавлен новыйфильм {} с id: {}", film.getName(), film.getId());
+        filmsMap.put(film.getId(), film);
+        log.info("Добавлен новый фильм {} с id: {}", film.getName(), film.getId());
 
         return film;
     }
@@ -39,9 +46,9 @@ public class InMemoryFilmStorage extends IdGenerator implements FilmStorage {
             log.error("id должен быть указан.");
             throw new ValidationException("id должен быть указан.");
         }
-        if (films.containsKey(newFilm.getId())) {
+        if (filmsMap.containsKey(newFilm.getId())) {
             filmValidator(newFilm);
-            Film oldFilm = films.get(newFilm.getId());
+            Film oldFilm = filmsMap.get(newFilm.getId());
             if (newFilm.getDescription() != null) {
                 oldFilm.setDescription(newFilm.getDescription());
             }
@@ -56,7 +63,7 @@ public class InMemoryFilmStorage extends IdGenerator implements FilmStorage {
     }
 
     private void filmValidator(Film film) {
-        for (Film f : films.values()) {
+        for (Film f : filmsMap.values()) {
             if (f.getName().equals(film.getName())) {
                 throw new ValidationException("Фильм с таким названием уже есть в списке.");
             }

@@ -7,6 +7,8 @@ import jakarta.validation.constraints.Past;
 import lombok.Data;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 @Data
@@ -21,5 +23,5 @@ public class User {
     @NotNull
     @Past
     private LocalDate birthday;
-    private Set<Long> friendsId;
+    private List<Long> friendsId = new ArrayList<>();
 }

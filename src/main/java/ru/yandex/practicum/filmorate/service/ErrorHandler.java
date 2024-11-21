@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import ru.yandex.practicum.filmorate.exception.DuplicateException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
+import ru.yandex.practicum.filmorate.exception.NotFoundToDeleteException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 
 
@@ -29,11 +30,10 @@ public class ErrorHandler {
     public ErrorResponse handleNotValidException(final ValidationException e) {
         return new ErrorResponse(e.getMessage());
     }
-
     @ExceptionHandler
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ErrorResponse unknownException (final Throwable e) {
-        return new ErrorResponse("Произошла непредвиденная ошибка.");
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public ErrorResponse handleNotFoundToDeleteException(final NotFoundToDeleteException e) {
+        return new ErrorResponse(e.getMessage());
     }
 
     public class ErrorResponse {
