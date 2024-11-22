@@ -8,7 +8,9 @@ import lombok.Data;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Data
 public class User {
@@ -22,5 +24,5 @@ public class User {
     @NotNull
     @Past
     private LocalDate birthday;
-    private List<Long> friendsId = new ArrayList<>();
+    private Set<Long> friendsId = new HashSet<>();
 }

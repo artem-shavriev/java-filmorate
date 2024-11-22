@@ -3,15 +3,15 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exception.DuplicateException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
-import ru.yandex.practicum.filmorate.exception.NotFoundToDeleteException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 
 @Slf4j
 @Service
@@ -30,10 +30,6 @@ public class UserService {
             throw new NotFoundException("friendId не найден.");
         }
 
-        if (users.get(userId).getFriendsId().contains(friendId)) {
-            log.error("Этот пользователь уже в друзьях.");
-            throw new DuplicateException("Этот пользователь уже в друзьях.");
-        }
         users.get(userId).getFriendsId().add(friendId);
         users.get(friendId).getFriendsId().add(userId);
         log.trace("Пользователи c id: {} и {} добавлены друг к другу в друзья.", friendId, userId);
@@ -55,8 +51,7 @@ public class UserService {
         }
 
         if (!users.get(userId).getFriendsId().contains(friendId)) {
-            log.error("Этого пользователя нет в друзьях.");
-            throw new NotFoundToDeleteException("Этого пользователя нет в друзьях.");
+            return users.get(friendId);
         }
         users.get(userId).getFriendsId().remove(friendId);
         users.get(friendId).getFriendsId().remove(userId);
@@ -80,7 +75,7 @@ public class UserService {
             throw new NotFoundException("У пользовтеля пустой список друзей.");
         }
 
-        List<Long> friendsId = users.get(userId).getFriendsId();
+        Set<Long> friendsId = users.get(userId).getFriendsId();
 
         for (Long id: friendsId) {
             friendsList.add(users.get(id));
@@ -108,5 +103,19 @@ public class UserService {
         log.info("Список общих друзей пользователей с id: {} и {} сформирован.", userId, otherId);
         return userfriendsList;
     }
+
+    public User addUser(User user) {
+        return inMemoryUserStorage.addUser(user);
+    }
+
+    public User updateUser(User newUser) {
+        return inMemoryUserStorage.updateUser(newUser);
+    }
+
+    public Collection<User> getUsers() {
+        return inMemoryUserStorage.getUsers();
+    }
+
+
 }
 

@@ -27,18 +27,18 @@ public class UserController extends IdGenerator {
 
     @GetMapping("/users")
     public Collection<User> getUsers() {
-        return inMemoryUserStorage.getUsers();
+        return userService.getUsers();
     }
 
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/users")
     public User addUser(@Valid @RequestBody User user) {
-        return inMemoryUserStorage.addUser(user);
+        return userService.addUser(user);
     }
 
     @PutMapping("/users")
     public User updateUser(@Valid @RequestBody User newUser) {
-        return inMemoryUserStorage.updateUser(newUser);
+        return userService.updateUser(newUser);
     }
 
     @PutMapping("/users/{id}/friends/{friendId}")

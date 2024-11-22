@@ -3,7 +3,6 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exception.DuplicateException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
@@ -11,6 +10,7 @@ import ru.yandex.practicum.filmorate.storage.InMemoryFilmStorage;
 import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.TreeMap;
@@ -36,10 +36,6 @@ public class FilmService {
             throw new NotFoundException("Пользовтель с данным id не сущетвует.");
         }
 
-        if (films.get(filmId).getLikesFromUsers().contains(userId)) {
-            log.error("Пользовтель с id: {} уже лайкал фильм с id: {}.", userId, filmId);
-            throw new DuplicateException("Данный пользовтаель уже лайкал этот фильм.");
-        }
         films.get(filmId).getLikesFromUsers().add(userId);
         log.info("Пользовтель с id {} лайкнул фильм с id {}.", userId, filmId);
 
@@ -98,5 +94,18 @@ public class FilmService {
         log.info("Список наиболее популярных фильмов сформирован. Длина списка: {}", count);
         return listOfPopularFilms;
     }
+
+    public Collection<Film> getFilms() {
+        return inMemoryFilmStorage.getFilms();
+    }
+
+    public Film addFilm(Film film) {
+        return inMemoryFilmStorage.addFilm(film);
+    }
+
+    public Film updateFilm(Film newFilm) {
+        return inMemoryFilmStorage.updateFilm(newFilm);
+    }
+
 }
 

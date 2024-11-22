@@ -29,7 +29,7 @@ public class InMemoryUserStorage extends IdGenerator implements UserStorage {
         return usersMap.keySet();
     }
 
-    public void userValidator(User user) {
+    public User addUser(User user) {
         for (User u : usersMap.values()) {
             if (u.getEmail().equals(user.getEmail())) {
                 throw new ValidationException("Электронная почта уже используется");
@@ -44,10 +44,6 @@ public class InMemoryUserStorage extends IdGenerator implements UserStorage {
             user.setName(user.getLogin());
             log.warn("Имя не передано, его заменит логин пользователя.");
         }
-    }
-
-    public User addUser(User user) {
-        userValidator(user);
         if (user.getId() == null) {
             user.setId(getNextId(usersMap));
         }
@@ -63,7 +59,20 @@ public class InMemoryUserStorage extends IdGenerator implements UserStorage {
             throw new ValidationException("Id должен быть указан");
         }
         if (usersMap.containsKey(newUser.getId())) {
-            userValidator(newUser);
+            for (User u : usersMap.values()) {
+                if (u.getEmail().equals(newUser.getEmail())) {
+                    throw new ValidationException("Электронная почта уже используется");
+                }
+            }
+            for (User u: usersMap.values()) {
+                if (u.getLogin().equals(newUser.getLogin())) {
+                    throw new ValidationException("Такой логин уже существует.");
+                }
+            }
+            if (newUser.getName() == null || newUser.getName().isBlank()) {
+                newUser.setName(newUser.getLogin());
+                log.warn("Имя не передано, его заменит логин пользователя.");
+            }
             User oldUser = usersMap.get(newUser.getId());
 
             oldUser.setName(newUser.getName());

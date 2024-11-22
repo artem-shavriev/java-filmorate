@@ -27,18 +27,18 @@ public class FilmController {
 
     @GetMapping("/films")
     public Collection<Film> getFilms() {
-        return inMemoryFilmStorage.getFilms();
+        return filmService.getFilms();
     }
 
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/films")
     public Film addFilm(@Valid @RequestBody Film film) {
-        return inMemoryFilmStorage.addFilm(film);
+        return filmService.addFilm(film);
     }
 
     @PutMapping("/films")
     public Film updateFilm(@Valid @RequestBody Film newFilm) {
-        return inMemoryFilmStorage.updateFilm(newFilm);
+        return filmService.updateFilm(newFilm);
     }
 
     @PutMapping("/films/{id}/like/{userId}")
