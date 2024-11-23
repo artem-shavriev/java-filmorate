@@ -24,10 +24,10 @@ public class FilmControllerTest {
     InMemoryFilmStorage inMemoryFilmStorage = new InMemoryFilmStorage();
     InMemoryUserStorage inMemoryUserStorage = new InMemoryUserStorage();
     FilmService filmService = new FilmService(inMemoryFilmStorage, inMemoryUserStorage);
-    FilmController filmController = new FilmController(inMemoryFilmStorage, filmService);
+    FilmController filmController = new FilmController(filmService);
 
     UserService userService = new UserService(inMemoryUserStorage);
-    UserController userController = new UserController(inMemoryUserStorage, userService);
+    UserController userController = new UserController(userService);
 
     @BeforeEach
     public void beforeEach() {

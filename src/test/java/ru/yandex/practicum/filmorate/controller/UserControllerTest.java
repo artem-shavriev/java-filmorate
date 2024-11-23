@@ -19,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 public class UserControllerTest {
     InMemoryUserStorage inMemoryUserStorage = new InMemoryUserStorage();
     UserService userService = new UserService(inMemoryUserStorage);
-    UserController userController = new UserController(inMemoryUserStorage, userService);
+    UserController userController = new UserController(userService);
 
     @BeforeEach
     public void beforeEach() {
