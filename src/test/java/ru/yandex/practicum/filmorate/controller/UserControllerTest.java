@@ -6,6 +6,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.UserService;
+import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
 
 import java.time.LocalDate;
 
@@ -15,7 +17,9 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SpringBootTest
 public class UserControllerTest {
-    UserController userController = new UserController();
+    InMemoryUserStorage inMemoryUserStorage = new InMemoryUserStorage();
+    UserService userService = new UserService(inMemoryUserStorage);
+    UserController userController = new UserController(userService);
 
     @BeforeEach
     public void beforeEach() {
@@ -127,5 +131,74 @@ public class UserControllerTest {
 
         assertThrows(NotFoundException.class, () -> userController.updateUser(updateUser),
                 "Исключение не было выброшено из-за несуществующего id.");
+    }
+
+    @Test
+    public void shouldAddFriend() {
+        User user2 = new User();
+        user2.setName("User2");
+        user2.setEmail("@user2.com");
+        user2.setLogin("userLogin2");
+        user2.setBirthday(LocalDate.of(1990, 12, 21));
+        userController.addUser(user2);
+
+        userController.addFriend(1L, 2L);
+
+        assertEquals(1, userController.getFriends(1L).size(), "Друг не был добавлен.");
+        assertEquals(1, userController.getFriends(2L).size(), "Друг не был добавлен.");
+    }
+
+    @Test
+    public void shouldGetFriends() {
+        User user2 = new User();
+        user2.setName("User2");
+        user2.setEmail("@user2.com");
+        user2.setLogin("userLogin2");
+        user2.setBirthday(LocalDate.of(1990, 12, 21));
+        userController.addUser(user2);
+
+        userController.addFriend(1L, 2L);
+
+        assertEquals(1, userController.getFriends(1).size(), "Список друзей пуст.");
+    }
+
+    @Test
+    public void shouldDeleteFriend() {
+        User user2 = new User();
+        user2.setName("User2");
+        user2.setEmail("@user2.com");
+        user2.setLogin("userLogin2");
+        user2.setBirthday(LocalDate.of(1990, 12, 21));
+        userController.addUser(user2);
+
+        userController.addFriend(1L, 2L);
+        userController.deleteFriend(1L, 2L);
+
+        assertEquals(0, userController.getFriends(1L).size(), "Друг не был удален.");
+        assertEquals(0, userController.getFriends(2L).size(), "Друг не был удален.");
+    }
+
+    @Test
+    public void shouldGetCommonFriends() {
+        User user2 = new User();
+        user2.setName("User2");
+        user2.setEmail("@user2.com");
+        user2.setLogin("userLogin2");
+        user2.setBirthday(LocalDate.of(1990, 12, 21));
+
+        User user3 = new User();
+        user3.setName("User3");
+        user3.setEmail("@user3.com");
+        user3.setLogin("userLogin3");
+        user3.setBirthday(LocalDate.of(1990, 12, 21));
+
+        userController.addUser(user3);
+        userController.addUser(user2);
+        userController.addFriend(1L, 2L);
+        userController.addFriend(1L, 3L);
+        userController.addFriend(2L, 3L);
+
+        assertEquals(1, userController.commonFriends(1L, 2L).size(),
+                "Список общих друзей не получен.");
     }
 }

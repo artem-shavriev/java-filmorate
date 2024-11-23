@@ -6,8 +6,14 @@ import org.springframework.boot.test.context.SpringBootTest;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.FilmService;
+import ru.yandex.practicum.filmorate.service.UserService;
+import ru.yandex.practicum.filmorate.storage.InMemoryFilmStorage;
+import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
 
 import java.time.LocalDate;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -15,22 +21,41 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SpringBootTest
 public class FilmControllerTest {
-    FilmController filmController = new FilmController() {
-    };
+    InMemoryFilmStorage inMemoryFilmStorage = new InMemoryFilmStorage();
+    InMemoryUserStorage inMemoryUserStorage = new InMemoryUserStorage();
+    FilmService filmService = new FilmService(inMemoryFilmStorage, inMemoryUserStorage);
+    FilmController filmController = new FilmController(filmService);
+
+    UserService userService = new UserService(inMemoryUserStorage);
+    UserController userController = new UserController(userService);
 
     @BeforeEach
     public void beforeEach() {
         cleanFilms();
+        cleanUsers();
+
         Film film = new Film();
         film.setName("New film");
         film.setReleaseDate(LocalDate.of(2024, 9, 9));
         film.setDescription("Description of new film");
         film.setDuration(120);
         filmController.addFilm(film);
+
+        User user = new User();
+        user.setId(1L);
+        user.setLogin("newUser");
+        user.setEmail("newUser@yandex.ru");
+        user.setName("Ivan");
+        user.setBirthday(LocalDate.of(1990, 11, 30));
+        userController.addUser(user);
     }
 
     public void cleanFilms() {
         filmController.getFilms().clear();
+    }
+
+    public void cleanUsers() {
+        userController.getUsers().clear();
     }
 
     @Test
@@ -172,4 +197,30 @@ public class FilmControllerTest {
         assertThrows(NotFoundException.class, () -> filmController.updateFilm(filmForUpdate),
                 "Исключение из-за несуществующего id не было выброшено.");
     }
-}
+
+    @Test
+    public void shouldAddLikeFilm() {
+        filmController.likeFilm(1L,1L);
+        Map<Long, Film> films = inMemoryFilmStorage.getFilmsMap();
+        Film film = films.get(1L);
+        assertEquals(1, film.getLikesFromUsers().size(), "Лайк не был добавлен.");
+    }
+
+    @Test
+    public void shouldDeleteLikeFromFilm() {
+        filmController.likeFilm(1L,1L);
+        filmController.deleteLikeFromFilm(1L,1L);
+        Map<Long, Film> films = inMemoryFilmStorage.getFilmsMap();
+        Film film = films.get(1L);
+        assertEquals(0, film.getLikesFromUsers().size(), "Лайк не был удален.");
+    }
+
+    @Test
+    public void shouldGetPopularFilms() {
+        filmController.likeFilm(1L,1L);
+        filmController.deleteLikeFromFilm(1L,1L);
+        Map<Long, Film> films = inMemoryFilmStorage.getFilmsMap();
+        Film film = films.get(1L);
+        assertEquals(1, filmController.getPopularFilms(1).size(), "Список фильмов пуст.");
+    }
+ }
