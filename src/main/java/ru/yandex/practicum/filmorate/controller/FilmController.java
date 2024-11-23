@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
-import ru.yandex.practicum.filmorate.storage.InMemoryFilmStorage;
 
 import java.util.Collection;
 import java.util.List;
@@ -22,7 +21,6 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 public class FilmController {
-    private final InMemoryFilmStorage inMemoryFilmStorage;
     private final FilmService filmService;
 
     @GetMapping("/films")

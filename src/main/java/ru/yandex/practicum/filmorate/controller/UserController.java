@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.IdGenerator;
 import ru.yandex.practicum.filmorate.service.UserService;
-import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
 
 import java.util.Collection;
 import java.util.List;
@@ -22,7 +21,6 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 public class UserController extends IdGenerator {
-    private final InMemoryUserStorage inMemoryUserStorage;
     private final UserService userService;
 
     @GetMapping("/users")
