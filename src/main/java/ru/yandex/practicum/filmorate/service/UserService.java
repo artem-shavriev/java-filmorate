@@ -30,8 +30,8 @@ public class UserService {
             throw new NotFoundException("friendId не найден.");
         }
 
-        users.get(userId).getFriendsId().add(friendId);
-        users.get(friendId).getFriendsId().add(userId);
+        users.get(userId).getConfirmedFriendsId().add(friendId);
+        users.get(friendId).getConfirmedFriendsId().add(userId);
         log.trace("Пользователи c id: {} и {} добавлены друг к другу в друзья.", friendId, userId);
 
         return users.get(friendId);

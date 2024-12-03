@@ -22,5 +22,6 @@ public class User {
     @NotNull
     @Past
     private LocalDate birthday;
-    private Set<Long> friendsId = new HashSet<>();
+    private Set<Long> confirmedFriendsId = new HashSet<>();
+    private Set<Long> unconfirmedFriendsId = new HashSet<>();
 }
