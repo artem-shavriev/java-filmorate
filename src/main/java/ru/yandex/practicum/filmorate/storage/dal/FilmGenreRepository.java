@@ -4,7 +4,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.FilmGenre;
-import ru.yandex.practicum.filmorate.model.Genre;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,11 +22,11 @@ public class FilmGenreRepository extends BaseRepository<FilmGenre>{
     }
 
     public void saveFilmGenres(Film film) {
-        ArrayList<Genre> genres = film.getGenres();
-        for (int i = 0; i < genres.size(); i++) {
+        ArrayList<Long> genres = film.getGenresIds();
+        for (Long genreId : genres) {
             long id = insert(INSERT_QUERY,
                     film.getId(),
-                    film.getGenres().get(i)
+                    genreId
             );
         }
     }

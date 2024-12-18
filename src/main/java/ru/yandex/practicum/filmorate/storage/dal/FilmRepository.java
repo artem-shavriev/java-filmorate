@@ -4,7 +4,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.service.MpaRatingConverter;
 
 import java.time.Instant;
 import java.util.Date;
@@ -33,27 +32,25 @@ public class FilmRepository extends BaseRepository<Film> {
     }
 
     public Film save(Film film) {
-        int mpaRating = MpaRatingConverter.convertFromMpa(film.getМpaRate());
 
         long id = insert(INSERT_QUERY,
                 film.getName(),
                 film.getDescription(),
                 Date.from(Instant.from(film.getReleaseDate())),
                 film.getDuration(),
-                mpaRating
+                film.getМpaRateId()
         );
         film.setId(id);
         return film;
     }
 
     public Film update(Film film) {
-        int mpaRating = MpaRatingConverter.convertFromMpa(film.getМpaRate());
 
         update(UPDATE_QUERY,
                 film.getName(),
                 film.getDescription(),
                 film.getDuration(),
-                mpaRating,
+                film.getМpaRateId(),
                 film.getId()
         );
         return film;
