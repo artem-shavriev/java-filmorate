@@ -77,4 +77,8 @@ public class FilmDbStorage {
         log.info("Получен список фильмов.");
         return filmRepository.findAll();
     }
+
+    public FilmDto getFilmById(long filmId) {
+        return FilmMapper.mapToFilmDto(filmRepository.findById(filmId).get());
+    }
 }

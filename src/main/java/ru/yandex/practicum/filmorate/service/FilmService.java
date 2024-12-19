@@ -18,7 +18,6 @@ import ru.yandex.practicum.filmorate.storage.mapper.FilmMapper;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
 
@@ -49,9 +48,7 @@ public class FilmService {
         likesFromUsersRepository.addLike(filmId, userId);
         log.info("Пользовтель с id {} лайкнул фильм с id {}.", userId, filmId);
 
-        Optional<Film> film = filmRepository.findById(filmId);
-
-        return FilmMapper.mapToFilmDto(film.get());
+        return filmDbStorage.getFilmById(filmId);
     }
 
     public FilmDto deleteLikeFromFilm(Long filmId, Long userId) {
@@ -76,13 +73,13 @@ public class FilmService {
         likesFromUsersRepository.deleteLike(filmId, userId);
         log.info("Лайк пользовтеля с id {} фильму с id {} был удален.", userId, filmId);
 
-        return FilmMapper.mapToFilmDto(filmRepository.findById(filmId).get());
+        return filmDbStorage.getFilmById(filmId);
     }
 
     public List<FilmDto> getPopularFilms(int count) {
         List<Film> filmsList = filmRepository.findAll();
 
-        List<Film> sortedFilmsIdsByLikes = new ArrayList<>();
+        List<FilmDto> sortedFilmsIdsByLikes = new ArrayList<>();
         List<FilmDto> listOfPopularFilms = new ArrayList<>();
         TreeMap<Integer, Long> sortedMapOfFilmsLikes = new TreeMap<>();
 
@@ -91,16 +88,16 @@ public class FilmService {
         }
 
         for (Long id : sortedMapOfFilmsLikes.values()) {
-            sortedFilmsIdsByLikes.add(filmRepository.findById(id).get());
+            sortedFilmsIdsByLikes.add(filmDbStorage.getFilmById(id));
         }
 
         if (sortedFilmsIdsByLikes.size() <= count) {
             for (int i = sortedFilmsIdsByLikes.size() - 1; i >= 0; i--) {
-                listOfPopularFilms.add(FilmMapper.mapToFilmDto(sortedFilmsIdsByLikes.get(i)));
+                listOfPopularFilms.add(sortedFilmsIdsByLikes.get(i));
             }
         } else {
             for (int i = count - 1; i >= 0; i--) {
-                listOfPopularFilms.add(FilmMapper.mapToFilmDto(sortedFilmsIdsByLikes.get(i)));
+                listOfPopularFilms.add(sortedFilmsIdsByLikes.get(i));
             }
         }
 
@@ -111,13 +108,13 @@ public class FilmService {
     public FilmDto addGenre(long filmId, long genreId) {
         filmGenreRepository.addGenre(filmId, genreId);
 
-        return FilmMapper.mapToFilmDto(filmRepository.findById(filmId).get());
+        return filmDbStorage.getFilmById(filmId);
     }
 
     public FilmDto deleteGenre(long filmId, long genreId) {
         filmGenreRepository.deleteGenre(filmId, genreId);
 
-        return FilmMapper.mapToFilmDto(filmRepository.findById(filmId).get());
+        return filmDbStorage.getFilmById(filmId);
     }
 
     public List<Film> getFilms() {

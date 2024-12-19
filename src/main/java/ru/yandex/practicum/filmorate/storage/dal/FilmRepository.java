@@ -29,7 +29,7 @@ public class FilmRepository extends BaseRepository<Film> {
     }
 
     public Optional<Film> findByName(String name) {
-        return findOne(FIND_BY_ID_QUERY, name);
+        return findOne(FIND_BY_NAME_QUERY, name);
     }
 
     public List<Film> findAll() {
