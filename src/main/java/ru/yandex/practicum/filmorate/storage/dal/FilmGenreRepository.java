@@ -28,7 +28,7 @@ public class FilmGenreRepository extends BaseRepository<FilmGenre>{
         long id = insert(INSERT_QUERY, filmId, genreId);
     }
 
-    public boolean deleteLike(long filmId, long genreId) {
+    public boolean deleteGenre(long filmId, long genreId) {
         return delete(DELETE_QUERY, filmId, genreId);
     }
 

@@ -1,3 +1,4 @@
+
 package ru.yandex.practicum.filmorate.storage;
 
 import lombok.extern.slf4j.Slf4j;
@@ -72,3 +73,4 @@ public class InMemoryFilmStorage extends IdGenerator implements FilmStorage {
         throw new NotFoundException("Фильм с id = " + newFilm.getId() + " не найден");
     }
 }
+

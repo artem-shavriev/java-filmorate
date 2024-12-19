@@ -14,6 +14,7 @@ import java.util.Optional;
 public class FilmRepository extends BaseRepository<Film> {
     private static final String FIND_ALL_QUERY = "SELECT * FROM FILM";
     private static final String FIND_BY_ID_QUERY = "SELECT * FROM FILM WHERE FILM_ID = ?";
+    private static final String FIND_BY_NAME_QUERY = "SELECT * FROM FILM WHERE NAME = ?";
     private static final String INSERT_QUERY = "INSERT INTO FILM(NAME, DESCRIPTION, RELEASE_DATE, DURATION, MPA_ID)" +
             "VALUES (?, ?, ?, ?, ?) returning id";
     private static final String UPDATE_QUERY = "UPDATE FILM SET NAME = ?, DESCRIPTION = ?, DURATION = ?, MPA_ID = ?," +
@@ -27,6 +28,10 @@ public class FilmRepository extends BaseRepository<Film> {
         return findOne(FIND_BY_ID_QUERY, id);
     }
 
+    public Optional<Film> findByName(String name) {
+        return findOne(FIND_BY_ID_QUERY, name);
+    }
+
     public List<Film> findAll() {
         return findMany(FIND_ALL_QUERY);
     }
@@ -38,7 +43,7 @@ public class FilmRepository extends BaseRepository<Film> {
                 film.getDescription(),
                 Date.from(Instant.from(film.getReleaseDate())),
                 film.getDuration(),
-                film.getМpaRateId()
+                film.getMpaRateId()
         );
         film.setId(id);
         return film;
@@ -49,7 +54,7 @@ public class FilmRepository extends BaseRepository<Film> {
                 film.getName(),
                 film.getDescription(),
                 film.getDuration(),
-                film.getМpaRateId(),
+                film.getMpaRateId(),
                 film.getId()
         );
         return film;

@@ -5,100 +5,102 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.InMemoryFilmStorage;
+import ru.yandex.practicum.filmorate.storage.FilmDbStorage;
 import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
+import ru.yandex.practicum.filmorate.storage.dal.FilmGenreRepository;
 import ru.yandex.practicum.filmorate.storage.dal.FilmRepository;
 import ru.yandex.practicum.filmorate.storage.dal.LikesFromUsersRepository;
+import ru.yandex.practicum.filmorate.storage.dal.UserRepository;
+import ru.yandex.practicum.filmorate.storage.dto.FilmDto;
+import ru.yandex.practicum.filmorate.storage.dto.NewFilmRequest;
+import ru.yandex.practicum.filmorate.storage.dto.UpdateFilmRequest;
+import ru.yandex.practicum.filmorate.storage.mapper.FilmMapper;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.TreeMap;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class FilmService {
-    private final InMemoryFilmStorage inMemoryFilmStorage;
+    private final FilmDbStorage filmDbStorage;
     private final InMemoryUserStorage inMemoryUserStorage;
 
     private final FilmRepository filmRepository;
+    private final UserRepository userRepository;
     private final LikesFromUsersRepository likesFromUsersRepository;
+    private final FilmGenreRepository filmGenreRepository;
 
-    public Film likeFilm(Long filmId, Long userId) {
+    public FilmDto likeFilm(Long filmId, Long userId) {
 
         if (filmRepository.findById(filmId).isEmpty()) {
             log.error("Фильм с id: {} не существует.", filmId);
             throw new NotFoundException("Фильм с данным id не существует.");
         }
 
-        /*HashMap<Long, Film> films = inMemoryFilmStorage.getFilmsMap();
-        HashMap<Long, User> users = inMemoryUserStorage.getUsersMap();
-
-        if (!films.containsKey(filmId)) {
-            log.error("Фильм с id: {} не существует.", filmId);
-            throw new NotFoundException("Фильм с данным id не существует.");
-        }
-
-        if (!users.containsKey(userId)) {
+        if (userRepository.findById(userId).isEmpty()) {
             log.error("Пользовтель с id: {} не сущетвует.", userId);
             throw new NotFoundException("Пользовтель с данным id не сущетвует.");
         }
 
-        films.get(filmId).getLikesFromUsers().add(userId);
-        log.info("Пользовтель с id {} лайкнул фильм с id {}.", userId, filmId);*/
+        likesFromUsersRepository.addLike(filmId, userId);
+        log.info("Пользовтель с id {} лайкнул фильм с id {}.", userId, filmId);
 
-        return films.get(filmId);
+        Optional<Film> film = filmRepository.findById(filmId);
+
+        return FilmMapper.mapToFilmDto(film.get());
     }
 
-    public Film deleteLikeFromFilm(Long filmId, Long userId) {
-        HashMap<Long, Film> films = inMemoryFilmStorage.getFilmsMap();
-        HashMap<Long, User> users = inMemoryUserStorage.getUsersMap();
+    public FilmDto deleteLikeFromFilm(Long filmId, Long userId) {
 
-        if (!films.containsKey(filmId)) {
-            log.error("Фильм с id: {} не найден.", filmId);
+        if (filmRepository.findById(filmId).isEmpty()) {
+            log.error("Фильм с id: {} не существует.", filmId);
             throw new NotFoundException("Фильм с данным id не существует.");
         }
 
-        if (!users.containsKey(userId)) {
-            log.error("Пользовтель с id: {} не найден.", userId);
+        if (userRepository.findById(userId).isEmpty()) {
+            log.error("Пользовтель с id: {} не сущетвует.", userId);
             throw new NotFoundException("Пользовтель с данным id не сущетвует.");
         }
 
-        if (!films.get(filmId).getLikesFromUsers().contains(userId)) {
+        Film film = filmRepository.findById(filmId).get();
+        Set<Long> likes = film.getLikesFromUsers();
+        if (!likes.contains(userId)) {
             log.error("Пользовтель с id: {} еще не лайкал фильм с id: {}.", userId, filmId);
             throw new NotFoundException("Данный пользовтаель еще не лайкал этот фильм.");
         }
-        films.get(filmId).getLikesFromUsers().remove(userId);
+
+        likesFromUsersRepository.deleteLike(filmId, userId);
         log.info("Лайк пользовтеля с id {} фильму с id {} был удален.", userId, filmId);
 
-        return films.get(filmId);
+        return FilmMapper.mapToFilmDto(filmRepository.findById(filmId).get());
     }
 
-    public List<Film> getPopularFilms(int count) {
-        HashMap<Long, Film> films = inMemoryFilmStorage.getFilmsMap();
+    public List<FilmDto> getPopularFilms(int count) {
+        List<Film> filmsList = filmRepository.findAll();
 
-        List<Film> sortedFilmsByLikes = new ArrayList<>();
-        List<Film> listOfPopularFilms = new ArrayList<>();
+        List<Film> sortedFilmsIdsByLikes = new ArrayList<>();
+        List<FilmDto> listOfPopularFilms = new ArrayList<>();
         TreeMap<Integer, Long> sortedMapOfFilmsLikes = new TreeMap<>();
 
-        for (Film film : films.values()) {
+        for (Film film : filmsList) {
             sortedMapOfFilmsLikes.put(film.getLikesFromUsers().size(), film.getId());
         }
 
         for (Long id : sortedMapOfFilmsLikes.values()) {
-            sortedFilmsByLikes.add(films.get(id));
+            sortedFilmsIdsByLikes.add(filmRepository.findById(id).get());
         }
 
-        if (sortedFilmsByLikes.size() <= count) {
-            for (int i = sortedFilmsByLikes.size() - 1; i >= 0; i--) {
-                listOfPopularFilms.add(sortedFilmsByLikes.get(i));
+        if (sortedFilmsIdsByLikes.size() <= count) {
+            for (int i = sortedFilmsIdsByLikes.size() - 1; i >= 0; i--) {
+                listOfPopularFilms.add(FilmMapper.mapToFilmDto(sortedFilmsIdsByLikes.get(i)));
             }
         } else {
             for (int i = count - 1; i >= 0; i--) {
-                listOfPopularFilms.add(sortedFilmsByLikes.get(i));
+                listOfPopularFilms.add(FilmMapper.mapToFilmDto(sortedFilmsIdsByLikes.get(i)));
             }
         }
 
@@ -106,16 +108,28 @@ public class FilmService {
         return listOfPopularFilms;
     }
 
-    public Collection<Film> getFilms() {
-        return inMemoryFilmStorage.getFilms();
+    public FilmDto addGenre(long filmId, long genreId) {
+        filmGenreRepository.addGenre(filmId, genreId);
+
+        return FilmMapper.mapToFilmDto(filmRepository.findById(filmId).get());
     }
 
-    public Film addFilm(Film film) {
-        return inMemoryFilmStorage.addFilm(film);
+    public FilmDto deleteGenre(long filmId, long genreId) {
+        filmGenreRepository.deleteGenre(filmId, genreId);
+
+        return FilmMapper.mapToFilmDto(filmRepository.findById(filmId).get());
     }
 
-    public Film updateFilm(Film newFilm) {
-        return inMemoryFilmStorage.updateFilm(newFilm);
+    public List<Film> getFilms() {
+        return filmDbStorage.getFilms();
+    }
+
+    public FilmDto addFilm(NewFilmRequest request) {
+        return filmDbStorage.addFilm(request);
+    }
+
+    public FilmDto updateFilm(long id, UpdateFilmRequest request) {
+        return filmDbStorage.updateFilm(id, request);
     }
 
 }
