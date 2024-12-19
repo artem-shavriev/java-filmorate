@@ -8,6 +8,8 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.InMemoryFilmStorage;
 import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
+import ru.yandex.practicum.filmorate.storage.dal.FilmRepository;
+import ru.yandex.practicum.filmorate.storage.dal.LikesFromUsersRepository;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -22,8 +24,17 @@ public class FilmService {
     private final InMemoryFilmStorage inMemoryFilmStorage;
     private final InMemoryUserStorage inMemoryUserStorage;
 
+    private final FilmRepository filmRepository;
+    private final LikesFromUsersRepository likesFromUsersRepository;
+
     public Film likeFilm(Long filmId, Long userId) {
-        HashMap<Long, Film> films = inMemoryFilmStorage.getFilmsMap();
+
+        if (filmRepository.findById(filmId).isEmpty()) {
+            log.error("Фильм с id: {} не существует.", filmId);
+            throw new NotFoundException("Фильм с данным id не существует.");
+        }
+
+        /*HashMap<Long, Film> films = inMemoryFilmStorage.getFilmsMap();
         HashMap<Long, User> users = inMemoryUserStorage.getUsersMap();
 
         if (!films.containsKey(filmId)) {
@@ -37,7 +48,7 @@ public class FilmService {
         }
 
         films.get(filmId).getLikesFromUsers().add(userId);
-        log.info("Пользовтель с id {} лайкнул фильм с id {}.", userId, filmId);
+        log.info("Пользовтель с id {} лайкнул фильм с id {}.", userId, filmId);*/
 
         return films.get(filmId);
     }

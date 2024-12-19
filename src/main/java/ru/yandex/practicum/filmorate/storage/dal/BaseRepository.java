@@ -57,4 +57,9 @@ public class BaseRepository<T> {
         }
     }
 
+    protected boolean delete(String query, Object... params) {
+        int rowsDeleted = jdbc.update(query, params);
+        return rowsDeleted > 0;
+    }
+
 }

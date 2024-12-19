@@ -85,7 +85,8 @@ public class UserService {
     }
 
     public List<User> commonFriends(Long userId, Long otherId) {
-        HashMap<Long, User> users = inMemoryUserStorage.getUsersMap();
+        if()
+        /*HashMap<Long, User> users = inMemoryUserStorage.getUsersMap();
 
         if (!users.containsKey(userId)) {
             log.error("Данного userId не существует.");
@@ -100,8 +101,8 @@ public class UserService {
         List<User> otherUserfriendsList = getFriends(otherId);
         userfriendsList.retainAll(otherUserfriendsList);
 
-        log.info("Список общих друзей пользователей с id: {} и {} сформирован.", userId, otherId);
-        return userfriendsList;
+        log.info("Список общих друзей пользователей с id: {} и {} сформирован.", userId, otherId);*//*
+        return userfriendsList;*/
     }
 
     public User addUser(User user) {

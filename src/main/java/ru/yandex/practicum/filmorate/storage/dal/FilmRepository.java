@@ -17,7 +17,7 @@ public class FilmRepository extends BaseRepository<Film> {
     private static final String INSERT_QUERY = "INSERT INTO FILM(NAME, DESCRIPTION, RELEASE_DATE, DURATION, MPA_ID)" +
             "VALUES (?, ?, ?, ?, ?) returning id";
     private static final String UPDATE_QUERY = "UPDATE FILM SET NAME = ?, DESCRIPTION = ?, DURATION = ?, MPA_ID = ?," +
-            " WHERE id = ?";
+            " WHERE FILM_ID = ?";
 
     public FilmRepository(JdbcTemplate jdbc, RowMapper<Film> mapper) {
         super(jdbc, mapper);
@@ -45,7 +45,6 @@ public class FilmRepository extends BaseRepository<Film> {
     }
 
     public Film update(Film film) {
-
         update(UPDATE_QUERY,
                 film.getName(),
                 film.getDescription(),

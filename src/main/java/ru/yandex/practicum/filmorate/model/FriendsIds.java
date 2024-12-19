@@ -3,8 +3,8 @@ package ru.yandex.practicum.filmorate.model;
 import lombok.Data;
 
 @Data
-public class LikesFromUsers {
+public class FriendsIds {
     private long id;
-    private long filmId;
     private long userId;
+    private long friendId;
 }
