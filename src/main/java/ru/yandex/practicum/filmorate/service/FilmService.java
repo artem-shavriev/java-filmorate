@@ -14,7 +14,6 @@ import ru.yandex.practicum.filmorate.storage.dal.UserRepository;
 import ru.yandex.practicum.filmorate.storage.dto.FilmDto;
 import ru.yandex.practicum.filmorate.storage.dto.NewFilmRequest;
 import ru.yandex.practicum.filmorate.storage.dto.UpdateFilmRequest;
-import ru.yandex.practicum.filmorate.storage.mapper.FilmMapper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -117,7 +116,7 @@ public class FilmService {
         return filmDbStorage.getFilmById(filmId);
     }
 
-    public List<Film> getFilms() {
+    public List<FilmDto> getFilms() {
         return filmDbStorage.getFilms();
     }
 

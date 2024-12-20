@@ -15,7 +15,6 @@ import java.util.List;
 import java.util.Set;
 
 @Component
-
 @RequiredArgsConstructor
 public class UserRowMapper implements RowMapper<User> {
     FriendsIdsRepository friendsIdsRepository;
@@ -38,6 +37,7 @@ public class UserRowMapper implements RowMapper<User> {
         }
 
         Set<Long> friendsIdsSet = new HashSet<>();
+
         List<FriendsIds> friendsIdsObjects = friendsIdsRepository.findUserFriends(user.getId());
         friendsIdsObjects.stream()
                 .forEach(friend -> friendsIdsSet.add(friend.getFriendId()));

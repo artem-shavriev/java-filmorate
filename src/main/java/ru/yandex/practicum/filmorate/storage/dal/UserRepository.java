@@ -20,6 +20,8 @@ public class UserRepository extends BaseRepository<User> {
             "VALUES (?, ?, ?, ?) returning id";
     private static final String UPDATE_QUERY = "UPDATE USER SET NAME = ?, LOGIN = ?, EMAIL = ?, BIRTHDAY = ?," +
             " WHERE USER_ID = ?";
+    private static final String FIND_BY_EMAIL_QUERY = "SELECT * FROM USER WHERE EMAIL = ?";
+    private static final String FIND_BY_LOGIN_QUERY = "SELECT * FROM USER WHERE LOGIN = ?";
 
     public UserRepository(JdbcTemplate jdbc, RowMapper<User> mapper) {
         super(jdbc, mapper);
@@ -27,6 +29,14 @@ public class UserRepository extends BaseRepository<User> {
 
     public Optional<User> findById(long id) {
         return findOne(FIND_BY_ID_QUERY, id);
+    }
+
+    public Optional<User> findByEmail(String email) {
+        return findOne(FIND_BY_EMAIL_QUERY, email);
+    }
+
+    public Optional<User> findByLogin(String login) {
+        return findOne(FIND_BY_LOGIN_QUERY, login);
     }
 
     public List<User> findAll() {
@@ -73,5 +83,4 @@ public class UserRepository extends BaseRepository<User> {
         log.info("Пользователь c id: {} обновлен", user.getId());
         return user;
     }
-
 }

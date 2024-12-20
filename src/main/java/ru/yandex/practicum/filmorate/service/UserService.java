@@ -4,88 +4,103 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
+import ru.yandex.practicum.filmorate.model.FriendsIds;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
+import ru.yandex.practicum.filmorate.storage.UserDbStorage;
+import ru.yandex.practicum.filmorate.storage.dal.FriendsIdsRepository;
+import ru.yandex.practicum.filmorate.storage.dal.UserRepository;
+import ru.yandex.practicum.filmorate.storage.dto.NewUserRequest;
+import ru.yandex.practicum.filmorate.storage.dto.UpdateUserRequest;
+import ru.yandex.practicum.filmorate.storage.dto.UserDto;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
+import java.util.Optional;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserService {
     private final InMemoryUserStorage inMemoryUserStorage;
+    private final UserDbStorage userDbStorage;
+    private final UserRepository userRepository;
+    private final FriendsIdsRepository friendsIdsRepository;
 
-    public User addFriend(Long userId, Long friendId) {
-        HashMap<Long, User> users = inMemoryUserStorage.getUsersMap();
-        if (!users.containsKey(userId)) {
-            log.error("userId не найден.");
-            throw new NotFoundException("userId не найден.");
-        }
-        if (!users.containsKey(friendId)) {
-            log.error("friendId не найден.");
-            throw new NotFoundException("friendId не найден.");
-        }
-
-        users.get(userId).getFriendsId().add(friendId);
-        users.get(friendId).getFriendsId().add(userId);
-        log.trace("Пользователи c id: {} и {} добавлены друг к другу в друзья.", friendId, userId);
-
-        return users.get(friendId);
+    public UserDto addUser(NewUserRequest request) {
+        return userDbStorage.addUser(request);
     }
 
-    public User deleteFriend(Long userId, Long friendId) {
-        HashMap<Long, User> users = inMemoryUserStorage.getUsersMap();
+    public UserDto updateUser(Long userId, UpdateUserRequest request) {
+        return userDbStorage.updateUser(userId, request);
+    }
 
-        if (!users.containsKey(userId)) {
-            log.error("userId не существует.");
+    public List<UserDto> getUsers() {
+        return userDbStorage.getUsers();
+    }
+
+    public UserDto addFriend(Long userId, Long friendId) {
+        Optional<User> existUser = userRepository.findById(userId);
+        if (existUser.isEmpty()) {
             throw new NotFoundException("userId не найден.");
         }
 
-        if (!users.containsKey(friendId)) {
-            log.error("friendId не существует.");
+        Optional<User> existFriend = userRepository.findById(friendId);
+        if (existFriend.isEmpty()) {
             throw new NotFoundException("friendId не найден.");
         }
 
-        if (!users.get(userId).getFriendsId().contains(friendId)) {
-            return users.get(friendId);
-        }
-        users.get(userId).getFriendsId().remove(friendId);
-        users.get(friendId).getFriendsId().remove(userId);
-        log.trace("Пользователи c id: {} и {} удалены из друзей у друг друга.", friendId, userId);
+        friendsIdsRepository.addFriend(friendId, userId);
+        log.trace("Пользователь c id: {} добавил в друзья пользователя с id: {}", userId, friendId);
 
-        return users.get(friendId);
+        return userDbStorage.getUserById(userId);
     }
 
-    public List<User> getFriends(Long userId) {
-        HashMap<Long, User> users = inMemoryUserStorage.getUsersMap();
-
-        if (!users.containsKey(userId)) {
+    public UserDto deleteFriend(Long userId, Long friendId) {
+        Optional<User> existUser = userRepository.findById(userId);
+        if (existUser.isEmpty()) {
             log.error("Переданный userId не существует.");
             throw new NotFoundException("userId не найден.");
         }
 
-        List<User> friendsList = new ArrayList<>();
-
-        if (users.get(userId).getFriendsId() == null) {
-            log.error("У пользовтеля с id: {} пустой список друзей", userId);
-            throw new NotFoundException("У пользовтеля пустой список друзей.");
+        Optional<User> existFriend = userRepository.findById(friendId);
+        if (existFriend.isEmpty()) {
+            log.error("Переданный friendId не существует.");
+            throw new NotFoundException("friendId не найден.");
         }
 
-        Set<Long> friendsId = users.get(userId).getFriendsId();
+        List<FriendsIds> friends = friendsIdsRepository.findUserFriends(userId);
+        List<Long> usersFriendIds = new ArrayList<>();
 
-        for (Long id: friendsId) {
-            friendsList.add(users.get(id));
+        friends.stream()
+                        .forEach(friend -> {
+                            usersFriendIds.add(friend.getFriendId());
+                        });
+
+        if (!usersFriendIds.contains(friendId)) {
+            log.trace("Данного пользователя небыло в друзьях.");
+        } else {
+            friendsIdsRepository.deleteLFriend(friendId, userId);
         }
-        log.info("Список друзей пользователя с id {} сформирован.", userId);
-        return friendsList;
+
+        log.trace("Пользователь id: {} удалены из друзей у пользователя с id: {}", friendId, userId);
+
+        return userDbStorage.getUserById(userId);
     }
 
-    public List<User> commonFriends(Long userId, Long otherId) {
-        if()
+    public List<UserDto> getFriends(Long userId) {
+        Optional<User> existUser = userRepository.findById(userId);
+        if (existUser.isEmpty()) {
+            log.error("Переданный userId не существует.");
+            throw new NotFoundException("userId не найден.");
+        }
+
+        log.info("Список друзей пользователя с id {} сформирован.", userId);
+        return userDbStorage.getFriends(userId);
+    }
+
+   /* public List<User> commonFriends(Long userId, Long otherId) {
+        if()*/
         /*HashMap<Long, User> users = inMemoryUserStorage.getUsersMap();
 
         if (!users.containsKey(userId)) {
@@ -103,20 +118,6 @@ public class UserService {
 
         log.info("Список общих друзей пользователей с id: {} и {} сформирован.", userId, otherId);*//*
         return userfriendsList;*/
-    }
-
-    public User addUser(User user) {
-        return inMemoryUserStorage.addUser(user);
-    }
-
-    public User updateUser(User newUser) {
-        return inMemoryUserStorage.updateUser(newUser);
-    }
-
-    public Collection<User> getUsers() {
-        return inMemoryUserStorage.getUsers();
-    }
-
 
 }
 

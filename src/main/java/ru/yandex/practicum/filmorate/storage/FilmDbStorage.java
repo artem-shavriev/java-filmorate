@@ -17,6 +17,7 @@ import ru.yandex.practicum.filmorate.storage.mapper.FilmMapper;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Repository
@@ -53,10 +54,17 @@ public class FilmDbStorage {
             throw new ValidationException("id должен быть указан.");
         }
 
-        Optional<Film> ExistFilm = filmRepository.findByName(request.getName());
-        if (ExistFilm.isEmpty()) {
+        Optional<Film> existFilm = filmRepository.findByName(request.getName());
+        if (existFilm.isEmpty()) {
             log.error("Фильм с id = {} не найден", filmId);
             throw new NotFoundException("Фильм с id = " + filmId + " не найден");
+        }
+
+        if (request.getName() != null) {
+            Optional<Film> alreadyExistName = filmRepository.findByName(request.getName());
+            if (alreadyExistName.isPresent()) {
+                throw new DuplicatedDataException("Фильм с таким названием уже есть в списке.");
+            }
         }
 
         if (request.getReleaseDate().isBefore(MIN_RELEASE_DATE)) {
@@ -65,17 +73,20 @@ public class FilmDbStorage {
 
         Film updateFilm = filmRepository.findById(filmId)
                 .map(film -> FilmMapper.updateFilmFields(film, request))
-                .orElseThrow(() -> new NotFoundException("Пользователь не найден"));
-        updateFilm = filmRepository.update(updateFilm);
+                .orElseThrow(() -> new NotFoundException("Фильм не найден"));
 
+        updateFilm = filmRepository.update(updateFilm);
         log.info("Фильм {} был обновлен.", updateFilm.getName());
 
         return FilmMapper.mapToFilmDto(updateFilm);
     }
 
-    public List<Film> getFilms() {
+    public List<FilmDto> getFilms() {
         log.info("Получен список фильмов.");
-        return filmRepository.findAll();
+        return  filmRepository.findAll()
+                .stream()
+                .map(FilmMapper::mapToFilmDto)
+                .collect(Collectors.toList());
     }
 
     public FilmDto getFilmById(long filmId) {
