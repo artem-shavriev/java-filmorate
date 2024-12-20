@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import ru.yandex.practicum.filmorate.service.IdGenerator;
 import ru.yandex.practicum.filmorate.service.UserService;
 import ru.yandex.practicum.filmorate.storage.dto.NewUserRequest;
 import ru.yandex.practicum.filmorate.storage.dto.UpdateUserRequest;
@@ -21,7 +20,7 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-public class UserController extends IdGenerator {
+public class UserController {
     private final UserService userService;
 
     @GetMapping("/users")
@@ -55,8 +54,8 @@ public class UserController extends IdGenerator {
         return userService.getFriends(id);
     }
 
-    /*@GetMapping("/users/{id}/friends/common/{otherId}")
-    public List<User> commonFriends(@PathVariable long id, @PathVariable long otherId) {
+    @GetMapping("/users/{id}/friends/common/{otherId}")
+    public List<UserDto> commonFriends(@PathVariable long id, @PathVariable long otherId) {
         return userService.commonFriends(id, otherId);
-    }*/
+    }
 }
