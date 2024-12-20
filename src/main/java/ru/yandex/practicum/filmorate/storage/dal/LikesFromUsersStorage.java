@@ -10,13 +10,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Repository
-public class LikesFromUsersRepository extends BaseRepository<LikesFromUsers> {
+public class LikesFromUsersStorage extends BaseStorage<LikesFromUsers> {
     private static final String FIND_ALL_QUERY = "SELECT * FROM LIKES_FROM_USERS";
     private static final String INSERT_QUERY = "MERGE INTO LIKES_FROM_USERS (FILM_ID, USER_ID)" +
             "VALUES (?, ?) returning id";
     private static final String DELETE_QUERY = "DELETE FROM LIKES_FROM_USERS WHERE FILM_ID = ? AND USER_ID = ?";
 
-    public LikesFromUsersRepository(JdbcTemplate jdbc, RowMapper<LikesFromUsers> mapper) {
+    public LikesFromUsersStorage(JdbcTemplate jdbc, RowMapper<LikesFromUsers> mapper) {
         super(jdbc, mapper);
     }
 

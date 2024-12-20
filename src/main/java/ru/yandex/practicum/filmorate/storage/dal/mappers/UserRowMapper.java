@@ -5,7 +5,7 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.FriendsIds;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.dal.FriendsIdsRepository;
+import ru.yandex.practicum.filmorate.storage.dal.FriendsIdsStorage;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -17,7 +17,7 @@ import java.util.Set;
 @Component
 @RequiredArgsConstructor
 public class UserRowMapper implements RowMapper<User> {
-    FriendsIdsRepository friendsIdsRepository;
+    FriendsIdsStorage friendsIdsRepository;
 
     @Override
     public User mapRow(ResultSet resultSet, int rowNum) throws SQLException {

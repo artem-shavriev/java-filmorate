@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public class FilmRepository extends BaseRepository<Film> {
+public class FilmDbStorage extends BaseStorage<Film> {
     private static final String FIND_ALL_QUERY = "SELECT * FROM FILM";
     private static final String FIND_BY_ID_QUERY = "SELECT * FROM FILM WHERE FILM_ID = ?";
     private static final String FIND_BY_NAME_QUERY = "SELECT * FROM FILM WHERE NAME = ?";
@@ -20,7 +20,7 @@ public class FilmRepository extends BaseRepository<Film> {
     private static final String UPDATE_QUERY = "UPDATE FILM SET NAME = ?, DESCRIPTION = ?, DURATION = ?, MPA_ID = ?," +
             " WHERE FILM_ID = ?";
 
-    public FilmRepository(JdbcTemplate jdbc, RowMapper<Film> mapper) {
+    public FilmDbStorage(JdbcTemplate jdbc, RowMapper<Film> mapper) {
         super(jdbc, mapper);
     }
 

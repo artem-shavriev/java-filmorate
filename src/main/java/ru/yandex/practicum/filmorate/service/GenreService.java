@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Genre;
-import ru.yandex.practicum.filmorate.storage.dal.GenreRepository;
+import ru.yandex.practicum.filmorate.storage.dal.GenreStorage;
 
 import java.util.List;
 import java.util.Optional;
@@ -14,7 +14,7 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 public class GenreService {
-    GenreRepository genreRepository;
+    GenreStorage genreRepository;
 
     public List<Genre> findAll() {
         return genreRepository.findAll();

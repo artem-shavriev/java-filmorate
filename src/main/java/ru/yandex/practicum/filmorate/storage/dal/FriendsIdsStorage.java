@@ -8,14 +8,14 @@ import ru.yandex.practicum.filmorate.model.FriendsIds;
 import java.util.List;
 
 @Repository
-public class FriendsIdsRepository extends BaseRepository<FriendsIds>{
+public class FriendsIdsStorage extends BaseStorage<FriendsIds> {
     private static final String FIND_ALL_QUERY = "SELECT * FROM FRIENDS_IDS";
     private static final String INSERT_QUERY = "MERGE INTO FRIENDS_IDS (USER_ID, FRIEND_ID)" +
             "VALUES (?, ?) returning id";
     private static final String DELETE_QUERY = "DELETE FROM FRIENDS_IDS WHERE FRIEND_ID = ? AND USER_ID = ?";
     private static final String FIND_USER_FRIENDS_QUERY = "SELECT * FROM FRIENDS_IDS WHERE USER_ID = ?";
 
-    public FriendsIdsRepository(JdbcTemplate jdbc, RowMapper<FriendsIds> mapper) {
+    public FriendsIdsStorage(JdbcTemplate jdbc, RowMapper<FriendsIds> mapper) {
         super(jdbc, mapper);
     }
 

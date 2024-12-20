@@ -2,7 +2,6 @@
 package ru.yandex.practicum.filmorate.storage;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
@@ -13,7 +12,7 @@ import java.util.Collection;
 import java.util.HashMap;
 
 @Slf4j
-@Component
+
 public class InMemoryFilmStorage extends IdGenerator implements FilmStorage {
     private static final LocalDate MIN_RELEASE_DATE = LocalDate.of(1895, 12, 28);
     private final HashMap<Long, Film> filmsMap = new HashMap<>();

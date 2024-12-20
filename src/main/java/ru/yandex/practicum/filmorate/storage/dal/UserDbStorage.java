@@ -13,7 +13,7 @@ import java.util.Optional;
 
 @Repository
 @Slf4j
-public class UserRepository extends BaseRepository<User> {
+public class UserDbStorage extends BaseStorage<User> {
     private static final String FIND_ALL_QUERY = "SELECT * FROM USER";
     private static final String FIND_BY_ID_QUERY = "SELECT * FROM USER WHERE USER_ID = ?";
     private static final String INSERT_QUERY = "INSERT INTO USER(NAME, LOGIN, EMAIL, BIRTHDAY)" +
@@ -23,7 +23,7 @@ public class UserRepository extends BaseRepository<User> {
     private static final String FIND_BY_EMAIL_QUERY = "SELECT * FROM USER WHERE EMAIL = ?";
     private static final String FIND_BY_LOGIN_QUERY = "SELECT * FROM USER WHERE LOGIN = ?";
 
-    public UserRepository(JdbcTemplate jdbc, RowMapper<User> mapper) {
+    public UserDbStorage(JdbcTemplate jdbc, RowMapper<User> mapper) {
         super(jdbc, mapper);
     }
 

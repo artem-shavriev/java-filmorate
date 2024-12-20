@@ -6,8 +6,8 @@ import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.FilmGenre;
 import ru.yandex.practicum.filmorate.model.LikesFromUsers;
-import ru.yandex.practicum.filmorate.storage.dal.FilmGenreRepository;
-import ru.yandex.practicum.filmorate.storage.dal.LikesFromUsersRepository;
+import ru.yandex.practicum.filmorate.storage.dal.FilmGenreStorage;
+import ru.yandex.practicum.filmorate.storage.dal.LikesFromUsersStorage;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -19,8 +19,8 @@ import java.util.Set;
 @Component
 @RequiredArgsConstructor
 public class FilmRowMapper implements RowMapper<Film> {
-    FilmGenreRepository filmGenreRepository;
-    LikesFromUsersRepository likesFromUsersRepository;
+    FilmGenreStorage filmGenreRepository;
+    LikesFromUsersStorage likesFromUsersRepository;
     ArrayList<Long> genres = new ArrayList<>();
     Set<Long> usersLikes = new HashSet<>();
 

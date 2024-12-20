@@ -10,13 +10,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Repository
-public class FilmGenreRepository extends BaseRepository<FilmGenre>{
+public class FilmGenreStorage extends BaseStorage<FilmGenre> {
     private static final String FIND_ALL_QUERY = "SELECT * FROM FILM_GENRE";
     private static final String INSERT_QUERY = "MERGE INTO FILM_GENRE (FILM_ID, GENRE_ID)" +
             "VALUES (?, ?) returning id";
     private static final String DELETE_QUERY = "DELETE FROM FILM_GENRE WHERE FILM_ID = ? AND GENRE_ID = ?";
 
-    public FilmGenreRepository(JdbcTemplate jdbc, RowMapper<FilmGenre> mapper) {
+    public FilmGenreStorage(JdbcTemplate jdbc, RowMapper<FilmGenre> mapper) {
         super(jdbc, mapper);
     }
 
