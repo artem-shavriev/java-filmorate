@@ -6,7 +6,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Past;
 import lombok.Data;
 
-import java.time.LocalDate;
+import java.util.Date;
 
 @Data
 public class NewUserRequest {
@@ -18,5 +18,5 @@ public class NewUserRequest {
     private String name;
     @NotNull
     @Past
-    private LocalDate birthday;
+    private Date birthday;
 }

@@ -14,20 +14,20 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 public class GenreService {
-    GenreStorage genreRepository;
+    private final GenreStorage genreStorage;
 
     public List<Genre> findAll() {
-        return genreRepository.findAll();
+        return genreStorage.findAll();
     }
 
     public Genre findById(long genreId) {
-        Optional<Genre> existGenre = genreRepository.findById(genreId);
+        Optional<Genre> existGenre = genreStorage.findById(genreId);
 
         if(existGenre.isEmpty())  {
             log.error("Жанр с id {} не найден", genreId);
             throw new NotFoundException("Жанр с данным id не найден");
         }
 
-        return genreRepository.findById(genreId).get();
+        return genreStorage.findById(genreId).get();
     }
 }

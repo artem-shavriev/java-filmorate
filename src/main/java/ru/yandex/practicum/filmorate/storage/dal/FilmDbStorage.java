@@ -5,8 +5,6 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.model.Film;
 
-import java.time.Instant;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -15,10 +13,10 @@ public class FilmDbStorage extends BaseStorage<Film> {
     private static final String FIND_ALL_QUERY = "SELECT * FROM FILM";
     private static final String FIND_BY_ID_QUERY = "SELECT * FROM FILM WHERE FILM_ID = ?";
     private static final String FIND_BY_NAME_QUERY = "SELECT * FROM FILM WHERE NAME = ?";
-    private static final String INSERT_QUERY = "INSERT INTO FILM(NAME, DESCRIPTION, RELEASE_DATE, DURATION, MPA_ID)" +
-            "VALUES (?, ?, ?, ?, ?) returning id";
+    private static final String INSERT_QUERY = "INSERT INTO FILM(NAME, DESCRIPTION, RELEASE_DATE, DURATION)" +
+            "VALUES (?, ?, ?, ?)";
     private static final String UPDATE_QUERY = "UPDATE FILM SET NAME = ?, DESCRIPTION = ?, DURATION = ?, MPA_ID = ?," +
-            " WHERE FILM_ID = ?";
+            "RELEASE_DATE = ? WHERE FILM_ID = ?";
 
     public FilmDbStorage(JdbcTemplate jdbc, RowMapper<Film> mapper) {
         super(jdbc, mapper);
@@ -41,9 +39,8 @@ public class FilmDbStorage extends BaseStorage<Film> {
         long id = insert(INSERT_QUERY,
                 film.getName(),
                 film.getDescription(),
-                Date.from(Instant.from(film.getReleaseDate())),
-                film.getDuration(),
-                film.getMpaRateId()
+                film.getReleaseDate(),
+                film.getDuration()
         );
         film.setId(id);
         return film;
@@ -54,7 +51,8 @@ public class FilmDbStorage extends BaseStorage<Film> {
                 film.getName(),
                 film.getDescription(),
                 film.getDuration(),
-                film.getMpaRateId(),
+                film.getMpaRate(),
+                film.getReleaseDate(),
                 film.getId()
         );
         return film;

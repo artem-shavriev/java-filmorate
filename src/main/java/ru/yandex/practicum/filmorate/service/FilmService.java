@@ -8,8 +8,8 @@ import ru.yandex.practicum.filmorate.exception.DuplicatedDataException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.storage.dal.FilmGenreStorage;
 import ru.yandex.practicum.filmorate.storage.dal.FilmDbStorage;
+import ru.yandex.practicum.filmorate.storage.dal.FilmGenreStorage;
 import ru.yandex.practicum.filmorate.storage.dal.LikesFromUsersStorage;
 import ru.yandex.practicum.filmorate.storage.dal.UserDbStorage;
 import ru.yandex.practicum.filmorate.storage.dto.FilmDto;
@@ -17,8 +17,8 @@ import ru.yandex.practicum.filmorate.storage.dto.NewFilmRequest;
 import ru.yandex.practicum.filmorate.storage.dto.UpdateFilmRequest;
 import ru.yandex.practicum.filmorate.storage.mapper.FilmMapper;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -34,7 +34,76 @@ public class FilmService {
     private final UserDbStorage userDbStorage;
     private final LikesFromUsersStorage likesFromUsersRepository;
     private final FilmGenreStorage filmGenreRepository;
-    private static final LocalDate MIN_RELEASE_DATE = LocalDate.of(1895, 12, 28);
+    private static final Date MIN_RELEASE_DATE = new Date(-5, 12, 28);
+
+    public FilmDto addFilm(NewFilmRequest request) {
+        if (request.getName() == null || request.getName().isEmpty()) {
+            throw new ConditionsNotMetException("Название фильма должно быть указано");
+        }
+
+        Optional<Film> alreadyExistFilm = filmDbStorage.findByName(request.getName());
+        if (alreadyExistFilm.isPresent()) {
+            throw new DuplicatedDataException("Фильм с таким названием уже есть в списке.");
+        }
+
+        if (request.getReleaseDate().getTime() < MIN_RELEASE_DATE.getTime()) {
+            throw new ValidationException("Дата релиза должна быть не раньше 28 декабря 1895 года");
+        }
+
+        Film film = FilmMapper.mapToFilm(request);
+
+        film = filmDbStorage.save(film);
+        filmGenreRepository.setFilmGenres(film);
+
+        log.info("Добавлен новый фильм {} с id: {}", film.getName(), film.getId());
+
+        return FilmMapper.mapToFilmDto(film);
+    }
+
+    public FilmDto updateFilm(Long filmId, UpdateFilmRequest request) {
+        if (filmId == null) {
+            log.error("id должен быть указан.");
+            throw new ValidationException("id должен быть указан.");
+        }
+
+        Optional<Film> existFilm = filmDbStorage.findByName(request.getName());
+        if (existFilm.isEmpty()) {
+            log.error("Фильм с id = {} не найден", filmId);
+            throw new NotFoundException("Фильм с id = " + filmId + " не найден");
+        }
+
+        if (request.getName() != null) {
+            Optional<Film> alreadyExistName = filmDbStorage.findByName(request.getName());
+            if (alreadyExistName.isPresent()) {
+                throw new DuplicatedDataException("Фильм с таким названием уже есть в списке.");
+            }
+        }
+
+        if (request.getReleaseDate().before(MIN_RELEASE_DATE)) {
+            throw new ValidationException("Дата релиза должна быть не раньше 28 декабря 1895 года");
+        }
+
+        Film updateFilm = filmDbStorage.findById(filmId)
+                .map(film -> FilmMapper.updateFilmFields(film, request))
+                .orElseThrow(() -> new NotFoundException("Фильм не найден"));
+
+        updateFilm = filmDbStorage.update(updateFilm);
+        log.info("Фильм {} был обновлен.", updateFilm.getName());
+
+        return FilmMapper.mapToFilmDto(updateFilm);
+    }
+
+    public List<FilmDto> getFilms() {
+        log.info("Получен список фильмов.");
+        return  filmDbStorage.findAll().stream()
+                .map(FilmMapper::mapToFilmDto)
+                .collect(Collectors.toList());
+    }
+
+    public FilmDto getFilmById(long filmId) {
+        FilmDto film = FilmMapper.mapToFilmDto(filmDbStorage.findById(filmId).get());
+        return film;
+    }
 
     public FilmDto likeFilm(Long filmId, Long userId) {
 
@@ -119,72 +188,5 @@ public class FilmService {
 
         return getFilmById(filmId);
     }
-
-    public FilmDto addFilm(NewFilmRequest request) {
-        if (request.getName() == null || request.getName().isEmpty()) {
-            throw new ConditionsNotMetException("Название фильма должно быть указано");
-        }
-
-        Optional<Film> alreadyExistFilm = filmDbStorage.findByName(request.getName());
-        if (alreadyExistFilm.isPresent()) {
-            throw new DuplicatedDataException("Фильм с таким названием уже есть в списке.");
-        }
-
-        if (request.getReleaseDate().isBefore(MIN_RELEASE_DATE)) {
-            throw new ValidationException("Дата релиза должна быть не раньше 28 декабря 1895 года");
-        }
-
-        Film film = FilmMapper.mapToFilm(request);
-
-        film = filmDbStorage.save(film);
-        log.info("Добавлен новый фильм {} с id: {}", film.getName(), film.getId());
-
-        return FilmMapper.mapToFilmDto(film);
-    }
-
-    public FilmDto updateFilm(Long filmId, UpdateFilmRequest request) {
-        if (filmId == null) {
-            log.error("id должен быть указан.");
-            throw new ValidationException("id должен быть указан.");
-        }
-
-        Optional<Film> existFilm = filmDbStorage.findByName(request.getName());
-        if (existFilm.isEmpty()) {
-            log.error("Фильм с id = {} не найден", filmId);
-            throw new NotFoundException("Фильм с id = " + filmId + " не найден");
-        }
-
-        if (request.getName() != null) {
-            Optional<Film> alreadyExistName = filmDbStorage.findByName(request.getName());
-            if (alreadyExistName.isPresent()) {
-                throw new DuplicatedDataException("Фильм с таким названием уже есть в списке.");
-            }
-        }
-
-        if (request.getReleaseDate().isBefore(MIN_RELEASE_DATE)) {
-            throw new ValidationException("Дата релиза должна быть не раньше 28 декабря 1895 года");
-        }
-
-        Film updateFilm = filmDbStorage.findById(filmId)
-                .map(film -> FilmMapper.updateFilmFields(film, request))
-                .orElseThrow(() -> new NotFoundException("Фильм не найден"));
-
-        updateFilm = filmDbStorage.update(updateFilm);
-        log.info("Фильм {} был обновлен.", updateFilm.getName());
-
-        return FilmMapper.mapToFilmDto(updateFilm);
-    }
-
-    public List<FilmDto> getFilms() {
-        log.info("Получен список фильмов.");
-        return  filmDbStorage.findAll().stream()
-                .map(FilmMapper::mapToFilmDto)
-                .collect(Collectors.toList());
-    }
-
-    public FilmDto getFilmById(long filmId) {
-        return FilmMapper.mapToFilmDto(filmDbStorage.findById(filmId).get());
-    }
-
 }
 

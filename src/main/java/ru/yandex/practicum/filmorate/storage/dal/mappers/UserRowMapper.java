@@ -9,7 +9,6 @@ import ru.yandex.practicum.filmorate.storage.dal.FriendsIdsStorage;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -26,9 +25,7 @@ public class UserRowMapper implements RowMapper<User> {
         user.setId(resultSet.getLong("USER_ID"));
         user.setLogin(resultSet.getString("LOGIN"));
         user.setEmail(resultSet.getString("EMAIL"));
-
-        LocalDate birthday = resultSet.getDate("BIRTHDAY").toLocalDate();
-        user.setBirthday(birthday);
+        user.setBirthday(resultSet.getDate("BIRTHDAY"));
 
         if (resultSet.getString("NAME") == null) {
             user.setName(user.getLogin());

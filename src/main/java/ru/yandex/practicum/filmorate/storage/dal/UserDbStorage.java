@@ -6,8 +6,6 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.model.User;
 
-import java.time.Instant;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -55,7 +53,7 @@ public class UserDbStorage extends BaseStorage<User> {
         long id = insert(INSERT_QUERY,
                 name,
                 user.getLogin(),
-                Date.from(Instant.from(user.getBirthday())),
+                user.getBirthday(),
                 user.getEmail()
         );
         user.setId(id);
@@ -75,7 +73,7 @@ public class UserDbStorage extends BaseStorage<User> {
         update(UPDATE_QUERY,
                 name,
                 user.getLogin(),
-                Date.from(Instant.from(user.getBirthday())),
+                user.getBirthday(),
                 user.getEmail(),
                 user.getId()
         );

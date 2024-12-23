@@ -12,7 +12,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 public class GenreController {
-    GenreService genreService;
+    private final GenreService genreService;
 
     @GetMapping("/genres")
     public List<Genre> getGenres() {

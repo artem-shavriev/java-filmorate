@@ -6,7 +6,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Past;
 import lombok.Data;
 
-import java.time.LocalDate;
+import java.util.Date;
 
 @Data
 public class UpdateUserRequest {
@@ -18,7 +18,7 @@ public class UpdateUserRequest {
     private String name;
     @NotNull
     @Past
-    private LocalDate birthday;
+    private Date birthday;
 
     public boolean hasEmail() {
         return email != null || !email.isEmpty();

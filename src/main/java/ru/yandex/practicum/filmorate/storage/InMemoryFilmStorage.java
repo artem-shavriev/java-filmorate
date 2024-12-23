@@ -7,14 +7,14 @@ import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.IdGenerator;
 
-import java.time.LocalDate;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 
 @Slf4j
 
 public class InMemoryFilmStorage extends IdGenerator implements FilmStorage {
-    private static final LocalDate MIN_RELEASE_DATE = LocalDate.of(1895, 12, 28);
+    private static final Date MIN_RELEASE_DATE = new Date(1895, 12, 28);
     private final HashMap<Long, Film> filmsMap = new HashMap<>();
 
     public HashMap<Long, Film> getFilmsMap() {
@@ -32,7 +32,7 @@ public class InMemoryFilmStorage extends IdGenerator implements FilmStorage {
                 throw new ValidationException("Фильм с таким названием уже есть в списке.");
             }
         }
-        if (film.getReleaseDate().isBefore(MIN_RELEASE_DATE)) {
+        if (film.getReleaseDate().before(MIN_RELEASE_DATE)) {
             throw new ValidationException("Дата релиза должна быть не раньше 28 декабря 1895 года");
         }
         if (film.getId() == null) {
@@ -55,7 +55,7 @@ public class InMemoryFilmStorage extends IdGenerator implements FilmStorage {
                     throw new ValidationException("Фильм с таким названием уже есть в списке.");
                 }
             }
-            if (newFilm.getReleaseDate().isBefore(MIN_RELEASE_DATE)) {
+            if (newFilm.getReleaseDate().before(MIN_RELEASE_DATE)) {
                 throw new ValidationException("Дата релиза должна быть не раньше 28 декабря 1895 года");
             }
             Film oldFilm = filmsMap.get(newFilm.getId());

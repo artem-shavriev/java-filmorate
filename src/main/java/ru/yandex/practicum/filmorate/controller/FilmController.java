@@ -17,7 +17,6 @@ import ru.yandex.practicum.filmorate.storage.dto.FilmDto;
 import ru.yandex.practicum.filmorate.storage.dto.NewFilmRequest;
 import ru.yandex.practicum.filmorate.storage.dto.UpdateFilmRequest;
 
-import java.util.Collection;
 import java.util.List;
 
 @RestController
@@ -26,7 +25,7 @@ public class FilmController {
     private final FilmService filmService;
 
     @GetMapping("/films")
-    public Collection<FilmDto> getFilms() {
+    public List<FilmDto> getFilms() {
         return filmService.getFilms();
     }
 
@@ -65,7 +64,4 @@ public class FilmController {
     public FilmDto deleteGenre(@PathVariable long id, @PathVariable long genreId) {
         return filmService.deleteGenre(id,genreId);
     }
-
-
-
 }

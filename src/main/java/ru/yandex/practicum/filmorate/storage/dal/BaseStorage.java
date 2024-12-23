@@ -48,7 +48,7 @@ public class BaseStorage<T> {
             return ps;
         }, keyHolder);
 
-        Long id = keyHolder.getKeyAs(Long.class);
+        Integer id = keyHolder.getKeyAs(Integer.class);
 
         if (id != null) {
             return id;

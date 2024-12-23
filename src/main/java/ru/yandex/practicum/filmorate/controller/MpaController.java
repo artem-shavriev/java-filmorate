@@ -15,7 +15,7 @@ public class MpaController {
     MpaService mpaService;
 
     @GetMapping("/mpa")
-    public List<Mpa> getGenres() {
+    public List<Mpa> getMpa() {
         return mpaService.findAll();
     }
 
