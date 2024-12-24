@@ -19,8 +19,8 @@ import ru.yandex.practicum.filmorate.storage.dto.NewFilmRequest;
 import ru.yandex.practicum.filmorate.storage.dto.UpdateFilmRequest;
 import ru.yandex.practicum.filmorate.storage.mapper.FilmMapper;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -36,7 +36,7 @@ public class FilmService {
     private final UserDbStorage userDbStorage;
     private final LikesFromUsersStorage likesFromUsersStorage;
     private final FilmGenreStorage filmGenreStorage;
-    private static final Date MIN_RELEASE_DATE = new Date(-5, 12, 28);
+    private static final LocalDate MIN_RELEASE_DATE = LocalDate.of(1895, 12, 28);
 
     public FilmDto addFilm(NewFilmRequest request) {
         if (request.getName() == null || request.getName().isEmpty()) {
@@ -48,7 +48,7 @@ public class FilmService {
             throw new DuplicatedDataException("Фильм с таким названием уже есть в списке.");
         }
 
-        if (request.getReleaseDate().before(MIN_RELEASE_DATE)) {
+        if (request.getReleaseDate().isBefore(MIN_RELEASE_DATE)) {
             throw new ValidationException("Дата релиза должна быть не раньше 28 декабря 1895 года");
         }
 
@@ -104,7 +104,7 @@ public class FilmService {
             }
         }
 
-        if (request.getReleaseDate().before(MIN_RELEASE_DATE)) {
+        if (request.getReleaseDate().isBefore(MIN_RELEASE_DATE)) {
             throw new ValidationException("Дата релиза должна быть не раньше 28 декабря 1895 года");
         }
 

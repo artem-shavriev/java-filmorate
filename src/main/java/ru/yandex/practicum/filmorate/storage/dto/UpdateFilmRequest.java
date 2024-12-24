@@ -8,7 +8,7 @@ import lombok.Data;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
 
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -20,7 +20,7 @@ public class UpdateFilmRequest {
     @Size(max = 200, message = "Максимальная длина описания не должна превышать 200 символов.")
     private String description;
     @NotNull
-    private Date releaseDate;
+    private LocalDate releaseDate;
     @NotNull
     @Positive(message = "Продолжительность должна быть положительным числом")
     private Integer duration;

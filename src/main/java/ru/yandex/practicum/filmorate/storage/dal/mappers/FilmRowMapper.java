@@ -12,6 +12,7 @@ import ru.yandex.practicum.filmorate.storage.dal.LikesFromUsersStorage;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,7 +31,9 @@ public class FilmRowMapper implements RowMapper<Film> {
         film.setName(resultSet.getString("NAME"));
         film.setDescription(resultSet.getString("DESCRIPTION"));
         film.setDuration(resultSet.getInt("DURATION"));
-        film.setReleaseDate(resultSet.getTimestamp("RELEASE_DATE"));
+
+        Timestamp date = resultSet.getTimestamp("RELEASE_DATE");
+        film.setReleaseDate(date.toLocalDateTime().toLocalDate());
 
         Mpa mpa = new Mpa();
         mpa.setId(resultSet.getLong("MPA_ID"));

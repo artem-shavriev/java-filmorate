@@ -5,7 +5,7 @@ import lombok.Data;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
 
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -16,7 +16,7 @@ public class FilmDto {
     private Long id;
     private String name;
     private String description;
-    private Date releaseDate;
+    private LocalDate releaseDate;
     private Integer duration;
     private Set<Long> likesFromUsers = new HashSet<>();
     private List<Genre> genres;
