@@ -5,9 +5,13 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
+import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
 
 import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 @Data
 public class UpdateFilmRequest {
@@ -20,7 +24,9 @@ public class UpdateFilmRequest {
     @NotNull
     @Positive(message = "Продолжительность должна быть положительным числом")
     private Integer duration;
-    private Mpa mpaRate;
+    private Mpa mpa;
+    private Set<Long> likesFromUsers = new HashSet<>();
+    private List<Genre> genres;
 
     public boolean hasName() {
         return name != null || !name.isEmpty();
@@ -38,7 +44,15 @@ public class UpdateFilmRequest {
         return description != null || !description.isEmpty();
     }
 
-    public boolean hasMpaRating() {
-        return mpaRate != null;
+    public boolean hasMpa() {
+        return mpa != null;
+    }
+
+    public boolean hasLikesFromUsers() {
+        return likesFromUsers != null;
+    }
+
+    public boolean hasGenres() {
+        return genres != null;
     }
 }

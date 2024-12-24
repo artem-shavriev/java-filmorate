@@ -30,13 +30,13 @@ public class FilmRowMapper implements RowMapper<Film> {
         film.setName(resultSet.getString("NAME"));
         film.setDescription(resultSet.getString("DESCRIPTION"));
         film.setDuration(resultSet.getInt("DURATION"));
-        film.setReleaseDate(resultSet.getDate("RELEASE_DATE"));
+        film.setReleaseDate(resultSet.getTimestamp("RELEASE_DATE"));
 
         Mpa mpa = new Mpa();
         mpa.setId(resultSet.getLong("MPA_ID"));
-        film.setMpaRate(mpa);
+        film.setMpa(mpa);
 
-       if (filmGenreStorage.findAll() != null) {
+       if (filmGenreStorage.findGenresByFilmId(film.getId()) != null) {
             List<FilmGenre> listFilmGenre = filmGenreStorage.findGenresByFilmId(film.getId());
             ArrayList<Genre> genres = new ArrayList<>();
             for (FilmGenre filmGenre: listFilmGenre) {

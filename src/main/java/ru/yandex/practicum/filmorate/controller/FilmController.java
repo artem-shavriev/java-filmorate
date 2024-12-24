@@ -54,14 +54,4 @@ public class FilmController {
     public List<FilmDto> getPopularFilms(@RequestParam(defaultValue = "10") int count) {
         return filmService.getPopularFilms(count);
     }
-
-    @PutMapping("/films/{id}/genre/{genreId}")
-    public FilmDto addGenre(@PathVariable long id, @PathVariable long genreId) {
-        return filmService.addGenre(id, genreId);
-    }
-
-    @DeleteMapping("/films/{id}/genre/{genreId}")
-    public FilmDto deleteGenre(@PathVariable long id, @PathVariable long genreId) {
-        return filmService.deleteGenre(id,genreId);
-    }
 }

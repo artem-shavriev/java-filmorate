@@ -8,6 +8,8 @@ import ru.yandex.practicum.filmorate.exception.DuplicatedDataException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.FilmGenre;
+import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.dal.FilmDbStorage;
 import ru.yandex.practicum.filmorate.storage.dal.FilmGenreStorage;
 import ru.yandex.practicum.filmorate.storage.dal.LikesFromUsersStorage;
@@ -32,8 +34,8 @@ public class FilmService {
 
     private final FilmDbStorage filmDbStorage;
     private final UserDbStorage userDbStorage;
-    private final LikesFromUsersStorage likesFromUsersRepository;
-    private final FilmGenreStorage filmGenreRepository;
+    private final LikesFromUsersStorage likesFromUsersStorage;
+    private final FilmGenreStorage filmGenreStorage;
     private static final Date MIN_RELEASE_DATE = new Date(-5, 12, 28);
 
     public FilmDto addFilm(NewFilmRequest request) {
@@ -46,14 +48,37 @@ public class FilmService {
             throw new DuplicatedDataException("Фильм с таким названием уже есть в списке.");
         }
 
-        if (request.getReleaseDate().getTime() < MIN_RELEASE_DATE.getTime()) {
+        if (request.getReleaseDate().before(MIN_RELEASE_DATE)) {
             throw new ValidationException("Дата релиза должна быть не раньше 28 декабря 1895 года");
+        }
+
+        if (request.getGenres() != null) {
+            request.getGenres().stream().forEach(genre -> {
+                if (genre.getId() > 6 || genre.getId() < 1) {
+                    throw new ValidationException("У жанров id от 1 до 6");
+                }
+            });
+        }
+
+        if (request.getMpa().getId() > 5 || request.getMpa().getId() < 1) {
+            throw new ValidationException("У рейтинга id от 1 до 5");
         }
 
         Film film = FilmMapper.mapToFilm(request);
 
         film = filmDbStorage.save(film);
-        filmGenreRepository.setFilmGenres(film);
+
+        if (film.getGenres() != null) {
+            List<Genre> genres = film.getGenres();
+            for (Genre genre : genres) {
+                FilmGenre filmGenre = new FilmGenre();
+
+                filmGenre.setFilmId(film.getId());
+                filmGenre.setGenreId(genre.getId());
+
+                filmGenreStorage.addGenre(filmGenre);
+            }
+        }
 
         log.info("Добавлен новый фильм {} с id: {}", film.getName(), film.getId());
 
@@ -117,7 +142,7 @@ public class FilmService {
             throw new NotFoundException("Пользовтель с данным id не сущетвует.");
         }
 
-        likesFromUsersRepository.addLike(filmId, userId);
+        likesFromUsersStorage.addLike(filmId, userId);
         log.info("Пользовтель с id {} лайкнул фильм с id {}.", userId, filmId);
 
         return getFilmById(filmId);
@@ -142,7 +167,7 @@ public class FilmService {
             throw new NotFoundException("Данный пользовтаель еще не лайкал этот фильм.");
         }
 
-        likesFromUsersRepository.deleteLike(filmId, userId);
+        likesFromUsersStorage.deleteLike(filmId, userId);
         log.info("Лайк пользовтеля с id {} фильму с id {} был удален.", userId, filmId);
 
         return getFilmById(filmId);
@@ -175,18 +200,6 @@ public class FilmService {
 
         log.info("Список наиболее популярных фильмов сформирован. Длина списка: {}", count);
         return listOfPopularFilms;
-    }
-
-    public FilmDto addGenre(long filmId, long genreId) {
-        filmGenreRepository.addGenre(filmId, genreId);
-
-        return getFilmById(filmId);
-    }
-
-    public FilmDto deleteGenre(long filmId, long genreId) {
-        filmGenreRepository.deleteGenre(filmId, genreId);
-
-        return getFilmById(filmId);
     }
 }
 

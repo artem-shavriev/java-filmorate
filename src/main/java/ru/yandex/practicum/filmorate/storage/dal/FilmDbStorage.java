@@ -13,8 +13,8 @@ public class FilmDbStorage extends BaseStorage<Film> {
     private static final String FIND_ALL_QUERY = "SELECT * FROM FILM";
     private static final String FIND_BY_ID_QUERY = "SELECT * FROM FILM WHERE FILM_ID = ?";
     private static final String FIND_BY_NAME_QUERY = "SELECT * FROM FILM WHERE NAME = ?";
-    private static final String INSERT_QUERY = "INSERT INTO FILM(NAME, DESCRIPTION, RELEASE_DATE, DURATION)" +
-            "VALUES (?, ?, ?, ?)";
+    private static final String INSERT_QUERY = "INSERT INTO FILM(NAME, DESCRIPTION, RELEASE_DATE, DURATION, MPA_ID)" +
+            "VALUES (?, ?, ?, ?, ?)";
     private static final String UPDATE_QUERY = "UPDATE FILM SET NAME = ?, DESCRIPTION = ?, DURATION = ?, MPA_ID = ?," +
             "RELEASE_DATE = ? WHERE FILM_ID = ?";
 
@@ -40,7 +40,8 @@ public class FilmDbStorage extends BaseStorage<Film> {
                 film.getName(),
                 film.getDescription(),
                 film.getReleaseDate(),
-                film.getDuration()
+                film.getDuration(),
+                film.getMpa().getId()
         );
         film.setId(id);
         return film;
@@ -51,7 +52,7 @@ public class FilmDbStorage extends BaseStorage<Film> {
                 film.getName(),
                 film.getDescription(),
                 film.getDuration(),
-                film.getMpaRate(),
+                film.getMpa(),
                 film.getReleaseDate(),
                 film.getId()
         );
