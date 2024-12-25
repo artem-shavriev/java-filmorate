@@ -13,9 +13,10 @@ public class UserMapper {
         User user = new User();
 
         user.setLogin(request.getLogin());
-        user.setName(request.getName());
+        user.setUsername(request.getUsername());
         user.setEmail(request.getEmail());
         user.setBirthday(request.getBirthday());
+        user.setPassword(request.getPassword());
 
         return user;
     }
@@ -23,8 +24,9 @@ public class UserMapper {
     public static UserDto mapToUserDto(User user) {
         UserDto userDto = new UserDto();
 
-        userDto.setLogin(userDto.getLogin());
-        userDto.setName(user.getName());
+        userDto.setId(user.getId());
+        userDto.setLogin(user.getLogin());
+        userDto.setUsername(user.getUsername());
         userDto.setEmail(user.getEmail());
         userDto.setBirthday(user.getBirthday());
         userDto.setFriendsId(user.getFriendsId());
@@ -38,7 +40,7 @@ public class UserMapper {
         }
 
         if (request.hasName()) {
-            user.setName(request.getName());
+            user.setUsername(request.getUsername());
         }
 
         if (request.hasBirthday()) {
@@ -47,6 +49,10 @@ public class UserMapper {
 
         if (request.hasEmail()) {
             user.setEmail(request.getEmail());
+        }
+
+        if (request.hasPassword()) {
+            user.setPassword(request.getPassword());
         }
 
         return user;

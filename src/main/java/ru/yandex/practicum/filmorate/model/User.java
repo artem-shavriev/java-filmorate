@@ -6,7 +6,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Past;
 import lombok.Data;
 
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -18,9 +18,11 @@ public class User {
     private String email;
     @NotBlank
     private String login;
-    private String name;
+    private String username;
+    @NotBlank
+    private String password;
     @NotNull
     @Past
-    private Date birthday;
+    private LocalDate birthday;
     private Set<Long> friendsId = new HashSet<>();
 }

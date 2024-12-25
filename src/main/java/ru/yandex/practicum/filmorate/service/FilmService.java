@@ -10,6 +10,7 @@ import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.FilmGenre;
 import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.model.LikesFromUsers;
 import ru.yandex.practicum.filmorate.storage.dal.FilmDbStorage;
 import ru.yandex.practicum.filmorate.storage.dal.FilmGenreStorage;
 import ru.yandex.practicum.filmorate.storage.dal.LikesFromUsersStorage;
@@ -131,8 +132,10 @@ public class FilmService {
             throw new NotFoundException("Пользовтель с данным id не сущетвует.");
         }
 
-        likesFromUsersStorage.addLike(filmId, userId);
-        log.info("Пользовтель с id {} лайкнул фильм с id {}.", userId, filmId);
+        LikesFromUsers like = likesFromUsersStorage.addLike(filmId, userId);
+        getFilmById(filmId).getLikesFromUsers().add(like.getUserId());
+
+        log.info("Пользовтель с idt {} лайкнул фильм с id {}.", userId, filmId);
 
         return getFilmById(filmId);
     }

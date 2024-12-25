@@ -12,8 +12,8 @@ import java.util.List;
 @Repository
 public class LikesFromUsersStorage extends BaseStorage<LikesFromUsers> {
     private static final String FIND_ALL_QUERY = "SELECT * FROM LIKES_FROM_USERS";
-    private static final String INSERT_QUERY = "MERGE INTO LIKES_FROM_USERS (FILM_ID, USER_ID)" +
-            "VALUES (?, ?) returning id";
+    private static final String INSERT_QUERY = "INSERT INTO LIKES_FROM_USERS (FILM_ID, USER_ID)" +
+            "VALUES (?, ?)";
     private static final String DELETE_QUERY = "DELETE FROM LIKES_FROM_USERS WHERE FILM_ID = ? AND USER_ID = ?";
 
     public LikesFromUsersStorage(JdbcTemplate jdbc, RowMapper<LikesFromUsers> mapper) {
@@ -24,8 +24,16 @@ public class LikesFromUsersStorage extends BaseStorage<LikesFromUsers> {
         return findMany(FIND_ALL_QUERY);
     }
 
-    public void addLike(long filmId, long userId) {
+    public LikesFromUsers addLike(long filmId, long userId) {
+        LikesFromUsers likes = new LikesFromUsers();
+
+        likes.setFilmId(filmId);
+        likes.setUserId(userId);
+
         long id = insert(INSERT_QUERY, filmId, userId);
+        likes.setId(id);
+
+        return likes;
     }
 
     public boolean deleteLike(long filmId, long userId) {

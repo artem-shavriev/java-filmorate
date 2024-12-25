@@ -37,8 +37,8 @@ public class UserService {
             throw new ValidationException("Электронная почта уже используется");
         }
 
-        if (request.getLogin() == null || request.getLogin().isEmpty()) {
-            throw new ConditionsNotMetException("Login должен быть указан");
+        if (request.getUsername() == null || request.getUsername().isEmpty()) {
+            throw new ConditionsNotMetException("Имя должено быть указано");
         }
 
         Optional<User> alreadyExistLogin = userDbStorage.findByLogin(request.getLogin());
