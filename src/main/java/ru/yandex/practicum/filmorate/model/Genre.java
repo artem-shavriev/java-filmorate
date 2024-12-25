@@ -9,4 +9,5 @@ public class Genre {
     @Min(value = 1, message = "Жанра с id меньше 1 нет")
     @Max(value = 6, message = "Жанра с id больше 6 нет")
     private long id;
+    private String name;
 }

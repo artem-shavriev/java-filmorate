@@ -16,8 +16,7 @@ public class UpdateUserRequest {
     private String email;
     private String login;
     @NotBlank
-    private String username;
-    private String password;
+    private String name;
     @NotNull
     @Past
     private LocalDate birthday;
@@ -31,13 +30,8 @@ public class UpdateUserRequest {
     }
 
     public boolean hasName() {
-        return username != null || !username.isEmpty();
+        return name != null || !name.isEmpty();
     }
-
-    public boolean hasPassword() {
-        return password != null || !password.isEmpty();
-    }
-
     public boolean hasBirthday() {
         return birthday != null;
     }

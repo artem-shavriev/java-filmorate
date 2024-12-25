@@ -14,10 +14,11 @@ import java.util.Optional;
 public class UserDbStorage extends BaseStorage<User> {
     private static final String FIND_ALL_QUERY = "SELECT * FROM \"USER\"";
     private static final String FIND_BY_ID_QUERY = "SELECT * FROM \"USER\" WHERE USER_ID = ?";
-    private static final String INSERT_QUERY = "INSERT INTO \"USER\"(USER_NAME, LOGIN, EMAIL, BIRTHDAY, PASSWORD)" +
-            "VALUES (?, ?, ?, ?, ?)";
-    private static final String UPDATE_QUERY = "UPDATE \"USER\" SET NAME = ?, LOGIN = ?, EMAIL = ?, BIRTHDAY = ?, " +
-            "PASSWORD = ? WHERE USER_ID = ?";
+    private static final String INSERT_QUERY = "INSERT INTO \"USER\"(NAME, LOGIN, EMAIL, BIRTHDAY)" +
+            "VALUES (?, ?, ?, ?)";
+    private static final String UPDATE_QUERY = "UPDATE \"USER\" SET NAME = ?, LOGIN = ?, EMAIL = ?, BIRTHDAY = ? " +
+            "WHERE USER_ID = ?";
+
     private static final String FIND_BY_EMAIL_QUERY = "SELECT * FROM \"USER\" WHERE EMAIL = ?";
     private static final String FIND_BY_LOGIN_QUERY = "SELECT * FROM \"USER\" WHERE LOGIN = ?";
 
@@ -44,17 +45,16 @@ public class UserDbStorage extends BaseStorage<User> {
     public User save(User user) {
         String login;
         if (user.getLogin() == null) {
-            login = user.getUsername() + "-" + user.getEmail();
+            login = user.getName() + "-" + user.getEmail();
             user.setLogin(login);
             log.warn("Логин не передан, он будет сгенирирован автоматически.");
         }
 
         long id = insert(INSERT_QUERY,
-                user.getUsername(),
+                user.getName(),
                 user.getLogin(),
                 user.getEmail(),
-                user.getBirthday(),
-                user.getPassword()
+                user.getBirthday()
         );
         user.setId(id);
         log.info("Создан новый пользователь c id: {}", user.getId());
@@ -65,16 +65,15 @@ public class UserDbStorage extends BaseStorage<User> {
     public User update(User user) {
         String login;
         if (user.getLogin() == null) {
-            login = user.getUsername() + "-" + user.getEmail();
+            login = user.getName() + "-" + user.getEmail();
             user.setLogin(login);
             log.warn("Логин не передан, он будет сгенирирован автоматически.");
         }
         update(UPDATE_QUERY,
-                user.getUsername(),
+                user.getName(),
                 user.getLogin(),
                 user.getEmail(),
                 user.getBirthday(),
-                user.getPassword(),
                 user.getId()
         );
 

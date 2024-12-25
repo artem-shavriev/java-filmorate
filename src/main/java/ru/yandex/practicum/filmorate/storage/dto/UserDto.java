@@ -13,7 +13,7 @@ public class UserDto {
     private Long id;
     private String email;
     private String login;
-    private String username;
+    private String name;
     private LocalDate birthday;
     private Set<Long> friendsId = new HashSet<>();
 }

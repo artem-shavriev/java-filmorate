@@ -37,7 +37,7 @@ public class UserService {
             throw new ValidationException("Электронная почта уже используется");
         }
 
-        if (request.getUsername() == null || request.getUsername().isEmpty()) {
+        if (request.getName() == null || request.getName().isEmpty()) {
             throw new ConditionsNotMetException("Имя должено быть указано");
         }
 
@@ -53,16 +53,16 @@ public class UserService {
         return UserMapper.mapToUserDto(user);
     }
 
-    public UserDto updateUser(Long userId, UpdateUserRequest request) {
-        if (userId == null) {
+    public UserDto updateUser(UpdateUserRequest request) {
+        if (request.getId() == null) {
             log.error("Id не куказан.");
             throw new ValidationException("Id должен быть указан");
         }
 
-        Optional<User> existUser = userDbStorage.findById(userId);
+        Optional<User> existUser = userDbStorage.findById(request.getId());
         if (existUser.isEmpty()) {
-            log.error("User с id = {} не найден", userId);
-            throw new NotFoundException("User с id = " + userId + " не найден");
+            log.error("User с id = {} не найден", request.getId());
+            throw new NotFoundException("User с id = " + request.getId() + " не найден");
         }
 
         if (request.getLogin() != null) {
@@ -79,12 +79,12 @@ public class UserService {
             }
         }
 
-        User updateUser = userDbStorage.findById(userId)
+        User updateUser = userDbStorage.findById(request.getId())
                 .map(user -> UserMapper.updateUserFields(user, request))
                 .orElseThrow(() -> new NotFoundException("Пользователь не найден"));
 
         updateUser = userDbStorage.update(updateUser);
-        log.info("Пользователь c id: {} обновлен", userId);
+        log.info("Пользователь c id: {} обновлен", request.getId());
 
         return UserMapper.mapToUserDto(updateUser);
     }

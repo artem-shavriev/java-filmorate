@@ -15,9 +15,7 @@ public class NewUserRequest {
     private String email;
     private String login;
     @NotBlank
-    private String username;
-    @NotBlank
-    private String password;
+    private String name;
     @Past
     private LocalDate birthday;
 }
