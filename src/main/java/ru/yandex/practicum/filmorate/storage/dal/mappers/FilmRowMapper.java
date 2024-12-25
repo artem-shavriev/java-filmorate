@@ -53,8 +53,8 @@ public class FilmRowMapper implements RowMapper<Film> {
             film.setGenres(genres);
         }
 
-        if(LikesFromUsersStorage.findAll() != null) {
-            List<LikesFromUsers> likes = LikesFromUsersStorage.findAll();
+        if(LikesFromUsersStorage.findLikesByFilmId(film.getId()) != null) {
+            List<LikesFromUsers> likes = LikesFromUsersStorage.findLikesByFilmId(film.getId());
             Set<Long> usersId = new HashSet<>();
             for (LikesFromUsers like : likes) {
                 usersId.add(like.getUserId());
