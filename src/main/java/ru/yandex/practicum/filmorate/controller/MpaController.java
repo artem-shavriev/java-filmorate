@@ -12,7 +12,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 public class MpaController {
-    MpaService mpaService;
+    private final MpaService mpaService;
 
     @GetMapping("/mpa")
     public List<Mpa> getMpa() {

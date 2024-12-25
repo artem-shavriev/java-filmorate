@@ -14,20 +14,20 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 public class MpaService {
-    MpaStorage mpaRepository;
+    private final MpaStorage mpaStorage;
 
     public List<Mpa> findAll() {
-        return mpaRepository.findAll();
+        return mpaStorage.findAll();
     }
 
     public Mpa findById(long mpaId) {
-        Optional<Mpa> existMpa = mpaRepository.findById(mpaId);
+        Optional<Mpa> existMpa = mpaStorage.findById(mpaId);
         if (existMpa.isEmpty()) {
             log.error("Рейтинг с id {} не найден", mpaId);
-            throw new NotFoundException("userId не найден.");
+            throw new NotFoundException("id mpa не найден.");
         }
         log.trace("Получен рейтинг фильма по его id: {}", mpaId);
 
-        return mpaRepository.findById(mpaId).get();
+        return mpaStorage.findById(mpaId).get();
     }
 }
