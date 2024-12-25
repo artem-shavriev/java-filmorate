@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class UserService {
     private final UserDbStorage userDbStorage;
-    private final FriendsIdsStorage friendsIdsRepository;
+    private final FriendsIdsStorage friendsIdsStorage;
 
     public UserDto addUser(NewUserRequest request) {
         if (request.getEmail() == null || request.getEmail().isEmpty()) {
@@ -120,7 +120,8 @@ public class UserService {
             throw new NotFoundException("friendId не найден.");
         }
 
-        friendsIdsRepository.addFriend(friendId, userId);
+        friendsIdsStorage.addFriend(userId, friendId);
+
         log.trace("Пользователь c id: {} добавил в друзья пользователя с id: {}", userId, friendId);
 
         return getUserById(userId);
@@ -139,7 +140,7 @@ public class UserService {
             throw new NotFoundException("friendId не найден.");
         }
 
-        List<FriendsIds> friends = friendsIdsRepository.findUserFriends(userId);
+        List<FriendsIds> friends = friendsIdsStorage.findUserFriends(userId);
         List<Long> usersFriendIds = new ArrayList<>();
 
         friends.stream()
@@ -150,7 +151,7 @@ public class UserService {
         if (!usersFriendIds.contains(friendId)) {
             log.trace("Данного пользователя небыло в друзьях.");
         } else {
-            friendsIdsRepository.deleteLFriend(friendId, userId);
+            friendsIdsStorage.deleteLFriend(friendId, userId);
         }
 
         log.trace("Пользователь id: {} удалены из друзей у пользователя с id: {}", friendId, userId);
@@ -167,7 +168,7 @@ public class UserService {
 
         List<Long> friendsIds = new ArrayList<>();
         List<UserDto> friends = new ArrayList<>();
-        List<FriendsIds> friendsIdsObjects = friendsIdsRepository.findUserFriends(userId);
+        List<FriendsIds> friendsIdsObjects = friendsIdsStorage.findUserFriends(userId);
 
         friendsIdsObjects.stream().forEach(friendObject -> friendsIds.add(friendObject.getFriendId()));
 

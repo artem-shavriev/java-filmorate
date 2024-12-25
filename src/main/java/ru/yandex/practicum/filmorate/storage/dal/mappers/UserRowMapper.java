@@ -3,17 +3,21 @@ package ru.yandex.practicum.filmorate.storage.dal.mappers;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.model.FriendsIds;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.dal.FriendsIdsStorage;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 @Component
 @RequiredArgsConstructor
 public class UserRowMapper implements RowMapper<User> {
-    FriendsIdsStorage friendsIdsRepository;
+    private final FriendsIdsStorage friendsIdsStorage;
 
     @Override
     public User mapRow(ResultSet resultSet, int rowNum) throws SQLException {
@@ -29,13 +33,12 @@ public class UserRowMapper implements RowMapper<User> {
             user.setBirthday(birthday.toLocalDateTime().toLocalDate());
         }
 
+        Set<Long> friendsIdsSet = new HashSet<>();
 
-        /*Set<Long> friendsIdsSet = new HashSet<>();
-
-        List<FriendsIds> friendsIdsObjects = friendsIdsRepository.findUserFriends(user.getId());
+        List<FriendsIds> friendsIdsObjects = friendsIdsStorage.findUserFriends(user.getId());
         friendsIdsObjects.stream()
                 .forEach(friend -> friendsIdsSet.add(friend.getFriendId()));
-        user.setFriendsId(friendsIdsSet);*/
+        user.setFriendsId(friendsIdsSet);
 
         return user;
     }
