@@ -15,6 +15,7 @@ import java.util.Set;
 
 @Data
 public class UpdateFilmRequest {
+    private Long id;
     @NotBlank
     private String name;
     @Size(max = 200, message = "Максимальная длина описания не должна превышать 200 символов.")

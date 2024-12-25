@@ -52,7 +52,7 @@ public class FilmDbStorage extends BaseStorage<Film> {
                 film.getName(),
                 film.getDescription(),
                 film.getDuration(),
-                film.getMpa(),
+                film.getMpa().getId(),
                 film.getReleaseDate(),
                 film.getId()
         );

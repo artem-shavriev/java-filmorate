@@ -7,8 +7,6 @@ import ru.yandex.practicum.filmorate.storage.dto.FilmDto;
 import ru.yandex.practicum.filmorate.storage.dto.NewFilmRequest;
 import ru.yandex.practicum.filmorate.storage.dto.UpdateFilmRequest;
 
-import java.time.LocalDate;
-
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class FilmMapper {
     public static Film mapToFilm(NewFilmRequest request) {
@@ -58,6 +56,14 @@ public class FilmMapper {
 
         if (request.hasMpa()) {
             film.setMpa(request.getMpa());
+        }
+
+        if (request.hasGenres()) {
+            film.setGenres(request.getGenres());
+        }
+
+        if (request.hasLikesFromUsers()) {
+            film.setLikesFromUsers(request.getLikesFromUsers());
         }
 
         return film;

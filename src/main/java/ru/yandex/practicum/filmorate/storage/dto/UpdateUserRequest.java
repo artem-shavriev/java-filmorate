@@ -10,6 +10,7 @@ import java.util.Date;
 
 @Data
 public class UpdateUserRequest {
+
     @NotBlank
     @Email
     private String email;
