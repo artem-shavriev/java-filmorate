@@ -22,8 +22,6 @@ public class UpdateFilmRequest {
     private String description;
     @NotNull
     private LocalDate releaseDate;
-    @NotBlank
-    private String password;
     @NotNull
     @Positive(message = "Продолжительность должна быть положительным числом")
     private Integer duration;

@@ -13,7 +13,9 @@ import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.LikesFromUsers;
 import ru.yandex.practicum.filmorate.storage.dal.FilmDbStorage;
 import ru.yandex.practicum.filmorate.storage.dal.FilmGenreStorage;
+import ru.yandex.practicum.filmorate.storage.dal.GenreStorage;
 import ru.yandex.practicum.filmorate.storage.dal.LikesFromUsersStorage;
+import ru.yandex.practicum.filmorate.storage.dal.MpaStorage;
 import ru.yandex.practicum.filmorate.storage.dal.UserDbStorage;
 import ru.yandex.practicum.filmorate.storage.dto.FilmDto;
 import ru.yandex.practicum.filmorate.storage.dto.NewFilmRequest;
@@ -37,6 +39,8 @@ public class FilmService {
     private final UserDbStorage userDbStorage;
     private final LikesFromUsersStorage likesFromUsersStorage;
     private final FilmGenreStorage filmGenreStorage;
+    private final MpaStorage mpaStorage;
+    private final GenreStorage genreStorage;
     private static final LocalDate MIN_RELEASE_DATE = LocalDate.of(1895, 12, 28);
 
     public FilmDto addFilm(NewFilmRequest request) {
@@ -64,6 +68,18 @@ public class FilmService {
         if (request.getMpa().getId() > 5 || request.getMpa().getId() < 1) {
             throw new ValidationException("У рейтинга id от 1 до 5");
         }
+
+        String mpaName = mpaStorage.findById(request.getMpa().getId()).get().getName();
+
+        request.getMpa().setName(mpaName);
+
+        List<Genre> genresList = request.getGenres();
+        for (Genre genre : genresList) {
+            String genreName = genreStorage.findById(genre.getId()).get().getName();
+            genre.setName(genreName);
+        }
+
+        request.setGenres(genresList);
 
         Film film = FilmMapper.mapToFilm(request);
 

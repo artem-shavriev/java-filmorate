@@ -9,7 +9,9 @@ import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.LikesFromUsers;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.storage.dal.FilmGenreStorage;
+import ru.yandex.practicum.filmorate.storage.dal.GenreStorage;
 import ru.yandex.practicum.filmorate.storage.dal.LikesFromUsersStorage;
+import ru.yandex.practicum.filmorate.storage.dal.MpaStorage;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -24,6 +26,8 @@ import java.util.Set;
 public class FilmRowMapper implements RowMapper<Film> {
 
     private final  FilmGenreStorage filmGenreStorage;
+    private final GenreStorage genreStorage;
+    private final MpaStorage mpaStorage;
     private final LikesFromUsersStorage LikesFromUsersStorage;
 
 
@@ -39,7 +43,12 @@ public class FilmRowMapper implements RowMapper<Film> {
         film.setReleaseDate(date.toLocalDateTime().toLocalDate());
 
         Mpa mpa = new Mpa();
-        mpa.setId(resultSet.getLong("MPA_ID"));
+        long mpaId = resultSet.getLong("MPA_ID");
+        mpa.setId(mpaId);
+
+        String mpaName = mpaStorage.findById(mpaId).get().getName();
+        mpa.setName(mpaName);
+
         film.setMpa(mpa);
 
        if (filmGenreStorage.findGenresByFilmId(film.getId()) != null) {
@@ -48,6 +57,8 @@ public class FilmRowMapper implements RowMapper<Film> {
             for (FilmGenre filmGenre: listFilmGenre) {
                     Genre currentGenre = new Genre();
                     currentGenre.setId(filmGenre.getGenreId());
+                    String genreName = genreStorage.findById(filmGenre.getGenreId()).get().getName();
+                    currentGenre.setName(genreName);
                     genres.add(currentGenre);
                 }
             film.setGenres(genres);
