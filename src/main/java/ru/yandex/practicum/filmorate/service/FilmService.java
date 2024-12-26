@@ -87,7 +87,7 @@ public class FilmService {
 
         Film film = FilmMapper.mapToFilm(request);
 
-        film = filmDbStorage.save(film);
+        film = filmDbStorage.addFilm(film);
 
         if (film.getGenres() != null) {
             List<Genre> genres = film.getGenres();
@@ -122,7 +122,7 @@ public class FilmService {
                 .map(film -> FilmMapper.updateFilmFields(film, request))
                 .orElseThrow(() -> new NotFoundException("Фильм не найден"));
 
-        updateFilm = filmDbStorage.update(updateFilm);
+        updateFilm = filmDbStorage.updateFilm(updateFilm);
         log.info("Фильм {} был обновлен.", updateFilm.getName());
 
         return FilmMapper.mapToFilmDto(updateFilm);

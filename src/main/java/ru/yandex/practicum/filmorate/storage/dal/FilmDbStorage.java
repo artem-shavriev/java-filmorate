@@ -1,15 +1,18 @@
 package ru.yandex.practicum.filmorate.storage.dal;
 
+import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.storage.FilmStorage;
 
 import java.util.List;
 import java.util.Optional;
 
+@Primary
 @Repository
-public class FilmDbStorage extends BaseStorage<Film> {
+public class FilmDbStorage extends BaseStorage<Film> implements FilmStorage {
     private static final String FIND_ALL_QUERY = "SELECT * FROM FILM";
     private static final String FIND_BY_ID_QUERY = "SELECT * FROM FILM WHERE FILM_ID = ?";
     private static final String FIND_BY_NAME_QUERY = "SELECT * FROM FILM WHERE NAME = ?";
@@ -34,7 +37,7 @@ public class FilmDbStorage extends BaseStorage<Film> {
         return findMany(FIND_ALL_QUERY);
     }
 
-    public Film save(Film film) {
+    public Film addFilm(Film film) {
 
         long id = insert(INSERT_QUERY,
                 film.getName(),
@@ -47,7 +50,7 @@ public class FilmDbStorage extends BaseStorage<Film> {
         return film;
     }
 
-    public Film update(Film film) {
+    public Film updateFilm(Film film) {
         update(UPDATE_QUERY,
                 film.getName(),
                 film.getDescription(),

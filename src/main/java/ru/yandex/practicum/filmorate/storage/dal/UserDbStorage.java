@@ -1,17 +1,20 @@
 package ru.yandex.practicum.filmorate.storage.dal;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.util.List;
 import java.util.Optional;
 
+@Primary
 @Repository
 @Slf4j
-public class UserDbStorage extends BaseStorage<User> {
+public class UserDbStorage extends BaseStorage<User> implements UserStorage {
     private static final String FIND_ALL_QUERY = "SELECT * FROM \"USER\"";
     private static final String FIND_BY_ID_QUERY = "SELECT * FROM \"USER\" WHERE USER_ID = ?";
     private static final String INSERT_QUERY = "INSERT INTO \"USER\"(NAME, LOGIN, EMAIL, BIRTHDAY)" +
@@ -41,7 +44,7 @@ public class UserDbStorage extends BaseStorage<User> {
         return findMany(FIND_ALL_QUERY);
     }
 
-    public User save(User user) {
+    public User addUser(User user) {
         String login;
         if (user.getLogin() == null) {
             login = user.getName() + "-" + user.getEmail();
@@ -61,7 +64,7 @@ public class UserDbStorage extends BaseStorage<User> {
         return user;
     }
 
-    public User update(User user) {
+    public User updateUser(User user) {
         String login;
         if (user.getLogin() == null) {
             login = user.getName() + "-" + user.getEmail();

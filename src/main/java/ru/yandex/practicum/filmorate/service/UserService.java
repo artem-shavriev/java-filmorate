@@ -47,7 +47,7 @@ public class UserService {
         }
 
         User user = UserMapper.mapToUser(request);
-        user = userDbStorage.save(user);
+        user = userDbStorage.addUser(user);
 
         log.info("Создан новый пользователь c id: {}", user.getId());
         return UserMapper.mapToUserDto(user);
@@ -83,7 +83,7 @@ public class UserService {
                 .map(user -> UserMapper.updateUserFields(user, request))
                 .orElseThrow(() -> new NotFoundException("Пользователь не найден"));
 
-        updateUser = userDbStorage.update(updateUser);
+        updateUser = userDbStorage.updateUser(updateUser);
         log.info("Пользователь c id: {} обновлен", request.getId());
 
         return UserMapper.mapToUserDto(updateUser);
