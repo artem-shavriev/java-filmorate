@@ -32,6 +32,7 @@ public class UpdateUserRequest {
     public boolean hasName() {
         return name != null || !name.isEmpty();
     }
+
     public boolean hasBirthday() {
         return birthday != null;
     }
