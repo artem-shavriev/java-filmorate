@@ -23,7 +23,7 @@ public class GenreService {
     public Genre findById(long genreId) {
         Optional<Genre> existGenre = genreStorage.findById(genreId);
 
-        if(existGenre.isEmpty()) {
+        if (existGenre.isEmpty()) {
             log.error("Жанр с id {} не найден", genreId);
             throw new NotFoundException("Жанр с данным id не найден");
         }
