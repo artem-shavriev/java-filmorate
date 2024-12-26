@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.ConditionsNotMetException;
-import ru.yandex.practicum.filmorate.exception.DuplicatedDataException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
@@ -24,6 +23,7 @@ import ru.yandex.practicum.filmorate.storage.mapper.FilmMapper;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -48,10 +48,11 @@ public class FilmService {
             throw new ConditionsNotMetException("Название фильма должно быть указано");
         }
 
-        Optional<Film> alreadyExistFilm = filmDbStorage.findByName(request.getName());
+        //Убрал проверку уникальности имени для прохождения тестов Postman
+        /*Optional<Film> alreadyExistFilm = filmDbStorage.findByName(request.getName());
         if (alreadyExistFilm.isPresent()) {
             throw new DuplicatedDataException("Фильм с таким названием уже есть в списке.");
-        }
+        }*/
 
         if (request.getReleaseDate().isBefore(MIN_RELEASE_DATE)) {
             throw new ValidationException("Дата релиза должна быть не раньше 28 декабря 1895 года");
@@ -74,12 +75,15 @@ public class FilmService {
         request.getMpa().setName(mpaName);
 
         List<Genre> genresList = request.getGenres();
-        for (Genre genre : genresList) {
+        List<Long> genresIds = genresList.stream().map(genre -> genre.getId()).toList();
+        Set<Long> uniqueGenresIds = new HashSet<>(genresIds);
+        List<Genre> uniqueGenresList = uniqueGenresIds.stream().map(id -> genreStorage.findById(id).get()).toList();
+
+        for (Genre genre : uniqueGenresList) {
             String genreName = genreStorage.findById(genre.getId()).get().getName();
             genre.setName(genreName);
         }
-
-        request.setGenres(genresList);
+        request.setGenres(uniqueGenresList);
 
         Film film = FilmMapper.mapToFilm(request);
 

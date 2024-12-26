@@ -18,7 +18,6 @@ public class UserDbStorage extends BaseStorage<User> {
             "VALUES (?, ?, ?, ?)";
     private static final String UPDATE_QUERY = "UPDATE \"USER\" SET NAME = ?, LOGIN = ?, EMAIL = ?, BIRTHDAY = ? " +
             "WHERE USER_ID = ?";
-
     private static final String FIND_BY_EMAIL_QUERY = "SELECT * FROM \"USER\" WHERE EMAIL = ?";
     private static final String FIND_BY_LOGIN_QUERY = "SELECT * FROM \"USER\" WHERE LOGIN = ?";
 

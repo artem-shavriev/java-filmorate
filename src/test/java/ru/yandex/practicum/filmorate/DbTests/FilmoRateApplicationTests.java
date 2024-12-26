@@ -18,12 +18,12 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 @Import({UserDbStorage.class})
 class FilmoRateApplicationTests {
-    private final UserDbStorage userStorage;
+    private final UserDbStorage userDbStorage;
 
     @Test
     public void testFindUserById() {
 
-        Optional<User> userOptional = userStorage.findById(1);
+        Optional<User> userOptional = userDbStorage.findById(1);
 
         assertThat(userOptional)
                 .isPresent()
