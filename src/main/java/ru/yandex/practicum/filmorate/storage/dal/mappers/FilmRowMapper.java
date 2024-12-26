@@ -28,7 +28,7 @@ public class FilmRowMapper implements RowMapper<Film> {
     private final  FilmGenreStorage filmGenreStorage;
     private final GenreStorage genreStorage;
     private final MpaStorage mpaStorage;
-    private final LikesFromUsersStorage LikesFromUsersStorage;
+    private final LikesFromUsersStorage likesFromUsersStorage;
 
 
     @Override
@@ -64,8 +64,8 @@ public class FilmRowMapper implements RowMapper<Film> {
             film.setGenres(genres);
         }
 
-        if(LikesFromUsersStorage.findLikesByFilmId(film.getId()) != null) {
-            List<LikesFromUsers> likes = LikesFromUsersStorage.findLikesByFilmId(film.getId());
+        if(likesFromUsersStorage.findLikesByFilmId(film.getId()) != null) {
+            List<LikesFromUsers> likes = likesFromUsersStorage.findLikesByFilmId(film.getId());
             Set<Long> usersId = new HashSet<>();
             for (LikesFromUsers like : likes) {
                 usersId.add(like.getUserId());
