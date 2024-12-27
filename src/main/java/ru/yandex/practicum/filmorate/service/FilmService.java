@@ -74,16 +74,18 @@ public class FilmService {
 
         request.getMpa().setName(mpaName);
 
-        List<Genre> genresList = request.getGenres();
-        List<Long> genresIds = genresList.stream().map(genre -> genre.getId()).toList();
-        Set<Long> uniqueGenresIds = new HashSet<>(genresIds);
-        List<Genre> uniqueGenresList = uniqueGenresIds.stream().map(id -> genreStorage.findById(id).get()).toList();
+        if (request.getGenres() != null) {
+            List<Genre> genresList = request.getGenres();
+            List<Long> genresIds = genresList.stream().map(genre -> genre.getId()).toList();
+            Set<Long> uniqueGenresIds = new HashSet<>(genresIds);
+            List<Genre> uniqueGenresList = uniqueGenresIds.stream().map(id -> genreStorage.findById(id).get()).toList();
 
-        for (Genre genre : uniqueGenresList) {
-            String genreName = genreStorage.findById(genre.getId()).get().getName();
-            genre.setName(genreName);
+            for (Genre genre : uniqueGenresList) {
+                String genreName = genreStorage.findById(genre.getId()).get().getName();
+                genre.setName(genreName);
+            }
+            request.setGenres(uniqueGenresList);
         }
-        request.setGenres(uniqueGenresList);
 
         Film film = FilmMapper.mapToFilm(request);
 
