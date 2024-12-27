@@ -48,12 +48,6 @@ public class FilmService {
             throw new ConditionsNotMetException("Название фильма должно быть указано");
         }
 
-        //Убрал проверку уникальности имени для прохождения тестов Postman
-        /*Optional<Film> alreadyExistFilm = filmDbStorage.findByName(request.getName());
-        if (alreadyExistFilm.isPresent()) {
-            throw new DuplicatedDataException("Фильм с таким названием уже есть в списке.");
-        }*/
-
         if (request.getMpa().getId() > 5 || request.getMpa().getId() < 1) {
             throw new ValidationException("У рейтинга id от 1 до 5");
         }
