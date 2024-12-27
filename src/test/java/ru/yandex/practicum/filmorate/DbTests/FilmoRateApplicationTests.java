@@ -138,11 +138,11 @@ class FilmoRateApplicationTests {
 
         userStorage.addUser(user);
 
-        User UpdatedUser = userStorage.findById(1).get();
+        User updatedUser = userStorage.findById(1).get();
 
-        UpdatedUser.setName("updateName");
+        updatedUser.setName("updateName");
 
-        userStorage.updateUser(UpdatedUser);
+        userStorage.updateUser(updatedUser);
 
         Optional<User> userOptional = userStorage.findById(1);
 
