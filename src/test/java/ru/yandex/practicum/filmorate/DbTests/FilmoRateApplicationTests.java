@@ -168,7 +168,7 @@ class FilmoRateApplicationTests {
         userStorage.addUser(user);
         userStorage.addUser(user1);
 
-        List<User> userList= userStorage.findAll();
+        List<User> userList = userStorage.findAll();
 
         assertThat(Optional.of(userList.get(0)))
                 .isNotNull()
