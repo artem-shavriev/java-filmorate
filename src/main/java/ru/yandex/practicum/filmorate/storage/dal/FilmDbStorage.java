@@ -50,6 +50,7 @@ public class FilmDbStorage extends BaseStorage<Film> implements FilmStorage {
         return film;
     }
 
+
     public Film updateFilm(Film film) {
         update(UPDATE_QUERY,
                 film.getName(),
