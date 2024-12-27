@@ -54,6 +54,14 @@ public class FilmService {
             throw new DuplicatedDataException("Фильм с таким названием уже есть в списке.");
         }*/
 
+        if (request.getMpa().getId() > 5 || request.getMpa().getId() < 1) {
+            throw new ValidationException("У рейтинга id от 1 до 5");
+        }
+
+        String mpaName = mpaStorage.findById(request.getMpa().getId()).get().getName();
+
+        request.getMpa().setName(mpaName);
+
         if (request.getReleaseDate().isBefore(MIN_RELEASE_DATE)) {
             throw new ValidationException("Дата релиза должна быть не раньше 28 декабря 1895 года");
         }
@@ -64,17 +72,7 @@ public class FilmService {
                     throw new ValidationException("У жанров id от 1 до 6");
                 }
             });
-        }
 
-        if (request.getMpa().getId() > 5 || request.getMpa().getId() < 1) {
-            throw new ValidationException("У рейтинга id от 1 до 5");
-        }
-
-        String mpaName = mpaStorage.findById(request.getMpa().getId()).get().getName();
-
-        request.getMpa().setName(mpaName);
-
-        if (request.getGenres() != null) {
             List<Genre> genresList = request.getGenres();
             List<Long> genresIds = genresList.stream().map(genre -> genre.getId()).toList();
             Set<Long> uniqueGenresIds = new HashSet<>(genresIds);
