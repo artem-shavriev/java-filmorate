@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.DbTests;
 
 import lombok.RequiredArgsConstructor;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -29,16 +30,18 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 class UserDbTest {
     private final UserDbStorage userStorage;
 
-
-    @Test
-    public void testFindUserById() {
-
+    @BeforeEach
+    public void beforeEach() {
         User user = new User();
         user.setName("testName");
         user.setLogin("testLogin");
         user.setEmail("testMail");
 
         userStorage.addUser(user);
+    }
+
+    @Test
+    public void testFindUserById() {
 
         Optional<User> userOptional = userStorage.findById(1);
 
@@ -51,12 +54,6 @@ class UserDbTest {
 
     @Test
     public void testFindUserByEmail() {
-        User user = new User();
-        user.setName("testName");
-        user.setLogin("testLogin");
-        user.setEmail("testMail");
-
-        userStorage.addUser(user);
 
         Optional<User> userOptional = userStorage.findByEmail("testMail");
 
@@ -69,13 +66,6 @@ class UserDbTest {
 
     @Test
     public void testFindUserByLogin() {
-
-        User user = new User();
-        user.setName("testName");
-        user.setLogin("testLogin");
-        user.setEmail("testMail");
-
-        userStorage.addUser(user);
 
         Optional<User> userOptional = userStorage.findByLogin("testLogin");
 
@@ -90,29 +80,22 @@ class UserDbTest {
     public void testAddUser() {
 
         User user = new User();
-        user.setName("testName");
-        user.setLogin("testLogin");
-        user.setEmail("testMail");
+        user.setName("testName1");
+        user.setLogin("testLogin1");
+        user.setEmail("testMail1");
 
         userStorage.addUser(user);
-        Optional<User> userOptional = userStorage.findByLogin("testLogin");
+        Optional<User> userOptional = userStorage.findByLogin("testLogin1");
 
         assertThat(userOptional)
                 .isPresent()
                 .hasValueSatisfying(u ->
-                        assertThat(u).hasFieldOrPropertyWithValue("login", "testLogin")
+                        assertThat(u).hasFieldOrPropertyWithValue("login", "testLogin1")
                 );
     }
 
     @Test
     public void testUpdateUser() {
-
-        User user = new User();
-        user.setName("testName");
-        user.setLogin("testLogin");
-        user.setEmail("testMail");
-
-        userStorage.addUser(user);
 
         User UpdatedUser = userStorage.findById(1).get();
 
@@ -131,20 +114,15 @@ class UserDbTest {
 
     @Test
     public void testFindAllUsers() {
-        User user = new User();
-        user.setName("testName");
-        user.setLogin("testLogin");
-        user.setEmail("testMail");
 
         User user1 = new User();
         user1.setName("testName1");
         user1.setLogin("testLogin1");
         user1.setEmail("testMail1");
 
-        userStorage.addUser(user);
         userStorage.addUser(user1);
 
-        List<User> userList= userStorage.findAll();
+        List<User> userList = userStorage.findAll();
 
         assertThat(Optional.of(userList.get(0)))
                 .isNotNull()

@@ -30,10 +30,6 @@ public class FilmGenreStorage extends BaseStorage<FilmGenre> {
         return genre;
     }
 
-    public boolean deleteGenre(Integer filmId, Integer genreId) {
-        return delete(DELETE_QUERY, filmId, genreId);
-    }
-
     public List<FilmGenre> findGenresByFilmId(Integer filmId) {
         return findMany(FIND_BY_FILM_ID_QUERY, filmId);
     }

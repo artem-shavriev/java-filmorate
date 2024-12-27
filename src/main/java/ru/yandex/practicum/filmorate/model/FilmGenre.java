@@ -6,6 +6,6 @@ import lombok.Data;
 public class FilmGenre {
     private Integer id;
     private Integer filmId;
-    private Integer genreId; //сделать int genreId
+    private Integer genreId;
 
 }
