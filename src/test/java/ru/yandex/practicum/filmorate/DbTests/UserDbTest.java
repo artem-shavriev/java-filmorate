@@ -43,7 +43,7 @@ class UserDbTest {
     @Test
     public void testFindUserById() {
         int userId = userStorage.findAll().get(0).getId();
-        Optional<User> userOptional = userStorage.findById(userId );
+        Optional<User> userOptional = userStorage.findById(userId);
 
         assertThat(userOptional)
                 .isPresent()
