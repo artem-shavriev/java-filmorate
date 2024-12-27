@@ -64,12 +64,13 @@ class FilmDbTest {
     @Test
     public void testFindFilmById() {
 
-        Optional<Film> filmOptional = filmDbStorage.findById(1);
+        int id = filmDbStorage.findAll().get(0).getId();
+        Optional<Film> filmOptional = filmDbStorage.findById(id);
 
         assertThat(filmOptional)
                 .isPresent()
                 .hasValueSatisfying(user ->
-                        assertThat(user).hasFieldOrPropertyWithValue("id", 1)
+                        assertThat(user).hasFieldOrPropertyWithValue("id", id)
                 );
     }
 
@@ -144,13 +145,12 @@ class FilmDbTest {
     @Test
     public void testUpdateFilm() {
 
-        Film updatedFilm = filmDbStorage.findById(1).get();
+        Film updatedFilm = filmDbStorage.findAll().get(0);
 
         updatedFilm.setName("updateName");
 
-        Optional<Film> newFilm = filmDbStorage.findById(1);
+        Optional<Film> newFilm = Optional.of(filmDbStorage.findAll().get(0));
         assertThat(newFilm)
-                .isPresent()
                 .hasValueSatisfying(user ->
                         assertThat(user).hasFieldOrPropertyWithValue("name", "TestFilm")
                 );

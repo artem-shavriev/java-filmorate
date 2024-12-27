@@ -42,13 +42,13 @@ class UserDbTest {
 
     @Test
     public void testFindUserById() {
-
-        Optional<User> userOptional = userStorage.findById(1);
+        int userId = userStorage.findAll().get(0).getId();
+        Optional<User> userOptional = userStorage.findById(userId );
 
         assertThat(userOptional)
                 .isPresent()
                 .hasValueSatisfying(u ->
-                        assertThat(u).hasFieldOrPropertyWithValue("id", 1)
+                        assertThat(u).hasFieldOrPropertyWithValue("id", userId)
                 );
     }
 
@@ -96,14 +96,15 @@ class UserDbTest {
 
     @Test
     public void testUpdateUser() {
+        int userId = userStorage.findAll().get(0).getId();
 
-        User updatedUser = userStorage.findById(1).get();
+        User updatedUser = userStorage.findById(userId).get();
 
         updatedUser.setName("updateName");
 
         userStorage.updateUser(updatedUser);
 
-        Optional<User> userOptional = userStorage.findById(1);
+        Optional<User> userOptional = userStorage.findById(userId);
 
         assertThat(userOptional)
                 .isPresent()

@@ -58,8 +58,12 @@ public class FriendsIdsStorageTest {
 
     @Test
     public void findAllFriendsIdsTest() {
-        friendsIdsStorage.addFriend(1,2);
-        friendsIdsStorage.addFriend(2,1);
+
+        int userId1 = userDbStorage.findAll().get(0).getId();
+        int userId2 = userDbStorage.findAll().get(1).getId();
+
+        friendsIdsStorage.addFriend(userId1,userId2);
+        friendsIdsStorage.addFriend(userId2,userId1);
 
         FriendsIds friendIds1 = friendsIdsStorage.findAll().get(0);
         FriendsIds friendIds2 = friendsIdsStorage.findAll().get(1);
@@ -73,9 +77,13 @@ public class FriendsIdsStorageTest {
 
     @Test
     public void deleteFriendTest() {
-        friendsIdsStorage.addFriend(1,2);
-        friendsIdsStorage.addFriend(2,1);
-        friendsIdsStorage.deleteLFriend(2,1);
+        int userId1 = userDbStorage.findAll().get(0).getId();
+        int userId2 = userDbStorage.findAll().get(1).getId();
+
+        friendsIdsStorage.addFriend(userId1,userId2);
+        friendsIdsStorage.addFriend(userId2,userId1);
+
+        friendsIdsStorage.deleteLFriend(userId2, userId1);
 
         int friendIdsSize = friendsIdsStorage.findAll().size();
 

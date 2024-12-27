@@ -92,9 +92,12 @@ public class LikeFromUsersStorageTest {
 
     @Test
     public void addLikeTest() {
-        likesFromUsersStorage.addLike(1,1);
+        int filmId = filmDbStorage.findAll().get(0).getId();
+        int userId = userDbStorage.findAll().get(0).getId();
 
-        int likesListSize = likesFromUsersStorage.findLikesByFilmId(1).size();
+        likesFromUsersStorage.addLike(filmId,userId);
+
+        int likesListSize = likesFromUsersStorage.findLikesByFilmId(filmId).size();
 
         assertThat(likesListSize).isEqualTo(1);
     }
@@ -111,18 +114,27 @@ public class LikeFromUsersStorageTest {
 
     @Test
     public void findLikesByFilmIdTest() {
-        likesFromUsersStorage.addLike(1,1);
+        int filmId = filmDbStorage.findAll().get(0).getId();
+        int userId = userDbStorage.findAll().get(0).getId();
 
-        int likesListSize = likesFromUsersStorage.findLikesByFilmId(1).size();
+        likesFromUsersStorage.addLike(filmId,userId);
+
+        int likesListSize = likesFromUsersStorage.findLikesByFilmId(filmId).size();
 
         assertThat(likesListSize).isEqualTo(1);
     }
 
     @Test
     public void deleteLikeTest() {
-        likesFromUsersStorage.addLike(1,1);
-        likesFromUsersStorage.addLike(1,2);
-        likesFromUsersStorage.deleteLike(1,2);
+
+        int filmId = filmDbStorage.findAll().get(0).getId();
+        int userId = userDbStorage.findAll().get(0).getId();
+        int userId2 = userDbStorage.findAll().get(1).getId();
+
+        likesFromUsersStorage.addLike(filmId,userId);
+        likesFromUsersStorage.addLike(filmId,userId2);
+
+        likesFromUsersStorage.deleteLike(filmId,userId2);
 
         int likesListSize = likesFromUsersStorage.findAll().size();
 

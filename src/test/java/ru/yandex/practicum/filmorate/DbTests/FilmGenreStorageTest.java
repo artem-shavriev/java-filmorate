@@ -23,7 +23,7 @@ import ru.yandex.practicum.filmorate.storage.dal.mappers.LikesFromUsersRowMapper
 import ru.yandex.practicum.filmorate.storage.dal.mappers.MpaRowMapper;
 
 import java.time.LocalDate;
-import java.util.Optional;
+import java.util.List;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
@@ -61,10 +61,10 @@ public class FilmGenreStorageTest {
         film.setDuration(100);
         filmDbStorage.addFilm(film);
 
-        FilmGenre filmGenre = new FilmGenre();
+        /*FilmGenre filmGenre = new FilmGenre();
         filmGenre.setFilmId(1);
         filmGenre.setGenreId(1);
-        filmGenreStorage.addGenre(filmGenre);
+        filmGenreStorage.addGenre(filmGenre);*/
     }
 
 
@@ -72,46 +72,47 @@ public class FilmGenreStorageTest {
     public void testAddFilmGenre() {
 
         FilmGenre filmGenre = new FilmGenre();
-        filmGenre.setFilmId(1);
+        int id = filmDbStorage.findAll().get(0).getId();
+        filmGenre.setFilmId(id);
         filmGenre.setGenreId(2);
 
         filmGenreStorage.addGenre(filmGenre);
 
-        Optional<FilmGenre> filmGenreOptional = Optional.of(filmGenreStorage.findAll().get(1));
+        List<FilmGenre> filmGenres = filmGenreStorage.findAll();
 
-        assertThat(filmGenreOptional)
-                .isPresent();
+        assertThat(filmGenres.size()).isEqualTo(1);
     }
 
     @Test
     public void testFindAllFilmGenre() {
 
         FilmGenre filmGenre = new FilmGenre();
-        filmGenre.setFilmId(1);
+        int id = filmDbStorage.findAll().get(0).getId();
+
+        filmGenre.setFilmId(id);
         filmGenre.setGenreId(2);
 
         filmGenreStorage.addGenre(filmGenre);
 
-        Optional<FilmGenre> filmGenreOptional = Optional.of(filmGenreStorage.findAll().get(1));
+        List<FilmGenre> filmGenres = filmGenreStorage.findAll();
 
-        assertThat(filmGenreOptional)
-                .isPresent();
+        assertThat(filmGenres.size()).isEqualTo(1);
     }
 
     @Test
     public void testFindGenresByFilmId() {
+        FilmGenre filmGenre = new FilmGenre();
 
-        FilmGenre findGenre = filmGenreStorage.findGenresByFilmId(1).get(0);
+        int id = filmDbStorage.findAll().get(0).getId();
 
-        assertThat(findGenre).isNotNull();
+        filmGenre.setFilmId(id);
+        filmGenre.setGenreId(2);
+
+        filmGenreStorage.addGenre(filmGenre);
+
+        List<FilmGenre> findGenresList = filmGenreStorage.findGenresByFilmId(id);
+
+        assertThat(findGenresList.size()).isEqualTo(1);
     }
-
-
-
-
-
-
-
-
 }
 
