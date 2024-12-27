@@ -23,16 +23,16 @@ public class FriendsIdsStorage extends BaseStorage<FriendsIds> {
         return findMany(FIND_ALL_QUERY);
     }
 
-    public void addFriend(long userId, long friendId) {
+    public void addFriend(Integer userId, Integer friendId) {
 
-        long id = insert(INSERT_QUERY, userId, friendId);
+        Integer id = insert(INSERT_QUERY, userId, friendId);
     }
 
-    public List<FriendsIds> findUserFriends(long userId) {
+    public List<FriendsIds> findUserFriends(Integer userId) {
         return findMany(FIND_USER_FRIENDS_QUERY, userId);
     }
 
-    public boolean deleteLFriend(long friendId, long userId) {
+    public boolean deleteLFriend(Integer friendId, Integer userId) {
         return delete(DELETE_QUERY, friendId, userId);
     }
 }

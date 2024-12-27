@@ -12,7 +12,7 @@ import java.util.Set;
 
 @Data
 public class User {
-    private Long id;
+    private Integer id;
     @NotBlank
     @Email
     private String email;
@@ -22,5 +22,5 @@ public class User {
     @NotNull
     @Past
     private LocalDate birthday;
-    private Set<Long> friendsId = new HashSet<>();
+    private Set<Integer> friendsId = new HashSet<>();
 }

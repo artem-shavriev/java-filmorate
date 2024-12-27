@@ -20,7 +20,7 @@ public class GenreService {
         return genreStorage.findAll();
     }
 
-    public Genre findById(long genreId) {
+    public Genre findById(Integer genreId) {
         Optional<Genre> existGenre = genreStorage.findById(genreId);
 
         if (existGenre.isEmpty()) {

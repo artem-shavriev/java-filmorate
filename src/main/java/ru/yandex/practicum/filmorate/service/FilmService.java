@@ -74,8 +74,8 @@ public class FilmService {
             });
 
             List<Genre> genresList = request.getGenres();
-            List<Long> genresIds = genresList.stream().map(genre -> genre.getId()).toList();
-            Set<Long> uniqueGenresIds = new HashSet<>(genresIds);
+            List<Integer> genresIds = genresList.stream().map(genre -> genre.getId()).toList();
+            Set<Integer> uniqueGenresIds = new HashSet<>(genresIds);
             List<Genre> uniqueGenresList = uniqueGenresIds.stream().map(id -> genreStorage.findById(id).get()).toList();
 
             for (Genre genre : uniqueGenresList) {
@@ -135,12 +135,12 @@ public class FilmService {
                 .collect(Collectors.toList());
     }
 
-    public FilmDto getFilmById(long filmId) {
+    public FilmDto getFilmById(Integer filmId) {
         FilmDto film = FilmMapper.mapToFilmDto(filmDbStorage.findById(filmId).get());
         return film;
     }
 
-    public FilmDto likeFilm(Long filmId, Long userId) {
+    public FilmDto likeFilm(Integer filmId, Integer userId) {
 
         if (filmDbStorage.findById(filmId).isEmpty()) {
             log.error("Фильм с id: {} не существует.", filmId);
@@ -160,7 +160,7 @@ public class FilmService {
         return getFilmById(filmId);
     }
 
-    public FilmDto deleteLikeFromFilm(Long filmId, Long userId) {
+    public FilmDto deleteLikeFromFilm(Integer filmId, Integer userId) {
 
         if (filmDbStorage.findById(filmId).isEmpty()) {
             log.error("Фильм с id: {} не существует.", filmId);
@@ -173,7 +173,7 @@ public class FilmService {
         }
 
         Film film = filmDbStorage.findById(filmId).get();
-        Set<Long> likes = film.getLikesFromUsers();
+        Set<Integer> likes = film.getLikesFromUsers();
         if (!likes.contains(userId)) {
             log.error("Пользовтель с id: {} еще не лайкал фильм с id: {}.", userId, filmId);
             throw new NotFoundException("Данный пользовтаель еще не лайкал этот фильм.");
@@ -190,13 +190,13 @@ public class FilmService {
 
         List<FilmDto> sortedFilmsIdsByLikes = new ArrayList<>();
         List<FilmDto> listOfPopularFilms = new ArrayList<>();
-        TreeMap<Integer, Long> sortedMapOfFilmsLikes = new TreeMap<>();
+        TreeMap<Integer, Integer> sortedMapOfFilmsLikes = new TreeMap<>();
 
         for (Film film : filmsList) {
             sortedMapOfFilmsLikes.put(film.getLikesFromUsers().size(), film.getId());
         }
 
-        for (Long id : sortedMapOfFilmsLikes.values()) {
+        for (Integer id : sortedMapOfFilmsLikes.values()) {
             sortedFilmsIdsByLikes.add(getFilmById(id));
         }
 

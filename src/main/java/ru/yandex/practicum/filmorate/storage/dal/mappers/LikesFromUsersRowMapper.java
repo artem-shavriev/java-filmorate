@@ -13,8 +13,8 @@ public class LikesFromUsersRowMapper implements RowMapper<LikesFromUsers> {
     public LikesFromUsers mapRow(ResultSet resultSet, int rowNum) throws SQLException {
         LikesFromUsers likesFromUsers = new LikesFromUsers();
 
-        likesFromUsers.setFilmId(resultSet.getLong("FILM_ID"));
-        likesFromUsers.setUserId(resultSet.getLong("USER_ID"));
+        likesFromUsers.setFilmId(resultSet.getInt("FILM_ID"));
+        likesFromUsers.setUserId(resultSet.getInt("USER_ID"));
 
         return likesFromUsers;
     }

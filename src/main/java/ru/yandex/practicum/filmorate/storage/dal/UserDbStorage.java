@@ -28,7 +28,7 @@ public class UserDbStorage extends BaseStorage<User> implements UserStorage {
         super(jdbc, mapper);
     }
 
-    public Optional<User> findById(long id) {
+    public Optional<User> findById(int id) {
         return findOne(FIND_BY_ID_QUERY, id);
     }
 
@@ -52,7 +52,7 @@ public class UserDbStorage extends BaseStorage<User> implements UserStorage {
             log.warn("Логин не передан, он будет сгенирирован автоматически.");
         }
 
-        long id = insert(INSERT_QUERY,
+        int id = insert(INSERT_QUERY,
                 user.getName(),
                 user.getLogin(),
                 user.getEmail(),

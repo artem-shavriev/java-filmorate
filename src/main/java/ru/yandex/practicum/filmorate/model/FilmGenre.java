@@ -4,8 +4,8 @@ import lombok.Data;
 
 @Data
 public class FilmGenre {
-    private long id;
-    private long filmId;
-    private long genreId; //сделать int genreId
+    private Integer id;
+    private Integer filmId;
+    private Integer genreId; //сделать int genreId
 
 }

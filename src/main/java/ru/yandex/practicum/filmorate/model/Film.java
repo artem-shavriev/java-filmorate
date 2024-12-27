@@ -13,7 +13,7 @@ import java.util.Set;
 
 @Data
 public class Film {
-    private Long id;
+    private Integer id;
     @NotBlank
     private String name;
     @Size(max = 200, message = "Максимальная длина описания не должна превышать 200 символов.")
@@ -23,7 +23,7 @@ public class Film {
     @NotNull
     @Positive (message = "Продолжительность должна быть положительным числом")
     private Integer duration;
-    private Set<Long> likesFromUsers = new HashSet<>();
+    private Set<Integer> likesFromUsers = new HashSet<>();
     private List<Genre> genres;
     private Mpa mpa;
 }

@@ -21,7 +21,7 @@ public class GenreStorage extends BaseStorage<Genre> {
         return findMany(FIND_ALL_QUERY);
     }
 
-    public Optional<Genre> findById(long id) {
+    public Optional<Genre> findById(Integer id) {
         return findOne(FIND_BY_ID_QUERY, id);
     }
 }

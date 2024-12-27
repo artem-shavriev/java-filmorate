@@ -23,7 +23,7 @@ public class UserRowMapper implements RowMapper<User> {
     public User mapRow(ResultSet resultSet, int rowNum) throws SQLException {
         User user = new User();
 
-        user.setId(resultSet.getLong("USER_ID"));
+        user.setId(resultSet.getInt("USER_ID"));
         user.setName(resultSet.getString("NAME"));
         user.setEmail(resultSet.getString("EMAIL"));
         user.setLogin(resultSet.getString("LOGIN"));
@@ -33,7 +33,7 @@ public class UserRowMapper implements RowMapper<User> {
             user.setBirthday(birthday.toLocalDateTime().toLocalDate());
         }
 
-        Set<Long> friendsIdsSet = new HashSet<>();
+        Set<Integer> friendsIdsSet = new HashSet<>();
 
         List<FriendsIds> friendsIdsObjects = friendsIdsStorage.findUserFriends(user.getId());
         friendsIdsObjects.stream()

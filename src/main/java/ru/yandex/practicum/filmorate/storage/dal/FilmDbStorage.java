@@ -25,7 +25,7 @@ public class FilmDbStorage extends BaseStorage<Film> implements FilmStorage {
         super(jdbc, mapper);
     }
 
-    public Optional<Film> findById(long id) {
+    public Optional<Film> findById(Integer id) {
         return findOne(FIND_BY_ID_QUERY, id);
     }
 
@@ -39,7 +39,7 @@ public class FilmDbStorage extends BaseStorage<Film> implements FilmStorage {
 
     public Film addFilm(Film film) {
 
-        long id = insert(INSERT_QUERY,
+        Integer id = insert(INSERT_QUERY,
                 film.getName(),
                 film.getDescription(),
                 film.getReleaseDate(),

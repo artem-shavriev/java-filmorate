@@ -20,7 +20,7 @@ public class MpaService {
         return mpaStorage.findAll();
     }
 
-    public Mpa findById(long mpaId) {
+    public Mpa findById(Integer mpaId) {
         Optional<Mpa> existMpa = mpaStorage.findById(mpaId);
         if (existMpa.isEmpty()) {
             log.error("Рейтинг с id {} не найден", mpaId);

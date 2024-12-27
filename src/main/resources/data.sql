@@ -41,3 +41,7 @@ VALUES(5, 'Документальный');
 MERGE INTO PUBLIC.GENRE
 (GENRE_ID, NAME)
 VALUES(6, 'Боевик');
+
+INSERT INTO PUBLIC."USER"
+(EMAIL, LOGIN, NAME)
+VALUES('email1', 'login1', 'name1');

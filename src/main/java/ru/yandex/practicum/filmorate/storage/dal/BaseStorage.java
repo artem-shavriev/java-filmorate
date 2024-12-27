@@ -37,7 +37,7 @@ public class BaseStorage<T> {
         }
     }
 
-    protected long insert(String query, Object... params) {
+    protected int insert(String query, Object... params) {
         GeneratedKeyHolder keyHolder = new GeneratedKeyHolder();
         jdbc.update(connection -> {
             PreparedStatement ps = connection

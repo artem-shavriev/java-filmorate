@@ -25,31 +25,31 @@ public class LikesFromUsersStorage extends BaseStorage<LikesFromUsers> {
         return findMany(FIND_ALL_QUERY);
     }
 
-    public List<LikesFromUsers> findLikesByFilmId(long filmId) {
+    public List<LikesFromUsers> findLikesByFilmId(Integer filmId) {
         return findMany(FIND_BY_FILM_ID_QUERY, filmId);
     }
 
-    public LikesFromUsers addLike(long filmId, long userId) {
+    public LikesFromUsers addLike(Integer filmId, Integer userId) {
         LikesFromUsers likes = new LikesFromUsers();
 
         likes.setFilmId(filmId);
         likes.setUserId(userId);
 
-        long id = insert(INSERT_QUERY, filmId, userId);
+        Integer id = insert(INSERT_QUERY, filmId, userId);
         likes.setId(id);
 
         return likes;
     }
 
-    public boolean deleteLike(long filmId, long userId) {
+    public boolean deleteLike(Integer filmId, Integer userId) {
         return delete(DELETE_QUERY, filmId, userId);
     }
 
     public void saveAllFilmsLikes(Film film) {
-        List<Long> likesList = new ArrayList<>(film.getLikesFromUsers());
+        List<Integer> likesList = new ArrayList<>(film.getLikesFromUsers());
 
-        for (Long like : likesList) {
-            long id = insert(INSERT_QUERY,
+        for (Integer like : likesList) {
+            Integer id = insert(INSERT_QUERY,
                     film.getId(),
                     like
             );

@@ -15,7 +15,7 @@ import java.util.Set;
 
 @Data
 public class UpdateFilmRequest {
-    private Long id;
+    private Integer id;
     @NotBlank
     private String name;
     @Size(max = 200, message = "Максимальная длина описания не должна превышать 200 символов.")
@@ -26,7 +26,7 @@ public class UpdateFilmRequest {
     @Positive(message = "Продолжительность должна быть положительным числом")
     private Integer duration;
     private Mpa mpa;
-    private Set<Long> likesFromUsers = new HashSet<>();
+    private Set<Integer> likesFromUsers = new HashSet<>();
     private List<Genre> genres;
 
     public boolean hasName() {

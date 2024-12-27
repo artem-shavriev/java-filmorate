@@ -97,7 +97,7 @@ public class UserService {
                 .collect(Collectors.toList());
     }
 
-    public UserDto getUserById(long userId) {
+    public UserDto getUserById(Integer userId) {
         return UserMapper.mapToUserDto(userDbStorage.findById(userId).get());
     }
 
@@ -109,7 +109,7 @@ public class UserService {
         return UserMapper.mapToUserDto(userDbStorage.findByEmail(email).get());
     }
 
-    public UserDto addFriend(Long userId, Long friendId) {
+    public UserDto addFriend(Integer userId, Integer friendId) {
         Optional<User> existUser = userDbStorage.findById(userId);
         if (existUser.isEmpty()) {
             throw new NotFoundException("userId не найден.");
@@ -127,7 +127,7 @@ public class UserService {
         return getUserById(userId);
     }
 
-    public UserDto deleteFriend(Long userId, Long friendId) {
+    public UserDto deleteFriend(Integer userId, Integer friendId) {
         Optional<User> existUser = userDbStorage.findById(userId);
         if (existUser.isEmpty()) {
             log.error("Переданный userId не существует.");
@@ -141,7 +141,7 @@ public class UserService {
         }
 
         List<FriendsIds> friends = friendsIdsStorage.findUserFriends(userId);
-        List<Long> usersFriendIds = new ArrayList<>();
+        List<Integer> usersFriendIds = new ArrayList<>();
 
         friends.stream()
                 .forEach(friend -> {
@@ -159,14 +159,14 @@ public class UserService {
         return getUserById(userId);
     }
 
-    public List<UserDto> getFriends(long userId) {
+    public List<UserDto> getFriends(Integer userId) {
         Optional<User> existUser = userDbStorage.findById(userId);
         if (existUser.isEmpty()) {
             log.error("Переданный userId не существует.");
             throw new NotFoundException("userId не найден.");
         }
 
-        List<Long> friendsIds = new ArrayList<>();
+        List<Integer> friendsIds = new ArrayList<>();
         List<UserDto> friends = new ArrayList<>();
         List<FriendsIds> friendsIdsObjects = friendsIdsStorage.findUserFriends(userId);
 
@@ -177,7 +177,7 @@ public class UserService {
         return friends;
     }
 
-    public List<UserDto> commonFriends(Long userId, Long otherId) {
+    public List<UserDto> commonFriends(Integer userId, Integer otherId) {
         Optional<User> existUser = userDbStorage.findById(userId);
         if (existUser.isEmpty()) {
             log.error("Переданный userId не существует.");

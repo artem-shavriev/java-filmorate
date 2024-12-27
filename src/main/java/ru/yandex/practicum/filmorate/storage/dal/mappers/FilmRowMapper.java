@@ -25,7 +25,7 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class FilmRowMapper implements RowMapper<Film> {
 
-    private final  FilmGenreStorage filmGenreStorage;
+    private final FilmGenreStorage filmGenreStorage;
     private final GenreStorage genreStorage;
     private final MpaStorage mpaStorage;
     private final LikesFromUsersStorage likesFromUsersStorage;
@@ -34,7 +34,7 @@ public class FilmRowMapper implements RowMapper<Film> {
     @Override
     public Film mapRow(ResultSet resultSet, int rowNum) throws SQLException {
         Film film = new Film();
-        film.setId(resultSet.getLong("FILM_ID"));
+        film.setId(resultSet.getInt("FILM_ID"));
         film.setName(resultSet.getString("NAME"));
         film.setDescription(resultSet.getString("DESCRIPTION"));
         film.setDuration(resultSet.getInt("DURATION"));
@@ -43,7 +43,7 @@ public class FilmRowMapper implements RowMapper<Film> {
         film.setReleaseDate(date.toLocalDateTime().toLocalDate());
 
         Mpa mpa = new Mpa();
-        long mpaId = resultSet.getLong("MPA_ID");
+        Integer mpaId = resultSet.getInt("MPA_ID");
         mpa.setId(mpaId);
 
         String mpaName = mpaStorage.findById(mpaId).get().getName();
@@ -66,7 +66,7 @@ public class FilmRowMapper implements RowMapper<Film> {
 
         if (likesFromUsersStorage.findLikesByFilmId(film.getId()) != null) {
             List<LikesFromUsers> likes = likesFromUsersStorage.findLikesByFilmId(film.getId());
-            Set<Long> usersId = new HashSet<>();
+            Set<Integer> usersId = new HashSet<>();
             for (LikesFromUsers like : likes) {
                 usersId.add(like.getUserId());
             }

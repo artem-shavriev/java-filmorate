@@ -21,7 +21,7 @@ public class MpaStorage extends BaseStorage<Mpa> {
         return findMany(FIND_ALL_QUERY);
     }
 
-    public Optional<Mpa> findById(long id) {
+    public Optional<Mpa> findById(Integer id) {
         return findOne(FIND_BY_ID_QUERY, id);
     }
 }

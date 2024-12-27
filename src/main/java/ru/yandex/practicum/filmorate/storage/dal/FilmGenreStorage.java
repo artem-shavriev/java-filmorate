@@ -25,16 +25,16 @@ public class FilmGenreStorage extends BaseStorage<FilmGenre> {
 
     public FilmGenre addGenre(FilmGenre genre) {
 
-        long id = insert(INSERT_QUERY, genre.getFilmId(), genre.getGenreId());
+        Integer id = insert(INSERT_QUERY, genre.getFilmId(), genre.getGenreId());
         genre.setId(id);
         return genre;
     }
 
-    public boolean deleteGenre(long filmId, long genreId) {
+    public boolean deleteGenre(Integer filmId, Integer genreId) {
         return delete(DELETE_QUERY, filmId, genreId);
     }
 
-    public List<FilmGenre> findGenresByFilmId(long filmId) {
+    public List<FilmGenre> findGenresByFilmId(Integer filmId) {
         return findMany(FIND_BY_FILM_ID_QUERY, filmId);
     }
 }
