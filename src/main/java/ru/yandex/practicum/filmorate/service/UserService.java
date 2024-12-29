@@ -3,7 +3,6 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exception.ConditionsNotMetException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.FriendsIds;
@@ -28,17 +27,10 @@ public class UserService {
     private final FriendsIdsStorage friendsIdsStorage;
 
     public UserDto addUser(NewUserRequest request) {
-        if (request.getEmail() == null || request.getEmail().isEmpty()) {
-            throw new ConditionsNotMetException("Email должен быть указан");
-        }
 
         Optional<User> alreadyExistEmail = userDbStorage.findByEmail(request.getEmail());
         if (alreadyExistEmail.isPresent()) {
             throw new ValidationException("Электронная почта уже используется");
-        }
-
-        if (request.getName() == null || request.getName().isEmpty()) {
-            throw new ConditionsNotMetException("Имя должено быть указано");
         }
 
         Optional<User> alreadyExistLogin = userDbStorage.findByLogin(request.getLogin());

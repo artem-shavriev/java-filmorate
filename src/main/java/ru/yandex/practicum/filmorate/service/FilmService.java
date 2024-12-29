@@ -3,7 +3,6 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exception.ConditionsNotMetException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
@@ -44,9 +43,6 @@ public class FilmService {
     private static final LocalDate MIN_RELEASE_DATE = LocalDate.of(1895, 12, 28);
 
     public FilmDto addFilm(NewFilmRequest request) {
-        if (request.getName() == null || request.getName().isEmpty()) {
-            throw new ConditionsNotMetException("Название фильма должно быть указано");
-        }
 
         if (request.getMpa().getId() > 5 || request.getMpa().getId() < 1) {
             throw new ValidationException("У рейтинга id от 1 до 5");
