@@ -1,7 +1,6 @@
 package ru.yandex.practicum.filmorate.storage.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
