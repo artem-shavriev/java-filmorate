@@ -118,7 +118,7 @@ public class FilmService {
             throw new ValidationException("Дата релиза должна быть не раньше 28 декабря 1895 года");
         }
 
-        if(request.getMpa() != null) {
+        if (request.getMpa() != null) {
             List<Mpa> mpaList = mpaStorage.findAll();
             List<Integer> mpaIdsList = mpaList.stream().map(mpa -> mpa.getId()).toList();
 
