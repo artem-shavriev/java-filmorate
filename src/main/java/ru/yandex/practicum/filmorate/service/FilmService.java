@@ -9,6 +9,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.FilmGenre;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.LikesFromUsers;
+import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.storage.dal.FilmDbStorage;
 import ru.yandex.practicum.filmorate.storage.dal.FilmGenreStorage;
 import ru.yandex.practicum.filmorate.storage.dal.GenreStorage;
@@ -44,28 +45,37 @@ public class FilmService {
 
     public FilmDto addFilm(NewFilmRequest request) {
 
-        if (request.getMpa().getId() > 5 || request.getMpa().getId() < 1) {
-            throw new ValidationException("У рейтинга id от 1 до 5");
+        if(request.getMpa() != null) {
+            List<Mpa> mpaList = mpaStorage.findAll();
+            List<Integer> mpaIdsList = mpaList.stream().map(mpa -> mpa.getId()).toList();
+
+            if (!mpaIdsList.contains(request.getMpa().getId())) {
+                throw new ValidationException("У рейтинга несуществующий id");
+            }
+
+            String mpaName = mpaStorage.findById(request.getMpa().getId()).get().getName();
+
+            request.getMpa().setName(mpaName);
         }
-
-        String mpaName = mpaStorage.findById(request.getMpa().getId()).get().getName();
-
-        request.getMpa().setName(mpaName);
 
         if (request.getReleaseDate().isBefore(MIN_RELEASE_DATE)) {
             throw new ValidationException("Дата релиза должна быть не раньше 28 декабря 1895 года");
         }
 
         if (request.getGenres() != null) {
+
+            List<Genre> genresList = genreStorage.findAll();
+            List<Integer> genresIdList = genresList.stream().map(Genre::getId).toList();
+
             request.getGenres().stream().forEach(genre -> {
-                if (genre.getId() > 6 || genre.getId() < 1) {
-                    throw new ValidationException("У жанров id от 1 до 6");
+                if (!genresIdList.contains(genre.getId())) {
+                    log.error("У фильма с названием: {} жанр с несуществующим id: {}", request.getName(), genre.getId());
+                    throw new ValidationException("У одного из жанров фильма несуществующий id");
                 }
             });
 
-            List<Genre> genresList = request.getGenres();
-            List<Integer> genresIds = genresList.stream().map(genre -> genre.getId()).toList();
-            Set<Integer> uniqueGenresIds = new HashSet<>(genresIds);
+            List<Integer> requestGenresId = request.getGenres().stream().map(genre -> genre.getId()).toList();
+            Set<Integer> uniqueGenresIds = new HashSet<>(requestGenresId);
             List<Genre> uniqueGenresList = uniqueGenresIds.stream().map(id -> genreStorage.findById(id).get()).toList();
 
             for (Genre genre : uniqueGenresList) {
@@ -106,6 +116,42 @@ public class FilmService {
 
         if (request.getReleaseDate().isBefore(MIN_RELEASE_DATE)) {
             throw new ValidationException("Дата релиза должна быть не раньше 28 декабря 1895 года");
+        }
+
+        if(request.getMpa() != null) {
+            List<Mpa> mpaList = mpaStorage.findAll();
+            List<Integer> mpaIdsList = mpaList.stream().map(mpa -> mpa.getId()).toList();
+
+            if (!mpaIdsList.contains(request.getMpa().getId())) {
+                throw new ValidationException("У рейтинга несуществующий id");
+            }
+
+            String mpaName = mpaStorage.findById(request.getMpa().getId()).get().getName();
+
+            request.getMpa().setName(mpaName);
+        }
+
+        if (request.getGenres() != null) {
+
+            List<Genre> genresList = genreStorage.findAll();
+            List<Integer> genresIdList = genresList.stream().map(Genre::getId).toList();
+
+            request.getGenres().stream().forEach(genre -> {
+                if (!genresIdList.contains(genre.getId())) {
+                    log.error("У фильма с названием: {} жанр с несуществующим id: {}", request.getName(), genre.getId());
+                    throw new ValidationException("У одного из жанров фильма несуществующий id");
+                }
+            });
+
+            List<Integer> requestGenresId = request.getGenres().stream().map(genre -> genre.getId()).toList();
+            Set<Integer> uniqueGenresIds = new HashSet<>(requestGenresId);
+            List<Genre> uniqueGenresList = uniqueGenresIds.stream().map(id -> genreStorage.findById(id).get()).toList();
+
+            for (Genre genre : uniqueGenresList) {
+                String genreName = genreStorage.findById(genre.getId()).get().getName();
+                genre.setName(genreName);
+            }
+            request.setGenres(uniqueGenresList);
         }
 
         Film updateFilm = filmDbStorage.findById(request.getId())
