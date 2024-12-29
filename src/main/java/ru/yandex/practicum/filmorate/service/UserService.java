@@ -182,10 +182,18 @@ public class UserService {
             throw new NotFoundException("otherId не найден.");
         }
 
-        List<UserDto> userfriendsList = getFriends(userId);
-        List<UserDto> otherUserfriendsList = getFriends(otherId);
+        List<Integer> userfriendsIdList = getFriends(userId).stream().map(friend -> friend.getId()).toList();
+        List<Integer> otherUserfriendsIdList = getFriends(otherId).stream().map(friend -> friend.getId()).toList();
 
-        userfriendsList.retainAll(otherUserfriendsList);
+        List<Integer> commonFriendsIdsList = new ArrayList<>();
+
+        userfriendsIdList.stream().forEach(id -> {
+            if (otherUserfriendsIdList.contains(id)) {
+                commonFriendsIdsList.add(id);
+            }
+        });
+
+        List<UserDto> userfriendsList = commonFriendsIdsList.stream().map(id -> getUserById(id)).toList();
 
         log.info("Список общих друзей пользователей с id: {} и {} сформирован.", userId, otherId);
 
