@@ -33,8 +33,7 @@ public class LikesFromUsersStorage extends BaseStorage<LikesFromUsers> {
         likes.setFilmId(filmId);
         likes.setUserId(userId);
 
-        Integer id = insert(INSERT_QUERY, filmId, userId);
-        likes.setId(id);
+        update(INSERT_QUERY, filmId, userId);
 
         return likes;
     }

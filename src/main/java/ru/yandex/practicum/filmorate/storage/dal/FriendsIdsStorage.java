@@ -25,7 +25,7 @@ public class FriendsIdsStorage extends BaseStorage<FriendsIds> {
 
     public void addFriend(Integer userId, Integer friendId) {
 
-        Integer id = insert(INSERT_QUERY, userId, friendId);
+        update(INSERT_QUERY, userId, friendId);
     }
 
     public List<FriendsIds> findUserFriends(Integer userId) {

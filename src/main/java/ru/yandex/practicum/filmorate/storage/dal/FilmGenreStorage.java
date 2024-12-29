@@ -23,11 +23,10 @@ public class FilmGenreStorage extends BaseStorage<FilmGenre> {
         return findMany(FIND_ALL_QUERY);
     }
 
-    public FilmGenre addGenre(FilmGenre genre) {
+    public void addGenre(FilmGenre genre) {
 
-        Integer id = insert(INSERT_QUERY, genre.getFilmId(), genre.getGenreId());
-        genre.setId(id);
-        return genre;
+        update(INSERT_QUERY, genre.getFilmId(), genre.getGenreId());
+
     }
 
     public List<FilmGenre> findGenresByFilmId(Integer filmId) {
