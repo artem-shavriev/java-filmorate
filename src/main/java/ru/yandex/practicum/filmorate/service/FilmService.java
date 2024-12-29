@@ -45,7 +45,7 @@ public class FilmService {
 
     public FilmDto addFilm(NewFilmRequest request) {
 
-        if(request.getMpa() != null) {
+        if (request.getMpa() != null) {
             List<Mpa> mpaList = mpaStorage.findAll();
             List<Integer> mpaIdsList = mpaList.stream().map(mpa -> mpa.getId()).toList();
 
