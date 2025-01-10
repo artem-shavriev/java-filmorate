@@ -1,9 +1,6 @@
-package ru.yandex.practicum.filmorate.model;
+package ru.yandex.practicum.filmorate.storage.dto;
 
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Past;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -13,16 +10,12 @@ import java.util.Set;
 
 @Getter
 @Setter
-public class User {
+public class UserDto {
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Integer id;
-    @NotBlank
-    @Email
     private String email;
     private String login;
-    @NotBlank
     private String name;
-    @NotNull
-    @Past
     private LocalDate birthday;
     private Set<Integer> friendsId = new HashSet<>();
 }

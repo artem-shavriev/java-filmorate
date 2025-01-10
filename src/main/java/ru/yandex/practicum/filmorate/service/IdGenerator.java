@@ -4,10 +4,10 @@ import java.util.Map;
 
 public abstract class IdGenerator {
 
-    protected long getNextId(Map data) {
-        long currentMaxId = data.keySet()
+    protected int getNextId(Map data) {
+        Integer currentMaxId = data.keySet()
                 .stream()
-                .mapToLong(id -> (long) id)
+                .mapToInt(id -> (Integer) id)
                 .max()
                 .orElse(0);
         return ++currentMaxId;

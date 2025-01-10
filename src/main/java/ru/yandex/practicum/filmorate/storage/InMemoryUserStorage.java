@@ -13,9 +13,9 @@ import java.util.HashMap;
 @Slf4j
 @Component
 public class InMemoryUserStorage extends IdGenerator implements UserStorage {
-    private final HashMap<Long, User> usersMap = new HashMap<>();
+    private final HashMap<Integer, User> usersMap = new HashMap<>();
 
-    public HashMap<Long, User> getUsersMap() {
+    public HashMap<Integer, User> getUsersMap() {
         return usersMap;
     }
 
@@ -24,7 +24,7 @@ public class InMemoryUserStorage extends IdGenerator implements UserStorage {
         return usersMap.values();
     }
 
-    public Collection<Long> getUsersIds() {
+    public Collection<Integer> getUsersIds() {
         log.info("Получен список id пользователей.");
         return usersMap.keySet();
     }

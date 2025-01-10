@@ -4,118 +4,200 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
+import ru.yandex.practicum.filmorate.exception.ValidationException;
+import ru.yandex.practicum.filmorate.model.FriendsIds;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
+import ru.yandex.practicum.filmorate.storage.dal.FriendsIdsStorage;
+import ru.yandex.practicum.filmorate.storage.dal.UserDbStorage;
+import ru.yandex.practicum.filmorate.storage.dto.NewUserRequest;
+import ru.yandex.practicum.filmorate.storage.dto.UpdateUserRequest;
+import ru.yandex.practicum.filmorate.storage.dto.UserDto;
+import ru.yandex.practicum.filmorate.storage.mapper.UserMapper;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserService {
-    private final InMemoryUserStorage inMemoryUserStorage;
+    private final UserDbStorage userDbStorage;
+    private final FriendsIdsStorage friendsIdsStorage;
 
-    public User addFriend(Long userId, Long friendId) {
-        HashMap<Long, User> users = inMemoryUserStorage.getUsersMap();
-        if (!users.containsKey(userId)) {
-            log.error("userId не найден.");
+    public UserDto addUser(NewUserRequest request) {
+
+        Optional<User> alreadyExistEmail = userDbStorage.findByEmail(request.getEmail());
+        if (alreadyExistEmail.isPresent()) {
+            throw new ValidationException("Электронная почта уже используется");
+        }
+
+        Optional<User> alreadyExistLogin = userDbStorage.findByLogin(request.getLogin());
+        if (alreadyExistLogin.isPresent()) {
+            throw new ValidationException("Такой логин уже существует.");
+        }
+
+        User user = UserMapper.mapToUser(request);
+        user = userDbStorage.addUser(user);
+
+        log.info("Создан новый пользователь c id: {}", user.getId());
+        return UserMapper.mapToUserDto(user);
+    }
+
+    public UserDto updateUser(UpdateUserRequest request) {
+        if (request.getId() == null) {
+            log.error("Id не куказан.");
+            throw new ValidationException("Id должен быть указан");
+        }
+
+        Optional<User> existUser = userDbStorage.findById(request.getId());
+        if (existUser.isEmpty()) {
+            log.error("User с id = {} не найден", request.getId());
+            throw new NotFoundException("User с id = " + request.getId() + " не найден");
+        }
+
+        if (request.getLogin() != null) {
+            Optional<User> alreadyExistLogin = userDbStorage.findByLogin(request.getLogin());
+            if (alreadyExistLogin.isPresent()) {
+                throw new ValidationException("Такой логин уже существует.");
+            }
+        }
+
+        if (request.getEmail() != null) {
+            Optional<User> alreadyExistEmail = userDbStorage.findByEmail(request.getEmail());
+            if (alreadyExistEmail.isPresent()) {
+                throw new ValidationException("Электронная почта уже используется");
+            }
+        }
+
+        User updateUser = userDbStorage.findById(request.getId())
+                .map(user -> UserMapper.updateUserFields(user, request))
+                .orElseThrow(() -> new NotFoundException("Пользователь не найден"));
+
+        updateUser = userDbStorage.updateUser(updateUser);
+        log.info("Пользователь c id: {} обновлен", request.getId());
+
+        return UserMapper.mapToUserDto(updateUser);
+    }
+
+    public List<UserDto> getUsers() {
+        log.info("Получен список пользователей.");
+        return userDbStorage.findAll()
+                .stream()
+                .map(UserMapper::mapToUserDto)
+                .collect(Collectors.toList());
+    }
+
+    public UserDto getUserById(Integer userId) {
+        return UserMapper.mapToUserDto(userDbStorage.findById(userId).get());
+    }
+
+    public UserDto getUserByLogin(String login) {
+        return UserMapper.mapToUserDto(userDbStorage.findByLogin(login).get());
+    }
+
+    public UserDto getUserByEmail(String email) {
+        return UserMapper.mapToUserDto(userDbStorage.findByEmail(email).get());
+    }
+
+    public UserDto addFriend(Integer userId, Integer friendId) {
+        Optional<User> existUser = userDbStorage.findById(userId);
+        if (existUser.isEmpty()) {
             throw new NotFoundException("userId не найден.");
         }
-        if (!users.containsKey(friendId)) {
-            log.error("friendId не найден.");
+
+        Optional<User> existFriend = userDbStorage.findById(friendId);
+        if (existFriend.isEmpty()) {
             throw new NotFoundException("friendId не найден.");
         }
 
-        users.get(userId).getFriendsId().add(friendId);
-        users.get(friendId).getFriendsId().add(userId);
-        log.trace("Пользователи c id: {} и {} добавлены друг к другу в друзья.", friendId, userId);
+        friendsIdsStorage.addFriend(userId, friendId);
 
-        return users.get(friendId);
+        log.trace("Пользователь c id: {} добавил в друзья пользователя с id: {}", userId, friendId);
+
+        return getUserById(userId);
     }
 
-    public User deleteFriend(Long userId, Long friendId) {
-        HashMap<Long, User> users = inMemoryUserStorage.getUsersMap();
-
-        if (!users.containsKey(userId)) {
-            log.error("userId не существует.");
-            throw new NotFoundException("userId не найден.");
-        }
-
-        if (!users.containsKey(friendId)) {
-            log.error("friendId не существует.");
-            throw new NotFoundException("friendId не найден.");
-        }
-
-        if (!users.get(userId).getFriendsId().contains(friendId)) {
-            return users.get(friendId);
-        }
-        users.get(userId).getFriendsId().remove(friendId);
-        users.get(friendId).getFriendsId().remove(userId);
-        log.trace("Пользователи c id: {} и {} удалены из друзей у друг друга.", friendId, userId);
-
-        return users.get(friendId);
-    }
-
-    public List<User> getFriends(Long userId) {
-        HashMap<Long, User> users = inMemoryUserStorage.getUsersMap();
-
-        if (!users.containsKey(userId)) {
+    public UserDto deleteFriend(Integer userId, Integer friendId) {
+        Optional<User> existUser = userDbStorage.findById(userId);
+        if (existUser.isEmpty()) {
             log.error("Переданный userId не существует.");
             throw new NotFoundException("userId не найден.");
         }
 
-        List<User> friendsList = new ArrayList<>();
-
-        if (users.get(userId).getFriendsId() == null) {
-            log.error("У пользовтеля с id: {} пустой список друзей", userId);
-            throw new NotFoundException("У пользовтеля пустой список друзей.");
-        }
-
-        Set<Long> friendsId = users.get(userId).getFriendsId();
-
-        for (Long id: friendsId) {
-            friendsList.add(users.get(id));
-        }
-        log.info("Список друзей пользователя с id {} сформирован.", userId);
-        return friendsList;
-    }
-
-    public List<User> commonFriends(Long userId, Long otherId) {
-        HashMap<Long, User> users = inMemoryUserStorage.getUsersMap();
-
-        if (!users.containsKey(userId)) {
-            log.error("Данного userId не существует.");
-            throw new NotFoundException("userId не найден.");
-        }
-        if (!users.containsKey(otherId)) {
-            log.error("Данного otherId не существует.");
+        Optional<User> existFriend = userDbStorage.findById(friendId);
+        if (existFriend.isEmpty()) {
+            log.error("Переданный friendId не существует.");
             throw new NotFoundException("friendId не найден.");
         }
 
-        List<User> userfriendsList = getFriends(userId);
-        List<User> otherUserfriendsList = getFriends(otherId);
-        userfriendsList.retainAll(otherUserfriendsList);
+        List<FriendsIds> friends = friendsIdsStorage.findUserFriends(userId);
+        List<Integer> usersFriendIds = new ArrayList<>();
+
+        friends.stream()
+                .forEach(friend -> {
+                    usersFriendIds.add(friend.getFriendId());
+                });
+
+        if (!usersFriendIds.contains(friendId)) {
+            log.trace("Данного пользователя небыло в друзьях.");
+        } else {
+            friendsIdsStorage.deleteLFriend(friendId, userId);
+        }
+
+        log.trace("Пользователь id: {} удалены из друзей у пользователя с id: {}", friendId, userId);
+
+        return getUserById(userId);
+    }
+
+    public List<UserDto> getFriends(Integer userId) {
+        Optional<User> existUser = userDbStorage.findById(userId);
+        if (existUser.isEmpty()) {
+            log.error("Переданный userId не существует.");
+            throw new NotFoundException("userId не найден.");
+        }
+
+        List<Integer> friendsIds = new ArrayList<>();
+        List<UserDto> friends = new ArrayList<>();
+        List<FriendsIds> friendsIdsObjects = friendsIdsStorage.findUserFriends(userId);
+
+        friendsIdsObjects.stream().forEach(friendObject -> friendsIds.add(friendObject.getFriendId()));
+
+        friendsIds.stream().forEach(friendId -> friends.add(getUserById(friendId)));
+
+        return friends;
+    }
+
+    public List<UserDto> commonFriends(Integer userId, Integer otherId) {
+        Optional<User> existUser = userDbStorage.findById(userId);
+        if (existUser.isEmpty()) {
+            log.error("Переданный userId не существует.");
+            throw new NotFoundException("userId не найден.");
+        }
+
+        Optional<User> existOtherUser = userDbStorage.findById(otherId);
+        if (existOtherUser.isEmpty()) {
+            log.error("Переданный otherId не существует.");
+            throw new NotFoundException("otherId не найден.");
+        }
+
+        List<Integer> userfriendsIdList = getFriends(userId).stream().map(friend -> friend.getId()).toList();
+        List<Integer> otherUserfriendsIdList = getFriends(otherId).stream().map(friend -> friend.getId()).toList();
+
+        List<Integer> commonFriendsIdsList = new ArrayList<>();
+
+        userfriendsIdList.stream().forEach(id -> {
+            if (otherUserfriendsIdList.contains(id)) {
+                commonFriendsIdsList.add(id);
+            }
+        });
+
+        List<UserDto> userfriendsList = commonFriendsIdsList.stream().map(id -> getUserById(id)).toList();
 
         log.info("Список общих друзей пользователей с id: {} и {} сформирован.", userId, otherId);
+
         return userfriendsList;
     }
-
-    public User addUser(User user) {
-        return inMemoryUserStorage.addUser(user);
-    }
-
-    public User updateUser(User newUser) {
-        return inMemoryUserStorage.updateUser(newUser);
-    }
-
-    public Collection<User> getUsers() {
-        return inMemoryUserStorage.getUsers();
-    }
-
-
 }
 

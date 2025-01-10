@@ -15,9 +15,9 @@ import java.util.HashMap;
 @Component
 public class InMemoryFilmStorage extends IdGenerator implements FilmStorage {
     private static final LocalDate MIN_RELEASE_DATE = LocalDate.of(1895, 12, 28);
-    private final HashMap<Long, Film> filmsMap = new HashMap<>();
+    private final HashMap<Integer, Film> filmsMap = new HashMap<>();
 
-    public HashMap<Long, Film> getFilmsMap() {
+    public HashMap<Integer, Film> getFilmsMap() {
         return filmsMap;
     }
 
