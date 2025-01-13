@@ -28,4 +28,5 @@ public class Film {
     private Set<Integer> likesFromUsers = new HashSet<>();
     private List<Genre> genres;
     private Mpa mpa;
+    private List<Director> directors;
 }

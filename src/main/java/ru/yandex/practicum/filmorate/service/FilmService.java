@@ -5,12 +5,16 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
+import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.FilmDirector;
 import ru.yandex.practicum.filmorate.model.FilmGenre;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.LikesFromUsers;
 import ru.yandex.practicum.filmorate.model.Mpa;
+import ru.yandex.practicum.filmorate.storage.dal.DirectorStorage;
 import ru.yandex.practicum.filmorate.storage.dal.FilmDbStorage;
+import ru.yandex.practicum.filmorate.storage.dal.FilmDirectorStorage;
 import ru.yandex.practicum.filmorate.storage.dal.FilmGenreStorage;
 import ru.yandex.practicum.filmorate.storage.dal.GenreStorage;
 import ru.yandex.practicum.filmorate.storage.dal.LikesFromUsersStorage;
@@ -41,10 +45,11 @@ public class FilmService {
     private final FilmGenreStorage filmGenreStorage;
     private final MpaStorage mpaStorage;
     private final GenreStorage genreStorage;
+    private final DirectorStorage directorStorage;
+    private final FilmDirectorStorage filmDirectorStorage;
     private static final LocalDate MIN_RELEASE_DATE = LocalDate.of(1895, 12, 28);
 
     public FilmDto addFilm(NewFilmRequest request) {
-
         if (request.getMpa() != null) {
             List<Mpa> mpaList = mpaStorage.findAll();
             List<Integer> mpaIdsList = mpaList.stream().map(mpa -> mpa.getId()).toList();
@@ -85,6 +90,15 @@ public class FilmService {
             request.setGenres(uniqueGenresList);
         }
 
+        if (request.getDirectors() != null)  {
+            List<Integer> directorsIdList = request.getDirectors().stream().map(dir -> dir.getId()).toList();
+
+            List<Director> directorsListWithName = directorsIdList.stream().map(id ->
+                    directorStorage.findById(id).get()).toList();
+
+            request.setDirectors(directorsListWithName);
+        }
+
         Film film = FilmMapper.mapToFilm(request);
 
         film = filmDbStorage.addFilm(film);
@@ -98,6 +112,19 @@ public class FilmService {
                 filmGenre.setGenreId(genre.getId());
 
                 filmGenreStorage.addGenre(filmGenre);
+            }
+        }
+
+        if (request.getDirectors() != null) {
+            List<Director> directorsList = film.getDirectors();
+
+            for (Director director : directorsList) {
+                FilmDirector filmDirector = new FilmDirector();
+
+                filmDirector.setDirectorId(director.getId());
+                filmDirector.setFilmId(film.getId());
+
+                filmDirectorStorage.addFilmDirector(filmDirector);
             }
         }
 

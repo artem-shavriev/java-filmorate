@@ -23,9 +23,7 @@ public class FilmGenreStorage extends BaseStorage<FilmGenre> {
     }
 
     public void addGenre(FilmGenre genre) {
-
         update(INSERT_QUERY, genre.getFilmId(), genre.getGenreId());
-
     }
 
     public List<FilmGenre> findGenresByFilmId(Integer filmId) {

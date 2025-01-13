@@ -12,8 +12,8 @@ import java.util.Optional;
 public class DirectorStorage extends BaseStorage<Director> {
     private static final String FIND_ALL_QUERY = "SELECT * FROM DIRECTORS";
     private static final String FIND_BY_ID_QUERY = "SELECT * FROM DIRECTORS WHERE DIRECTOR_ID = ?";
-    private static final String INSERT_QUERY = "INSERT INTO DIRECTOR(NAME) VALUES (?)";
-    private static final String UPDATE_QUERY = "UPDATE DIRECTOR SET DIRECTOR_ID = ?, NAME = ? WHERE DIRECTOR_ID = ?";
+    private static final String INSERT_QUERY = "INSERT INTO DIRECTORS(NAME) VALUES (?)";
+    private static final String UPDATE_QUERY = "UPDATE DIRECTORS SET NAME = ? WHERE DIRECTOR_ID = ?";
     private static final String DELETE_QUERY = "DELETE FROM DIRECTORS WHERE DIRECTOR_ID = ?";
 
     public DirectorStorage(JdbcTemplate jdbc, RowMapper<Director> mapper) {
@@ -35,7 +35,7 @@ public class DirectorStorage extends BaseStorage<Director> {
     }
 
     public Director updateDirector(Director director) {
-        update(UPDATE_QUERY, director.getName());
+        update(UPDATE_QUERY, director.getName(), director.getId());
         return director;
     }
 
