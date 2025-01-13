@@ -22,12 +22,7 @@ import ru.yandex.practicum.filmorate.storage.dto.UpdateFilmRequest;
 import ru.yandex.practicum.filmorate.storage.mapper.FilmMapper;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -221,33 +216,49 @@ public class FilmService {
         return getFilmById(filmId);
     }
 
-    public List<FilmDto> getPopularFilms(int count) {
+    public List<FilmDto> getPopularFilms(Integer count, Integer genreId, Integer year) {
         List<Film> filmsList = filmDbStorage.findAll();
 
-        List<FilmDto> sortedFilmsIdsByLikes = new ArrayList<>();
+        if (year != null) {
+            filmsList = filmsList.stream()
+                    .filter(film -> film.getReleaseDate().getYear() == year)
+                    .toList();
+        }
+
+        if (genreId != null) {
+            filmsList = filmsList.stream()
+                    .filter(film -> film.getGenres().stream().anyMatch(genre -> genre.getId().equals(genreId)))
+                    .toList();
+        }
+
+        if (count == null || count <= 0) {
+            count = filmsList.size();
+        }
+
+        List<Film> sortedFilmsByLikes = new ArrayList<>(filmsList);
+
+        Collections.sort(sortedFilmsByLikes, new Comparator<Film>() {
+            @Override
+            public int compare(Film film1, Film film2) {
+                return Integer.compare(film2.getLikesFromUsers().size(), film1.getLikesFromUsers().size());
+            }
+        });
+
+        if (sortedFilmsByLikes.size() > count) {
+            sortedFilmsByLikes = sortedFilmsByLikes.subList(0, count);
+        }
+
         List<FilmDto> listOfPopularFilms = new ArrayList<>();
-        TreeMap<Integer, Integer> sortedMapOfFilmsLikes = new TreeMap<>();
-
-        for (Film film : filmsList) {
-            sortedMapOfFilmsLikes.put(film.getLikesFromUsers().size(), film.getId());
-        }
-
-        for (Integer id : sortedMapOfFilmsLikes.values()) {
-            sortedFilmsIdsByLikes.add(getFilmById(id));
-        }
-
-        if (sortedFilmsIdsByLikes.size() <= count) {
-            for (int i = sortedFilmsIdsByLikes.size() - 1; i >= 0; i--) {
-                listOfPopularFilms.add(sortedFilmsIdsByLikes.get(i));
-            }
-        } else {
-            for (int i = count - 1; i >= 0; i--) {
-                listOfPopularFilms.add(sortedFilmsIdsByLikes.get(i));
+        for (Film film : sortedFilmsByLikes) {
+            FilmDto filmDto = getFilmById(film.getId());
+            if (filmDto != null) {
+                listOfPopularFilms.add(filmDto);
             }
         }
 
-        log.info("Список наиболее популярных фильмов сформирован. Длина списка: {}", count);
+        log.info("Список наиболее популярных фильмов сформирован. Длина списка: {}", listOfPopularFilms.size());
+
         return listOfPopularFilms;
-    }
+        }
 }
 
