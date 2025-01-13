@@ -51,4 +51,19 @@ public class DirectorService {
 
         return updatedDirector;
     }
+
+    public Director deleteDirector(Integer directorId) {
+        Optional<Director> existDirector = directorStorage.findById(directorId);
+
+        if (existDirector.isEmpty()) {
+            log.error("Режиссер с id {} не найден.", directorId );
+            throw new NotFoundException("Режиссер с id: " + directorId  + " не найден.");
+        }
+
+        Director director = findById(directorId);
+
+        directorStorage.deleteDirector(directorId);
+
+        return director;
+    }
 }
