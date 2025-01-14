@@ -27,6 +27,8 @@ import ru.yandex.practicum.filmorate.storage.mapper.FilmMapper;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -115,7 +117,7 @@ public class FilmService {
             }
         }
 
-        if (request.getDirectors() != null) {
+        if (film.getDirectors() != null) {
             List<Director> directorsList = film.getDirectors();
 
             for (Director director : directorsList) {
@@ -179,6 +181,25 @@ public class FilmService {
                 genre.setName(genreName);
             }
             request.setGenres(uniqueGenresList);
+        }
+
+        if (request.getDirectors() != null)  {
+            List<Integer> directorsIdList = request.getDirectors().stream().map(dir -> dir.getId()).toList();
+
+            List<Director> directorsListWithName = directorsIdList.stream().map(id ->
+                    directorStorage.findById(id).get()).toList();
+            request.setDirectors(directorsListWithName);
+
+            List<Director> directorsList = request.getDirectors();
+
+            for (Director director : directorsList) {
+                FilmDirector filmDirector = new FilmDirector();
+
+                filmDirector.setDirectorId(director.getId());
+                filmDirector.setFilmId(request.getId());
+
+                filmDirectorStorage.addFilmDirector(filmDirector);
+            }
         }
 
         Film updateFilm = filmDbStorage.findById(request.getId())
@@ -276,5 +297,41 @@ public class FilmService {
         log.info("Список наиболее популярных фильмов сформирован. Длина списка: {}", count);
         return listOfPopularFilms;
     }
+
+    public List<FilmDto> getFilmsByDirector(Integer directorId) {
+        List<FilmDirector> filmDirectorsList = filmDirectorStorage.findFilmDirectorByDirectorId(directorId);
+        List<Integer> findFilmIds = filmDirectorsList.stream().map(f -> f.getFilmId()).toList();
+
+        List<FilmDto> findFilms = findFilmIds.stream().map(id -> getFilmById(id)).toList();
+
+        return findFilms;
+    }
+
+    public List<FilmDto> sortedByLikes(List<FilmDto> filmsForSort) {
+        List<FilmDto> sortedFilmsByLikes = new ArrayList<>(filmsForSort);
+
+        Collections.sort(sortedFilmsByLikes, new Comparator<FilmDto>() {
+            @Override
+            public int compare(FilmDto film1, FilmDto film2) {
+                return Integer.compare(film2.getLikesFromUsers().size(), film1.getLikesFromUsers().size());
+            }
+        });
+
+        return sortedFilmsByLikes;
+    }
+
+    public List<FilmDto> sortedByYear(List<FilmDto> filmsForSort) {
+        List<FilmDto> sortedFilmsByYear = new ArrayList<>(filmsForSort);
+
+        Collections.sort(sortedFilmsByYear, new Comparator<FilmDto>() {
+            @Override
+            public int compare(FilmDto film1, FilmDto film2) {
+                return film2.getReleaseDate().compareTo(film2.getReleaseDate());
+            }
+        });
+
+        return sortedFilmsByYear;
+    }
+
 }
 

@@ -59,4 +59,19 @@ public class FilmController {
     public List<FilmDto> getPopularFilms(@RequestParam(defaultValue = "10") int count) {
         return filmService.getPopularFilms(count);
     }
+
+    @GetMapping("/films/director/{directorId}")
+        public List<FilmDto> getDirectorFilmsSortedByYearOrLikes(@RequestParam String sortBy,
+                                                                 @PathVariable Integer directorId) {
+        List<FilmDto> filmsList = filmService.getFilmsByDirector(directorId);
+        if (sortBy.equals("year")) {
+            filmsList = filmService.sortedByYear(filmsList);
+        }
+
+        if (sortBy.equals("likes")) {
+            filmsList = filmService.sortedByLikes(filmsList);
+        }
+
+        return filmsList;
+    }
 }

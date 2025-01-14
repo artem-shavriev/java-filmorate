@@ -11,6 +11,7 @@ import java.util.List;
 public class FilmDirectorStorage extends BaseStorage<FilmDirector> {
     private static final String FIND_ALL_QUERY = "SELECT * FROM FILM_DIRECTOR";
     private static final String FIND_BY_FILM_ID_QUERY = "SELECT * FROM FILM_DIRECTOR WHERE FILM_ID = ?";
+    private static final String FIND_BY_DIRECTOR_ID_QUERY = "SELECT * FROM FILM_DIRECTOR WHERE DIRECTOR_ID = ?";
     private static final String INSERT_QUERY = "INSERT INTO FILM_DIRECTOR (FILM_ID, DIRECTOR_ID)" +
             "VALUES (?, ?)";
 
@@ -30,5 +31,9 @@ public class FilmDirectorStorage extends BaseStorage<FilmDirector> {
 
     public List<FilmDirector> findFilmDirectorByFilmId(Integer filmId) {
         return findMany(FIND_BY_FILM_ID_QUERY, filmId);
+    }
+
+    public List<FilmDirector> findFilmDirectorByDirectorId(Integer directorId) {
+        return findMany(FIND_BY_DIRECTOR_ID_QUERY, directorId);
     }
 }
