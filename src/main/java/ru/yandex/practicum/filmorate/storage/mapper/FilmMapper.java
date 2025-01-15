@@ -17,7 +17,7 @@ public class FilmMapper {
         film.setMpa(request.getMpa());
         film.setReleaseDate(request.getReleaseDate());
         film.setGenres(request.getGenres());
-
+        film.setDirectors(request.getDirectors());
 
         return film;
     }
@@ -33,6 +33,7 @@ public class FilmMapper {
         filmDto.setReleaseDate(film.getReleaseDate());
         filmDto.setLikesFromUsers(film.getLikesFromUsers());
         filmDto.setGenres(film.getGenres());
+        filmDto.setDirectors(film.getDirectors());
 
         return filmDto;
     }
@@ -64,6 +65,10 @@ public class FilmMapper {
 
         if (request.hasLikesFromUsers()) {
             film.setLikesFromUsers(request.getLikesFromUsers());
+        }
+
+        if (request.hasDirector()) {
+            film.setDirectors(request.getDirectors());
         }
 
         return film;

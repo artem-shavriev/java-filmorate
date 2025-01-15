@@ -9,11 +9,15 @@ import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Mpa;
+import ru.yandex.practicum.filmorate.storage.dal.DirectorStorage;
 import ru.yandex.practicum.filmorate.storage.dal.FilmDbStorage;
+import ru.yandex.practicum.filmorate.storage.dal.FilmDirectorStorage;
 import ru.yandex.practicum.filmorate.storage.dal.FilmGenreStorage;
 import ru.yandex.practicum.filmorate.storage.dal.GenreStorage;
 import ru.yandex.practicum.filmorate.storage.dal.LikesFromUsersStorage;
 import ru.yandex.practicum.filmorate.storage.dal.MpaStorage;
+import ru.yandex.practicum.filmorate.storage.dal.mappers.DirectorRowMapper;
+import ru.yandex.practicum.filmorate.storage.dal.mappers.FilmDirectorRowMapper;
 import ru.yandex.practicum.filmorate.storage.dal.mappers.FilmGenreRowMapper;
 import ru.yandex.practicum.filmorate.storage.dal.mappers.FilmRowMapper;
 import ru.yandex.practicum.filmorate.storage.dal.mappers.GenreRowMapper;
@@ -39,6 +43,10 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
         LikesFromUsersRowMapper.class,
         MpaStorage.class,
         MpaRowMapper.class,
+        FilmDirectorStorage.class,
+        FilmDirectorRowMapper.class,
+        DirectorStorage.class,
+        DirectorRowMapper.class,
 })
 
 class FilmDbTest {
