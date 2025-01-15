@@ -80,8 +80,8 @@ public class FilmRowMapper implements RowMapper<Film> {
         }
 
         if (filmDirectorStorage.findFilmDirectorByFilmId(film.getId()) != null) {
-            List<FilmDirector> filmDirectorsList =filmDirectorStorage.findFilmDirectorByFilmId(film.getId());
-            List<Director> directorsList= new ArrayList<>();
+            List<FilmDirector> filmDirectorsList = filmDirectorStorage.findFilmDirectorByFilmId(film.getId());
+            List<Director> directorsList = new ArrayList<>();
             for (FilmDirector filmDirector : filmDirectorsList) {
 
                 Director currentDirector = new Director();
