@@ -31,6 +31,11 @@ public class UserController {
         return userService.getUsers();
     }
 
+    @GetMapping("/users/{id}")
+    public UserDto getUserById(@PathVariable Integer id) {
+        return userService.getUserById(id);
+    }
+
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/users")
     public UserDto addUser(@Valid @RequestBody NewUserRequest request) {
@@ -65,5 +70,10 @@ public class UserController {
     @GetMapping("/users/{id}/recommendations")
     public List<FilmDto> getRecommendations(@PathVariable("id") Integer userId) {
         return filmService.getRecommendations(userId);
+    }
+
+    @DeleteMapping("/users/{userId}")
+    public UserDto deleteUserById(@PathVariable Integer userId) {
+        return userService.deleteUserById(userId);
     }
 }
