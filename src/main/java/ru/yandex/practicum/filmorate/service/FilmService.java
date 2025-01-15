@@ -342,5 +342,59 @@ public class FilmService {
         return sortedFilmsByYear;
     }
 
+    public List<FilmDto> getRecommendations(Integer userId) {
+        List<Integer> userFilms = likesFromUsersStorage.getLikedFilmsId(userId);
+        if (userFilms.isEmpty()) {
+            return new ArrayList<>();
+        }
+        log.info("Получаем фильмы, которые лайкнул текущий пользователь {}", userFilms);
+
+        Map<Integer, List<Integer>> allUserLikes = getAllUserLikes();
+
+        Integer similarTasteUserId = null;
+        int maxCommonLikes = 0;
+
+        for (Map.Entry<Integer, List<Integer>> entry : allUserLikes.entrySet()) {
+            Integer otherUserId = entry.getKey();
+            List<Integer> otherUserFilms = entry.getValue();
+
+            if (!otherUserId.equals(userId)) {
+                int commonLikes = (int) otherUserFilms.stream()
+                        .filter(userFilms::contains)
+                        .count();
+
+                if (commonLikes > maxCommonLikes) {
+                    maxCommonLikes = commonLikes;
+                    similarTasteUserId = otherUserId;
+                }
+            }
+        }
+
+        if (similarTasteUserId == null) {
+            log.info("Нет похожего пользователя на {}", userId);
+            return List.of();
+        }
+        log.info("Похожий пользователь {}", similarTasteUserId);
+
+        List<Integer> similarTasteUserFilms = allUserLikes.get(similarTasteUserId);
+        return similarTasteUserFilms.stream()
+                .filter(filmId -> !userFilms.contains(filmId))
+                .map(this::getFilmById)
+                .collect(Collectors.toList());
+    }
+
+    private Map<Integer, List<Integer>> getAllUserLikes() {
+        List<Integer> allUserIds = likesFromUsersStorage.getAllUserIds();
+
+        Map<Integer, List<Integer>> userLikes = new HashMap<>();
+        for (Integer userId : allUserIds) {
+            userLikes.put(userId, likesFromUsersStorage.getLikedFilmsId(userId));
+        }
+
+        return userLikes;
+    }
+
+
+
 }
 
