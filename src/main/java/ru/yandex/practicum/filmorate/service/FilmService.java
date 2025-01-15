@@ -214,8 +214,12 @@ public class FilmService {
     }
 
     public FilmDto getFilmById(Integer filmId) {
-        FilmDto film = FilmMapper.mapToFilmDto(filmDbStorage.findById(filmId).get());
-        return film;
+        if (filmDbStorage.findById(filmId).isEmpty()) {
+            log.error("Фильм с id: {} не найден", filmId);
+            throw  new NotFoundException("Фильм с данным id не найден");
+        }
+
+        return FilmMapper.mapToFilmDto(filmDbStorage.findById(filmId).get());
     }
 
     public FilmDto likeFilm(Integer filmId, Integer userId) {
@@ -338,6 +342,21 @@ public class FilmService {
         List<FilmDto> commonFilms = commonFilmsId.stream().map(id -> getFilmById(id)).toList();
 
         return commonFilms;
+    }
+
+    public FilmDto deleteFilmById(Integer filmIdForDelete) {
+        FilmDto filmForDelete = getFilmById(filmIdForDelete);
+
+        filmGenreStorage.deleteFilmGenreByFilmId(filmIdForDelete);
+        log.info("Удалены записи о жанрах удаляемого фильма");
+        filmDirectorStorage.deleteFilmDirectorByFilmId(filmIdForDelete);
+        log.info("Удалены записи о режиссерах удаляемого фильма");
+        likesFromUsersStorage.deleteLikesFromUsersByFilmId(filmIdForDelete);
+        log.info("Удалены записи о лайках удаляемого фильма");
+        filmDbStorage.deleteFilmById(filmIdForDelete);
+        log.info("Удален фильм с id: {}", filmIdForDelete);
+
+        return filmForDelete;
     }
 
     public List<FilmDto> getFilmsByDirector(Integer directorId) {
