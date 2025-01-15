@@ -211,7 +211,7 @@ public class UserService {
         userForDelete.getFriendsId().stream().forEach(id -> deleteFriend(userForDeleteId, id));
 
         allUsers.stream().forEach(user -> {
-            if(user.getFriendsId().contains(userForDeleteId)) {
+            if (user.getFriendsId().contains(userForDeleteId)) {
                 deleteFriend(user.getId(), userForDeleteId);
             }
         });
