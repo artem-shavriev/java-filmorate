@@ -28,6 +28,11 @@ public class UserController {
         return userService.getUsers();
     }
 
+    @GetMapping("/users/{id}")
+    public UserDto getUserById(@PathVariable Integer id) {
+        return userService.getUserById(id);
+    }
+
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/users")
     public UserDto addUser(@Valid @RequestBody NewUserRequest request) {
@@ -57,5 +62,10 @@ public class UserController {
     @GetMapping("/users/{id}/friends/common/{otherId}")
     public List<UserDto> commonFriends(@PathVariable Integer id, @PathVariable Integer otherId) {
         return userService.commonFriends(id, otherId);
+    }
+
+    @DeleteMapping("/users/{userId}")
+    public UserDto deleteUserById(@PathVariable Integer userId) {
+        return userService.deleteUserById(userId);
     }
 }

@@ -23,6 +23,7 @@ public class UserDbStorage extends BaseStorage<User> implements UserStorage {
             "WHERE USER_ID = ?";
     private static final String FIND_BY_EMAIL_QUERY = "SELECT * FROM USER_ WHERE EMAIL = ?";
     private static final String FIND_BY_LOGIN_QUERY = "SELECT * FROM USER_ WHERE LOGIN = ?";
+    private static final String DELETE_QUERY = "DELETE FROM USER_ WHERE USER_ID = ?";
 
     public UserDbStorage(JdbcTemplate jdbc, RowMapper<User> mapper) {
         super(jdbc, mapper);
@@ -81,5 +82,9 @@ public class UserDbStorage extends BaseStorage<User> implements UserStorage {
 
         log.info("Пользователь c id: {} обновлен", user.getId());
         return user;
+    }
+
+    public boolean deleteUserById(Integer userId) {
+        return delete(DELETE_QUERY, userId);
     }
 }
