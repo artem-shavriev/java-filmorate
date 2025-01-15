@@ -40,10 +40,10 @@ public class DirectorService {
     public Director updateDirector(Director directorForUpdate) {
         Integer directorId = directorForUpdate.getId();
 
-        Optional<Director> existDirector = directorStorage.findById(directorId );
+        Optional<Director> existDirector = directorStorage.findById(directorId);
 
         if (existDirector.isEmpty()) {
-            log.error("Режиссер с id {} не найден.", directorId );
+            log.error("Режиссер с id {} не найден.", directorId);
             throw new NotFoundException("Режиссер с id: " + directorId  + " не найден.");
         }
 
@@ -56,7 +56,7 @@ public class DirectorService {
         Optional<Director> existDirector = directorStorage.findById(directorId);
 
         if (existDirector.isEmpty()) {
-            log.error("Режиссер с id {} не найден.", directorId );
+            log.error("Режиссер с id {} не найден.", directorId);
             throw new NotFoundException("Режиссер с id: " + directorId  + " не найден.");
         }
 
