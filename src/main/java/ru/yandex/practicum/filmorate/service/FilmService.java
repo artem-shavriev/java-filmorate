@@ -12,6 +12,7 @@ import ru.yandex.practicum.filmorate.model.FilmGenre;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.LikesFromUsers;
 import ru.yandex.practicum.filmorate.model.Mpa;
+import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.dal.DirectorStorage;
 import ru.yandex.practicum.filmorate.storage.dal.FilmDbStorage;
 import ru.yandex.practicum.filmorate.storage.dal.FilmDirectorStorage;
@@ -85,7 +86,7 @@ public class FilmService {
             request.setGenres(uniqueGenresList);
         }
 
-        if (request.getDirectors() != null)  {
+        if (request.getDirectors() != null) {
             List<Integer> directorsIdList = request.getDirectors().stream().map(dir -> dir.getId()).toList();
 
             List<Director> directorsListWithName = directorsIdList.stream().map(id ->
@@ -176,7 +177,7 @@ public class FilmService {
             request.setGenres(uniqueGenresList);
         }
 
-        if (request.getDirectors() != null)  {
+        if (request.getDirectors() != null) {
             List<Integer> directorsIdList = request.getDirectors().stream().map(dir -> dir.getId()).toList();
 
             List<Director> directorsListWithName = directorsIdList.stream().map(id ->
@@ -207,7 +208,7 @@ public class FilmService {
 
     public List<FilmDto> getFilms() {
         log.info("Получен список фильмов.");
-        return  filmDbStorage.findAll().stream()
+        return filmDbStorage.findAll().stream()
                 .map(FilmMapper::mapToFilmDto)
                 .collect(Collectors.toList());
     }
@@ -305,7 +306,39 @@ public class FilmService {
         log.info("Список наиболее популярных фильмов сформирован. Длина списка: {}", listOfPopularFilms.size());
 
         return listOfPopularFilms;
+    }
+
+    public List<FilmDto> getCommonFilms(Integer userId, Integer friendId) {
+        Optional<User> existUser = userDbStorage.findById(userId);
+        if (existUser.isEmpty()) {
+            log.error("Переданный userId не существует.");
+            throw new NotFoundException("userId не найден.");
         }
+
+        Optional<User> existFriend = userDbStorage.findById(userId);
+        if (existFriend.isEmpty()) {
+            log.error("Переданный friendId не существует.");
+            throw new NotFoundException("friendId не найден.");
+        }
+
+        List<LikesFromUsers> likesFromUsersList = likesFromUsersStorage.findLikesByUserId(userId);
+        List<Integer> userFilmsIdList = likesFromUsersList.stream().map(x -> x.getFilmId()).toList();
+
+        List<LikesFromUsers> likesFromFriendList = likesFromUsersStorage.findLikesByUserId(friendId);
+        List<Integer> friendFilmsIdList = likesFromFriendList.stream().map(x -> x.getFilmId()).toList();
+
+        List<Integer> commonFilmsId = new ArrayList<>();
+
+        userFilmsIdList.stream().forEach(id -> {
+            if (friendFilmsIdList.contains(id)) {
+                commonFilmsId.add(id);
+            }
+        });
+
+        List<FilmDto> commonFilms = commonFilmsId.stream().map(id -> getFilmById(id)).toList();
+
+        return commonFilms;
+    }
 
     public List<FilmDto> getFilmsByDirector(Integer directorId) {
         List<FilmDirector> filmDirectorsList = filmDirectorStorage.findFilmDirectorByDirectorId(directorId);

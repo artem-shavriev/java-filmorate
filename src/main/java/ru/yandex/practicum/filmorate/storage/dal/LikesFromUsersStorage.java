@@ -14,6 +14,7 @@ public class LikesFromUsersStorage extends BaseStorage<LikesFromUsers> {
             "VALUES (?, ?)";
     private static final String DELETE_QUERY = "DELETE FROM LIKES_FROM_USERS WHERE FILM_ID = ? AND USER_ID = ?";
     private static final String FIND_BY_FILM_ID_QUERY = "SELECT * FROM LIKES_FROM_USERS WHERE FILM_ID = ?";
+    private static final String FIND_BY_USER_ID_QUERY = "SELECT * FROM LIKES_FROM_USERS WHERE USER_ID = ?";
 
     public LikesFromUsersStorage(JdbcTemplate jdbc, RowMapper<LikesFromUsers> mapper) {
         super(jdbc, mapper);
@@ -25,6 +26,10 @@ public class LikesFromUsersStorage extends BaseStorage<LikesFromUsers> {
 
     public List<LikesFromUsers> findLikesByFilmId(Integer filmId) {
         return findMany(FIND_BY_FILM_ID_QUERY, filmId);
+    }
+
+    public List<LikesFromUsers> findLikesByUserId(Integer userId) {
+        return findMany(FIND_BY_USER_ID_QUERY, userId);
     }
 
     public LikesFromUsers addLike(Integer filmId, Integer userId) {

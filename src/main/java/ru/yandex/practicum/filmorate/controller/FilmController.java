@@ -63,8 +63,8 @@ public class FilmController {
     }
 
     @GetMapping("/films/director/{directorId}")
-        public List<FilmDto> getDirectorFilmsSortedByYearOrLikes(@RequestParam String sortBy,
-                                                                 @PathVariable Integer directorId) {
+    public List<FilmDto> getDirectorFilmsSortedByYearOrLikes(@RequestParam String sortBy,
+                                                             @PathVariable Integer directorId) {
         List<FilmDto> filmsList = filmService.getFilmsByDirector(directorId);
         if (sortBy.equals("year")) {
             filmsList = filmService.sortedByYear(filmsList);
@@ -75,5 +75,10 @@ public class FilmController {
         }
 
         return filmsList;
+    }
+
+    @GetMapping("/films/common")
+    public List<FilmDto> getCommonFilms(@RequestParam Integer userId, @RequestParam Integer friendId) {
+        return filmService.getCommonFilms(userId,friendId);
     }
 }
