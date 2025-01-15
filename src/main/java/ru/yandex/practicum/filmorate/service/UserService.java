@@ -90,6 +90,10 @@ public class UserService {
     }
 
     public UserDto getUserById(Integer userId) {
+        if (userDbStorage.findById(userId).isEmpty()) {
+            log.error("Пользователь с id: {} не найден", userId);
+            throw  new NotFoundException("Пользователь с данным id не найден");
+        }
         return UserMapper.mapToUserDto(userDbStorage.findById(userId).get());
     }
 
@@ -141,7 +145,7 @@ public class UserService {
                 });
 
         if (!usersFriendIds.contains(friendId)) {
-            log.trace("Данного пользователя небыло в друзьях.");
+            log.trace("Данного пользователя нет в друзьях.");
         } else {
             friendsIdsStorage.deleteLFriend(friendId, userId);
         }
@@ -198,6 +202,24 @@ public class UserService {
         log.info("Список общих друзей пользователей с id: {} и {} сформирован.", userId, otherId);
 
         return userfriendsList;
+    }
+
+    public UserDto deleteUserById(Integer userForDeleteId) {
+        UserDto userForDelete = getUserById(userForDeleteId);
+        List<UserDto> allUsers = getUsers();
+
+        userForDelete.getFriendsId().stream().forEach(id -> deleteFriend(userForDeleteId, id));
+
+        allUsers.stream().forEach(user -> {
+            if(user.getFriendsId().contains(userForDeleteId)) {
+                deleteFriend(user.getId(), userForDeleteId);
+            }
+        });
+
+        userDbStorage.deleteUserById(userForDeleteId);
+
+        log.info("Пользователь с id: {} удален", userForDeleteId);
+        return userForDelete;
     }
 }
 
