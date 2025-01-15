@@ -20,6 +20,7 @@ public class FilmDbStorage extends BaseStorage<Film> implements FilmStorage {
             "VALUES (?, ?, ?, ?, ?)";
     private static final String UPDATE_QUERY = "UPDATE FILM SET NAME = ?, DESCRIPTION = ?, DURATION = ?, MPA_ID = ?," +
             "RELEASE_DATE = ? WHERE FILM_ID = ?";
+    private static final String DELETE_QUERY = "DELETE FROM FILM WHERE FILM_ID = ?";
 
     public FilmDbStorage(JdbcTemplate jdbc, RowMapper<Film> mapper) {
         super(jdbc, mapper);
@@ -61,5 +62,9 @@ public class FilmDbStorage extends BaseStorage<Film> implements FilmStorage {
                 film.getId()
         );
         return film;
+    }
+
+    public boolean deleteFilmById(Integer filmId) {
+        return delete(DELETE_QUERY, filmId);
     }
 }

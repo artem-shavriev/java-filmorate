@@ -14,6 +14,7 @@ public class FilmDirectorStorage extends BaseStorage<FilmDirector> {
     private static final String FIND_BY_DIRECTOR_ID_QUERY = "SELECT * FROM FILM_DIRECTOR WHERE DIRECTOR_ID = ?";
     private static final String INSERT_QUERY = "INSERT INTO FILM_DIRECTOR (FILM_ID, DIRECTOR_ID)" +
             "VALUES (?, ?)";
+    private static final String DELETE_BY_FILM_ID_QUERY = "DELETE FROM FILM_DIRECTOR WHERE FILM_ID = ?";
 
     public FilmDirectorStorage(JdbcTemplate jdbc, RowMapper<FilmDirector> mapper) {
         super(jdbc, mapper);
@@ -35,5 +36,9 @@ public class FilmDirectorStorage extends BaseStorage<FilmDirector> {
 
     public List<FilmDirector> findFilmDirectorByDirectorId(Integer directorId) {
         return findMany(FIND_BY_DIRECTOR_ID_QUERY, directorId);
+    }
+
+    public boolean deleteFilmDirectorByFilmId(Integer filmId) {
+        return delete(DELETE_BY_FILM_ID_QUERY, filmId);
     }
 }
