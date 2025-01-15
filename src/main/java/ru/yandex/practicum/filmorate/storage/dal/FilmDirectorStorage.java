@@ -15,7 +15,7 @@ public class FilmDirectorStorage extends BaseStorage<FilmDirector> {
     private static final String INSERT_QUERY = "INSERT INTO FILM_DIRECTOR (FILM_ID, DIRECTOR_ID)" +
             "VALUES (?, ?)";
 
-    public FilmDirectorStorage (JdbcTemplate jdbc, RowMapper<FilmDirector> mapper) {
+    public FilmDirectorStorage(JdbcTemplate jdbc, RowMapper<FilmDirector> mapper) {
         super(jdbc, mapper);
     }
 
