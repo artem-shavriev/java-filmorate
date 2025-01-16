@@ -10,7 +10,7 @@ import lombok.Value;
 public class UpdateReviews {
 
     @NotNull
-    Integer id;
+    Integer reviewId;
     @NotNull
     @NotBlank
     String content;

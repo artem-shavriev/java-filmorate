@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.ReviewsMark;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.dal.FilmDbStorage;
 import ru.yandex.practicum.filmorate.storage.dal.ReviewsDbStorage;
@@ -30,7 +31,7 @@ public class ReviewsService {
     }
 
     public ReviewsDto updateReviews(UpdateReviews updateReviews) {
-        validNotFoundReviews(updateReviews.getId());
+        validNotFoundReviews(updateReviews.getReviewId());
         validNotFoundFilm(updateReviews.getFilmId());
         validNotFoundUser(updateReviews.getUserId());
         return reviewsDbStorage.updateReviews(updateReviews);
@@ -56,7 +57,11 @@ public class ReviewsService {
     public void addLikeAndDislikeReviews(Integer reviewsId, Integer userId, String mark) {
         validNotFoundReviews(reviewsId);
         validNotFoundUser(userId);
-        reviewsDbStorage.addLikeAndDislikeReviews(reviewsId, userId, mark);
+        if (validNotFoundReviewsMark(reviewsId, userId).isEmpty()) {
+            reviewsDbStorage.addLikeAndDislikeReviews(reviewsId, userId, mark);
+        } else {
+            reviewsDbStorage.updateLikeAndDislikeReviews(reviewsId, userId, mark);
+        }
     }
 
     public void deleteLikeAndDislikeReviews(Integer reviewsId, Integer userId) {
@@ -82,5 +87,9 @@ public class ReviewsService {
         if (user.isEmpty()) {
             throw new NotFoundException("Пользователь с таким id " + userId + " не найден");
         }
+    }
+
+    private Optional<ReviewsMark> validNotFoundReviewsMark(Integer reviewsId, Integer userId) {
+        return Optional.ofNullable(reviewsDbStorage.getReviewsMarkById(reviewsId, userId));
     }
 }

@@ -7,7 +7,7 @@ import lombok.Value;
 @Builder(toBuilder = true)
 public class ReviewsDto {
 
-    Integer id;
+    Integer reviewId;
     String content;
     Boolean isPositive;
     Integer userId;

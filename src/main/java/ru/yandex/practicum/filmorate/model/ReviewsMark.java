@@ -5,12 +5,9 @@ import lombok.Value;
 
 @Value
 @Builder(toBuilder = true)
-public class Reviews {
+public class ReviewsMark {
 
     Integer reviewsId;
-    String content;
-    Boolean isPositive;
     Integer userId;
-    Integer filmId;
-    Integer useful;
+    String mark;
 }

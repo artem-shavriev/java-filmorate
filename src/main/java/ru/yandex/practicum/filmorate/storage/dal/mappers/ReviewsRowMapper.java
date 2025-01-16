@@ -22,7 +22,7 @@ public class ReviewsRowMapper implements RowMapper<ReviewsDto> {
     public ReviewsDto mapRow(ResultSet rs, int rowNum) throws SQLException {
         Integer useful = reviewsDbStorage.getUseful(rs.getInt("REVIEWS_ID"));
         return ReviewsDto.builder()
-                .id(rs.getInt("REVIEWS_ID"))
+                .reviewId(rs.getInt("REVIEWS_ID"))
                 .content(rs.getString("CONTENT"))
                 .isPositive(rs.getBoolean("IS_POSITIVE"))
                 .userId(rs.getInt("USER_ID"))

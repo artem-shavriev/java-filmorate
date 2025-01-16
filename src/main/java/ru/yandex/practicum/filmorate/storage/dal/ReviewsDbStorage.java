@@ -2,12 +2,15 @@ package ru.yandex.practicum.filmorate.storage.dal;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.DuplicatedDataException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
+import ru.yandex.practicum.filmorate.model.ReviewsMark;
+import ru.yandex.practicum.filmorate.storage.dal.mappers.ReviewsMarkRowMapper;
 import ru.yandex.practicum.filmorate.storage.dal.mappers.ReviewsRowMapper;
 import ru.yandex.practicum.filmorate.storage.dto.NewReviews;
 import ru.yandex.practicum.filmorate.storage.dto.ReviewsDto;
@@ -17,7 +20,6 @@ import java.sql.PreparedStatement;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
@@ -26,6 +28,7 @@ public class ReviewsDbStorage {
 
     private final JdbcTemplate jdbcTemplate;
     private final ReviewsRowMapper reviewsRowMapper;
+    private final ReviewsMarkRowMapper reviewsMarkRowMapper;
 
     public ReviewsDto createReviews(NewReviews newReviews) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
@@ -47,7 +50,7 @@ public class ReviewsDbStorage {
             throw new NotFoundException("Ошибка добавления отзыва в таблицу");
         }
         return ReviewsDto.builder()
-                .id(reviewsId)
+                .reviewId(reviewsId)
                 .content(newReviews.getContent())
                 .isPositive(newReviews.getIsPositive())
                 .userId(newReviews.getUserId())
@@ -68,7 +71,7 @@ public class ReviewsDbStorage {
             stmt.setBoolean(2, updateReviews.getIsPositive());
             stmt.setInt(3, updateReviews.getUserId());
             stmt.setInt(4, updateReviews.getFilmId());
-            stmt.setInt(5, updateReviews.getId());
+            stmt.setInt(5, updateReviews.getReviewId());
             return stmt;
         }, keyHolder);
         if (Objects.nonNull(keyHolder.getKey())) {
@@ -76,24 +79,13 @@ public class ReviewsDbStorage {
         } else {
             throw new NotFoundException("Ошибка обновления отзыва");
         }
-//        String updateReviewsSql = "UPDATE REVIEWS SET CONTENT = ?, IS_POSITIVE = ?, USER_ID = ?, FILM_ID = ?" +
-//                " WHERE REVIEWS_ID = ?";
-//        int rows = jdbcTemplate.update(updateReviewsSql,
-//                updateReviews.getContent(),
-//                String.valueOf(updateReviews.getIsPositive()),
-//                updateReviews.getUserId(),
-//                updateReviews.getFilmId(),
-//                updateReviews.getId());
-//        if (rows == 0) {
-//            throw new InternalServerException("Не удалось обновить данные");
-//        }
         return ReviewsDto.builder()
-                .id(updateReviews.getId())
+                .reviewId(updateReviews.getReviewId())
                 .content(updateReviews.getContent())
                 .isPositive(updateReviews.getIsPositive())
                 .userId(updateReviews.getUserId())
                 .filmId(updateReviews.getFilmId())
-                .useful(updateReviews.getUseful())
+                .useful(getUseful(updateReviews.getReviewId()))
                 .build();
     }
 
@@ -104,11 +96,11 @@ public class ReviewsDbStorage {
 
     public ReviewsDto getReviewsById(Integer id) {
         String getReviewsById = "SELECT * FROM REVIEWS WHERE REVIEWS_ID = ?";
-        Optional<ReviewsDto> result = Optional.ofNullable(
-                jdbcTemplate.queryForObject(getReviewsById, reviewsRowMapper::mapRow, id));
-        if (result.isPresent()) {
-            return result.get();
-        } else {
+        try {
+            ReviewsDto result = jdbcTemplate.queryForObject(getReviewsById, reviewsRowMapper, id);
+            log.info("Отзыв получен по id {}", id);
+            return result;
+        } catch (EmptyResultDataAccessException e) {
             throw new NotFoundException("Отзыв с id " + id + " не найден");
         }
     }
@@ -139,6 +131,14 @@ public class ReviewsDbStorage {
         }
     }
 
+    public void updateLikeAndDislikeReviews(Integer reviewsId, Integer userId, String mark) {
+        String addLikeSql = "UPDATE REVIEWS_MARK SET MARK = ? WHERE REVIEWS_ID = ? AND USER_ID = ?";
+        int rows = jdbcTemplate.update(addLikeSql, mark, reviewsId, userId);
+        if (rows == 0) {
+            throw new DuplicatedDataException("Не удалось обновить данные в таблице");
+        }
+    }
+
     public void deleteLikeAndDislikeReviews(Integer reviewsId, Integer userId) {
         String deleteSql = "DELETE FROM REVIEWS_MARK WHERE REVIEWS_ID = ? AND USER_ID = ?";
         jdbcTemplate.update(deleteSql, reviewsId, userId);
@@ -150,5 +150,15 @@ public class ReviewsDbStorage {
         String getDislikeSql = "SELECT COUNT(MARK) FROM REVIEWS_MARK WHERE REVIEWS_ID = ? AND MARK = 'dislike'";
         Integer dislike = jdbcTemplate.queryForObject(getDislikeSql, Integer.class, reviewsId);
         return like - dislike;
+    }
+
+    public ReviewsMark getReviewsMarkById(Integer reviewsId, Integer userId) {
+        String getReviewsMark = "SELECT * FROM REVIEWS_MARK WHERE REVIEWS_ID = ? AND USER_ID = ?";
+        try {
+            ReviewsMark result = jdbcTemplate.queryForObject(getReviewsMark, reviewsMarkRowMapper, reviewsId, userId);
+            return result;
+        } catch (EmptyResultDataAccessException e) {
+            return null;
+        }
     }
 }
