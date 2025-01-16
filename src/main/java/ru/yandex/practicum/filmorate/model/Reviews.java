@@ -6,7 +6,6 @@ import lombok.Value;
 @Value
 @Builder(toBuilder = true)
 public class Reviews {
-
     Integer reviewsId;
     String content;
     Boolean isPositive;

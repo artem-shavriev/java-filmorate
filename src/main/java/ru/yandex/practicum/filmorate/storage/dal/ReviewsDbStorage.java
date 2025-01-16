@@ -25,7 +25,6 @@ import java.util.Objects;
 @RequiredArgsConstructor
 @Slf4j
 public class ReviewsDbStorage {
-
     private final JdbcTemplate jdbcTemplate;
     private final ReviewsRowMapper reviewsRowMapper;
     private final ReviewsMarkRowMapper reviewsMarkRowMapper;

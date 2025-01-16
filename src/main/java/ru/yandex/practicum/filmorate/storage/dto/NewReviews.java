@@ -8,7 +8,6 @@ import lombok.Value;
 @Value
 @Builder(toBuilder = true)
 public class NewReviews {
-
     @NotNull
     @NotBlank
     String content;

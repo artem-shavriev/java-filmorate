@@ -6,7 +6,6 @@ import lombok.Value;
 @Value
 @Builder(toBuilder = true)
 public class ReviewsMark {
-
     Integer reviewsId;
     Integer userId;
     String mark;

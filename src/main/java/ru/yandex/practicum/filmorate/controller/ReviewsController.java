@@ -22,7 +22,6 @@ import java.util.List;
 @RequestMapping("/reviews")
 @RequiredArgsConstructor
 public class ReviewsController {
-
     private final ReviewsService reviewsService;
 
     @PostMapping
