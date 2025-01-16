@@ -6,6 +6,7 @@ import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
+import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
 
@@ -29,4 +30,5 @@ public class NewFilmRequest {
     private Mpa mpa;
     private Set<Integer> likesFromUsers = new HashSet<>();
     private List<Genre> genres;
+    private List<Director> directors;
 }
