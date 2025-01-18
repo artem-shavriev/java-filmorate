@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.exception.InternalServerException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Director;
@@ -435,6 +436,21 @@ public class FilmService {
                 .collect(Collectors.toList());
     }
 
+    public List<FilmDto> getSearch(String query, String by) {
+        List<FilmDto> result;
+        if (query == null || by == null) {
+            result = filmDbStorage.findAll()
+                    .stream()
+                    .map(FilmMapper::mapToFilmDto)
+                    .toList();
+            return sortedByLikes(result);
+        } else if (by.contains("director") || by.contains("title")) {
+            return filmDbStorage.getSearch(query, by);
+        } else {
+            throw new InternalServerException("Произошла ошибка");
+        }
+    }
+
     private Map<Integer, List<Integer>> getAllUserLikes() {
         List<Integer> allUserIds = likesFromUsersStorage.getAllUserIds();
 
@@ -445,7 +461,5 @@ public class FilmService {
 
         return userLikes;
     }
-
-
 }
 
