@@ -12,7 +12,7 @@ public class FilmDirectorStorage extends BaseStorage<FilmDirector> {
     private static final String FIND_ALL_QUERY = "SELECT * FROM FILM_DIRECTOR";
     private static final String FIND_BY_FILM_ID_QUERY = "SELECT * FROM FILM_DIRECTOR WHERE FILM_ID = ?";
     private static final String FIND_BY_DIRECTOR_ID_QUERY = "SELECT * FROM FILM_DIRECTOR WHERE DIRECTOR_ID = ?";
-    private static final String INSERT_QUERY = "INSERT INTO FILM_DIRECTOR (FILM_ID, DIRECTOR_ID)" +
+    private static final String INSERT_QUERY = "MERGE INTO FILM_DIRECTOR (FILM_ID, DIRECTOR_ID) KEY (FILM_ID, DIRECTOR_ID) " +
             "VALUES (?, ?)";
     private static final String DELETE_BY_FILM_ID_QUERY = "DELETE FROM FILM_DIRECTOR WHERE FILM_ID = ?";
 
@@ -26,7 +26,6 @@ public class FilmDirectorStorage extends BaseStorage<FilmDirector> {
 
     public FilmDirector addFilmDirector(FilmDirector director) {
         update(INSERT_QUERY, director.getFilmId(), director.getDirectorId());
-
         return director;
     }
 

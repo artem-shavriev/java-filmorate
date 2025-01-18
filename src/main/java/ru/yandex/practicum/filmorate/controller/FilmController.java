@@ -82,6 +82,12 @@ public class FilmController {
         return filmService.getCommonFilms(userId,friendId);
     }
 
+    @GetMapping("/films/search")
+    public List<FilmDto> getSearch(@RequestParam(required = false, name = "query") String query,
+                                   @RequestParam(required = false, name = "by") String by) {
+        return filmService.getSearch(query, by);
+    }
+
     @DeleteMapping("/films/{filmId}")
     public FilmDto deleteFilmById(@PathVariable Integer filmId) {
         return filmService.deleteFilmById(filmId);
