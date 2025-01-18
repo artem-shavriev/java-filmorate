@@ -388,7 +388,7 @@ public class FilmService {
         Collections.sort(sortedFilmsByYear, new Comparator<FilmDto>() {
             @Override
             public int compare(FilmDto film1, FilmDto film2) {
-                return film2.getReleaseDate().compareTo(film2.getReleaseDate());
+                return film1.getReleaseDate().compareTo(film2.getReleaseDate());
             }
         });
 
