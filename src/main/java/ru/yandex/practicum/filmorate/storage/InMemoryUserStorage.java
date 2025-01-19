@@ -9,6 +9,7 @@ import ru.yandex.practicum.filmorate.service.IdGenerator;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Optional;
 
 @Slf4j
 @Component
@@ -89,5 +90,10 @@ public class InMemoryUserStorage extends IdGenerator implements UserStorage {
         }
         log.error("User с id = {} не найден", newUser.getId());
         throw new NotFoundException("User с id = " + newUser.getId() + " не найден");
+    }
+
+    @Override
+    public Optional<User> findById(int id) {
+        return Optional.empty();
     }
 }

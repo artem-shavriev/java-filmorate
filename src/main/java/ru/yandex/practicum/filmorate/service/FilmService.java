@@ -5,11 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
-import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.FilmGenre;
-import ru.yandex.practicum.filmorate.model.Genre;
-import ru.yandex.practicum.filmorate.model.LikesFromUsers;
-import ru.yandex.practicum.filmorate.model.Mpa;
+import ru.yandex.practicum.filmorate.model.*;
 import ru.yandex.practicum.filmorate.storage.dal.FilmDbStorage;
 import ru.yandex.practicum.filmorate.storage.dal.FilmGenreStorage;
 import ru.yandex.practicum.filmorate.storage.dal.GenreStorage;
@@ -41,20 +37,20 @@ public class FilmService {
     private final FilmGenreStorage filmGenreStorage;
     private final MpaStorage mpaStorage;
     private final GenreStorage genreStorage;
+    private final EventService eventService;
     private static final LocalDate MIN_RELEASE_DATE = LocalDate.of(1895, 12, 28);
 
     public FilmDto addFilm(NewFilmRequest request) {
 
         if (request.getMpa() != null) {
             List<Mpa> mpaList = mpaStorage.findAll();
-            List<Integer> mpaIdsList = mpaList.stream().map(mpa -> mpa.getId()).toList();
+            List<Integer> mpaIdsList = mpaList.stream().map(Mpa::getId).toList();
 
             if (!mpaIdsList.contains(request.getMpa().getId())) {
                 throw new ValidationException("У рейтинга несуществующий id");
             }
 
             String mpaName = mpaStorage.findById(request.getMpa().getId()).get().getName();
-
             request.getMpa().setName(mpaName);
         }
 
@@ -63,20 +59,21 @@ public class FilmService {
         }
 
         if (request.getGenres() != null) {
-
             List<Genre> genresList = genreStorage.findAll();
             List<Integer> genresIdList = genresList.stream().map(Genre::getId).toList();
 
-            request.getGenres().stream().forEach(genre -> {
+            request.getGenres().forEach(genre -> {
                 if (!genresIdList.contains(genre.getId())) {
                     log.error("У фильма с названием: {} жанр с несуществующим id: {}", request.getName(), genre.getId());
                     throw new ValidationException("У одного из жанров фильма несуществующий id");
                 }
             });
 
-            List<Integer> requestGenresId = request.getGenres().stream().map(genre -> genre.getId()).toList();
+            List<Integer> requestGenresId = request.getGenres().stream().map(Genre::getId).toList();
             Set<Integer> uniqueGenresIds = new HashSet<>(requestGenresId);
-            List<Genre> uniqueGenresList = uniqueGenresIds.stream().map(id -> genreStorage.findById(id).get()).toList();
+            List<Genre> uniqueGenresList = uniqueGenresIds.stream()
+                    .map(id -> genreStorage.findById(id).get())
+                    .toList();
 
             for (Genre genre : uniqueGenresList) {
                 String genreName = genreStorage.findById(genre.getId()).get().getName();
@@ -85,24 +82,30 @@ public class FilmService {
             request.setGenres(uniqueGenresList);
         }
 
+        // Маппинг DTO на модель
         Film film = FilmMapper.mapToFilm(request);
 
+        // Добавление фильма в хранилище
         film = filmDbStorage.addFilm(film);
 
+        // Добавление жанров, если они есть
         if (film.getGenres() != null) {
             List<Genre> genres = film.getGenres();
             for (Genre genre : genres) {
                 FilmGenre filmGenre = new FilmGenre();
-
                 filmGenre.setFilmId(film.getId());
                 filmGenre.setGenreId(genre.getId());
-
                 filmGenreStorage.addGenre(filmGenre);
             }
         }
 
+        // Логгирование информации о новом фильме
         log.info("Добавлен новый фильм {} с id: {}", film.getName(), film.getId());
 
+        // Добавление события через EventService
+        eventService.createEvent(film.getId(), EventType.LIKE, EventOperation.ADD, film.getId());
+
+        // Возвращение DTO
         return FilmMapper.mapToFilmDto(film);
     }
 
@@ -198,26 +201,34 @@ public class FilmService {
 
     public FilmDto deleteLikeFromFilm(Integer filmId, Integer userId) {
 
+        // Проверяем существование фильма
         if (filmDbStorage.findById(filmId).isEmpty()) {
             log.error("Фильм с id: {} не существует.", filmId);
             throw new NotFoundException("Фильм с данным id не существует.");
         }
 
+        // Проверяем существование пользователя
         if (userDbStorage.findById(userId).isEmpty()) {
-            log.error("Пользовтель с id: {} не сущетвует.", userId);
-            throw new NotFoundException("Пользовтель с данным id не сущетвует.");
+            log.error("Пользователь с id: {} не существует.", userId);
+            throw new NotFoundException("Пользователь с данным id не существует.");
         }
 
+        // Получаем фильм и проверяем наличие лайка от пользователя
         Film film = filmDbStorage.findById(filmId).get();
         Set<Integer> likes = film.getLikesFromUsers();
         if (!likes.contains(userId)) {
-            log.error("Пользовтель с id: {} еще не лайкал фильм с id: {}.", userId, filmId);
-            throw new NotFoundException("Данный пользовтаель еще не лайкал этот фильм.");
+            log.error("Пользователь с id: {} еще не лайкал фильм с id: {}.", userId, filmId);
+            throw new NotFoundException("Данный пользователь еще не лайкал этот фильм.");
         }
 
+        // Удаляем лайк из хранилища
         likesFromUsersStorage.deleteLike(filmId, userId);
-        log.info("Лайк пользовтеля с id {} фильму с id {} был удален.", userId, filmId);
+        log.info("Лайк пользователя с id {} фильму с id {} был удален.", userId, filmId);
 
+        // Добавляем событие в ленту событий
+        eventService.createEvent(userId, EventType.LIKE, EventOperation.REMOVE, filmId);
+
+        // Возвращаем обновленную информацию о фильме
         return getFilmById(filmId);
     }
 
