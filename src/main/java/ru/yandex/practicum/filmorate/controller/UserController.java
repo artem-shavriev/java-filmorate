@@ -13,7 +13,9 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import ru.yandex.practicum.filmorate.model.Event;
 import ru.yandex.practicum.filmorate.service.EventService;
+import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.service.UserService;
+import ru.yandex.practicum.filmorate.storage.dto.FilmDto;
 import ru.yandex.practicum.filmorate.storage.dto.NewUserRequest;
 import ru.yandex.practicum.filmorate.storage.dto.UpdateUserRequest;
 import ru.yandex.practicum.filmorate.storage.dto.UserDto;
@@ -25,10 +27,16 @@ import java.util.List;
 public class UserController {
     private final UserService userService;
     private final EventService eventService;
+    private final FilmService filmService;
 
     @GetMapping("/users")
     public List<UserDto> getUsers() {
         return userService.getUsers();
+    }
+
+    @GetMapping("/users/{id}")
+    public UserDto getUserById(@PathVariable Integer id) {
+        return userService.getUserById(id);
     }
 
     @ResponseStatus(HttpStatus.CREATED)
@@ -65,5 +73,15 @@ public class UserController {
     @GetMapping("/{id}/feed")
     public List<Event> getFeed(@PathVariable int id) {
         return eventService.getFeed(id);
+    }
+
+    @GetMapping("/users/{id}/recommendations")
+    public List<FilmDto> getRecommendations(@PathVariable("id") Integer userId) {
+        return filmService.getRecommendations(userId);
+    }
+
+    @DeleteMapping("/users/{userId}")
+    public UserDto deleteUserById(@PathVariable Integer userId) {
+        return userService.deleteUserById(userId);
     }
 }

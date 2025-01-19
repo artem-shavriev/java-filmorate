@@ -6,6 +6,8 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.dto.FilmDto;
+import ru.yandex.practicum.filmorate.storage.mapper.FilmMapper;
 
 import java.util.List;
 import java.util.Optional;
@@ -20,6 +22,7 @@ public class FilmDbStorage extends BaseStorage<Film> implements FilmStorage {
             "VALUES (?, ?, ?, ?, ?)";
     private static final String UPDATE_QUERY = "UPDATE FILM SET NAME = ?, DESCRIPTION = ?, DURATION = ?, MPA_ID = ?," +
             "RELEASE_DATE = ? WHERE FILM_ID = ?";
+    private static final String DELETE_QUERY = "DELETE FROM FILM WHERE FILM_ID = ?";
 
     public FilmDbStorage(JdbcTemplate jdbc, RowMapper<Film> mapper) {
         super(jdbc, mapper);
@@ -61,5 +64,36 @@ public class FilmDbStorage extends BaseStorage<Film> implements FilmStorage {
                 film.getId()
         );
         return film;
+    }
+
+    public boolean deleteFilmById(Integer filmId) {
+        return delete(DELETE_QUERY, filmId);
+    }
+
+    public List<FilmDto> getSearch(String query, String by) {
+        String sql;
+        String replaced = by.replace("director", "d.NAME").replace("title", "f.NAME");
+        if (replaced.contains(",")) {
+            String[] split = replaced.split(",");
+            sql = "SELECT f.FILM_ID, f.NAME, f.DESCRIPTION, f.DURATION, f.RELEASE_DATE, f.MPA_ID FROM FILM AS f " +
+                    "LEFT JOIN FILM_DIRECTOR  AS fd ON f.FILM_ID =  fd.FILM_ID " +
+                    "LEFT JOIN DIRECTORS AS d ON fd.DIRECTOR_ID = d.DIRECTOR_ID " +
+                    "WHERE " + split[0] + " ILIKE '%" + query + "%' OR " + split[1] + " ILIKE '%" + query + "%' " +
+                    "GROUP BY f.FILM_ID";
+            return jdbc.query(sql, mapper::mapRow)
+                    .stream()
+                    .map(FilmMapper::mapToFilmDto)
+                    .toList();
+        } else {
+            sql =  "SELECT f.FILM_ID, f.NAME, f.DESCRIPTION, f.DURATION, f.RELEASE_DATE, f.MPA_ID FROM FILM AS f " +
+                    "LEFT JOIN FILM_DIRECTOR  AS fd ON f.FILM_ID =  fd.FILM_ID " +
+                    "LEFT JOIN DIRECTORS AS d ON fd.DIRECTOR_ID = d.DIRECTOR_ID " +
+                    "WHERE " + replaced + " ILIKE '%" + query + "%' " +
+                    "GROUP BY f.FILM_ID";
+            return jdbc.query(sql, mapper::mapRow)
+                    .stream()
+                    .map(FilmMapper::mapToFilmDto)
+                    .toList();
+        }
     }
 }

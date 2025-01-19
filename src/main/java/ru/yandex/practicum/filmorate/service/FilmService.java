@@ -3,10 +3,21 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.exception.InternalServerException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.*;
+import ru.yandex.practicum.filmorate.model.Director;
+import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.FilmDirector;
+import ru.yandex.practicum.filmorate.model.FilmGenre;
+import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.model.LikesFromUsers;
+import ru.yandex.practicum.filmorate.model.Mpa;
+import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.dal.DirectorStorage;
 import ru.yandex.practicum.filmorate.storage.dal.FilmDbStorage;
+import ru.yandex.practicum.filmorate.storage.dal.FilmDirectorStorage;
 import ru.yandex.practicum.filmorate.storage.dal.FilmGenreStorage;
 import ru.yandex.practicum.filmorate.storage.dal.GenreStorage;
 import ru.yandex.practicum.filmorate.storage.dal.LikesFromUsersStorage;
@@ -18,12 +29,7 @@ import ru.yandex.practicum.filmorate.storage.dto.UpdateFilmRequest;
 import ru.yandex.practicum.filmorate.storage.mapper.FilmMapper;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -38,6 +44,8 @@ public class FilmService {
     private final MpaStorage mpaStorage;
     private final GenreStorage genreStorage;
     private final EventService eventService;
+    private final DirectorStorage directorStorage;
+    private final FilmDirectorStorage filmDirectorStorage;
     private static final LocalDate MIN_RELEASE_DATE = LocalDate.of(1895, 12, 28);
 
     public FilmDto addFilm(NewFilmRequest request) {
@@ -82,13 +90,19 @@ public class FilmService {
             request.setGenres(uniqueGenresList);
         }
 
-        // Маппинг DTO на модель
+        if (request.getDirectors() != null) {
+            List<Integer> directorsIdList = request.getDirectors().stream().map(dir -> dir.getId()).toList();
+
+            List<Director> directorsListWithName = directorsIdList.stream().map(id ->
+                    directorStorage.findById(id).get()).toList();
+
+            request.setDirectors(directorsListWithName);
+        }
+
         Film film = FilmMapper.mapToFilm(request);
 
-        // Добавление фильма в хранилище
         film = filmDbStorage.addFilm(film);
 
-        // Добавление жанров, если они есть
         if (film.getGenres() != null) {
             List<Genre> genres = film.getGenres();
             for (Genre genre : genres) {
@@ -99,13 +113,23 @@ public class FilmService {
             }
         }
 
-        // Логгирование информации о новом фильме
+        if (film.getDirectors() != null) {
+            List<Director> directorsList = film.getDirectors();
+
+            for (Director director : directorsList) {
+                FilmDirector filmDirector = new FilmDirector();
+
+                filmDirector.setDirectorId(director.getId());
+                filmDirector.setFilmId(film.getId());
+
+                filmDirectorStorage.addFilmDirector(filmDirector);
+            }
+        }
+
         log.info("Добавлен новый фильм {} с id: {}", film.getName(), film.getId());
 
-        // Добавление события через EventService
         eventService.createEvent(film.getId(), EventType.LIKE, EventOperation.ADD, film.getId());
 
-        // Возвращение DTO
         return FilmMapper.mapToFilmDto(film);
     }
 
@@ -157,6 +181,25 @@ public class FilmService {
             request.setGenres(uniqueGenresList);
         }
 
+        if (request.getDirectors() != null) {
+            List<Integer> directorsIdList = request.getDirectors().stream().map(dir -> dir.getId()).toList();
+
+            List<Director> directorsListWithName = directorsIdList.stream().map(id ->
+                    directorStorage.findById(id).get()).toList();
+            request.setDirectors(directorsListWithName);
+
+            List<Director> directorsList = request.getDirectors();
+
+            for (Director director : directorsList) {
+                FilmDirector filmDirector = new FilmDirector();
+
+                filmDirector.setDirectorId(director.getId());
+                filmDirector.setFilmId(request.getId());
+
+                filmDirectorStorage.addFilmDirector(filmDirector);
+            }
+        }
+
         Film updateFilm = filmDbStorage.findById(request.getId())
                 .map(film -> FilmMapper.updateFilmFields(film, request))
                 .orElseThrow(() -> new NotFoundException("Фильм не найден"));
@@ -201,19 +244,16 @@ public class FilmService {
 
     public FilmDto deleteLikeFromFilm(Integer filmId, Integer userId) {
 
-        // Проверяем существование фильма
         if (filmDbStorage.findById(filmId).isEmpty()) {
             log.error("Фильм с id: {} не существует.", filmId);
             throw new NotFoundException("Фильм с данным id не существует.");
         }
 
-        // Проверяем существование пользователя
         if (userDbStorage.findById(userId).isEmpty()) {
-            log.error("Пользователь с id: {} не существует.", userId);
-            throw new NotFoundException("Пользователь с данным id не существует.");
+            log.error("Пользовтель с id: {} не сущетвует.", userId);
+            throw new NotFoundException("Пользовтель с данным id не сущетвует.");
         }
 
-        // Получаем фильм и проверяем наличие лайка от пользователя
         Film film = filmDbStorage.findById(filmId).get();
         Set<Integer> likes = film.getLikesFromUsers();
         if (!likes.contains(userId)) {
@@ -221,7 +261,6 @@ public class FilmService {
             throw new NotFoundException("Данный пользователь еще не лайкал этот фильм.");
         }
 
-        // Удаляем лайк из хранилища
         likesFromUsersStorage.deleteLike(filmId, userId);
         log.info("Лайк пользователя с id {} фильму с id {} был удален.", userId, filmId);
 
@@ -232,33 +271,198 @@ public class FilmService {
         return getFilmById(filmId);
     }
 
-    public List<FilmDto> getPopularFilms(int count) {
+    public List<FilmDto> getPopularFilms(Integer count, Integer genreId, Integer year) {
         List<Film> filmsList = filmDbStorage.findAll();
 
-        List<FilmDto> sortedFilmsIdsByLikes = new ArrayList<>();
+        if (year != null) {
+            filmsList = filmsList.stream()
+                    .filter(film -> film.getReleaseDate().getYear() == year)
+                    .toList();
+        }
+
+        if (genreId != null) {
+            filmsList = filmsList.stream()
+                    .filter(film -> film.getGenres().stream().anyMatch(genre -> genre.getId().equals(genreId)))
+                    .toList();
+        }
+
+        if (count == null || count <= 0) {
+            count = filmsList.size();
+        }
+
+        List<Film> sortedFilmsByLikes = new ArrayList<>(filmsList);
+
+        Collections.sort(sortedFilmsByLikes, new Comparator<Film>() {
+            @Override
+            public int compare(Film film1, Film film2) {
+                return Integer.compare(film2.getLikesFromUsers().size(), film1.getLikesFromUsers().size());
+            }
+        });
+
+        if (sortedFilmsByLikes.size() > count) {
+            sortedFilmsByLikes = sortedFilmsByLikes.subList(0, count);
+        }
+
         List<FilmDto> listOfPopularFilms = new ArrayList<>();
-        TreeMap<Integer, Integer> sortedMapOfFilmsLikes = new TreeMap<>();
-
-        for (Film film : filmsList) {
-            sortedMapOfFilmsLikes.put(film.getLikesFromUsers().size(), film.getId());
-        }
-
-        for (Integer id : sortedMapOfFilmsLikes.values()) {
-            sortedFilmsIdsByLikes.add(getFilmById(id));
-        }
-
-        if (sortedFilmsIdsByLikes.size() <= count) {
-            for (int i = sortedFilmsIdsByLikes.size() - 1; i >= 0; i--) {
-                listOfPopularFilms.add(sortedFilmsIdsByLikes.get(i));
-            }
-        } else {
-            for (int i = count - 1; i >= 0; i--) {
-                listOfPopularFilms.add(sortedFilmsIdsByLikes.get(i));
+        for (Film film : sortedFilmsByLikes) {
+            FilmDto filmDto = getFilmById(film.getId());
+            if (filmDto != null) {
+                listOfPopularFilms.add(filmDto);
             }
         }
 
-        log.info("Список наиболее популярных фильмов сформирован. Длина списка: {}", count);
+        log.info("Список наиболее популярных фильмов сформирован. Длина списка: {}", listOfPopularFilms.size());
+
         return listOfPopularFilms;
+    }
+
+    public List<FilmDto> getCommonFilms(Integer userId, Integer friendId) {
+        Optional<User> existUser = userDbStorage.findById(userId);
+        if (existUser.isEmpty()) {
+            log.error("Переданный userId не существует.");
+            throw new NotFoundException("userId не найден.");
+        }
+
+        Optional<User> existFriend = userDbStorage.findById(userId);
+        if (existFriend.isEmpty()) {
+            log.error("Переданный friendId не существует.");
+            throw new NotFoundException("friendId не найден.");
+        }
+
+        List<LikesFromUsers> likesFromUsersList = likesFromUsersStorage.findLikesByUserId(userId);
+        List<Integer> userFilmsIdList = likesFromUsersList.stream().map(x -> x.getFilmId()).toList();
+
+        List<LikesFromUsers> likesFromFriendList = likesFromUsersStorage.findLikesByUserId(friendId);
+        List<Integer> friendFilmsIdList = likesFromFriendList.stream().map(x -> x.getFilmId()).toList();
+
+        List<Integer> commonFilmsId = new ArrayList<>();
+
+        userFilmsIdList.stream().forEach(id -> {
+            if (friendFilmsIdList.contains(id)) {
+                commonFilmsId.add(id);
+            }
+        });
+
+        List<FilmDto> commonFilms = commonFilmsId.stream().map(id -> getFilmById(id)).toList();
+
+        return commonFilms;
+    }
+
+    public FilmDto deleteFilmById(Integer filmIdForDelete) {
+        FilmDto filmForDelete = getFilmById(filmIdForDelete);
+
+        filmGenreStorage.deleteFilmGenreByFilmId(filmIdForDelete);
+        log.info("Удалены записи о жанрах удаляемого фильма");
+        filmDirectorStorage.deleteFilmDirectorByFilmId(filmIdForDelete);
+        log.info("Удалены записи о режиссерах удаляемого фильма");
+        likesFromUsersStorage.deleteLikesFromUsersByFilmId(filmIdForDelete);
+        log.info("Удалены записи о лайках удаляемого фильма");
+        filmDbStorage.deleteFilmById(filmIdForDelete);
+        log.info("Удален фильм с id: {}", filmIdForDelete);
+
+        return filmForDelete;
+    }
+
+    public List<FilmDto> getFilmsByDirector(Integer directorId) {
+        List<FilmDirector> filmDirectorsList = filmDirectorStorage.findFilmDirectorByDirectorId(directorId);
+        List<Integer> findFilmIds = filmDirectorsList.stream().map(f -> f.getFilmId()).toList();
+
+        List<FilmDto> findFilms = findFilmIds.stream().map(id -> getFilmById(id)).toList();
+
+        return findFilms;
+    }
+
+    public List<FilmDto> sortedByLikes(List<FilmDto> filmsForSort) {
+        List<FilmDto> sortedFilmsByLikes = new ArrayList<>(filmsForSort);
+
+        Collections.sort(sortedFilmsByLikes, new Comparator<FilmDto>() {
+            @Override
+            public int compare(FilmDto film1, FilmDto film2) {
+                return Integer.compare(film2.getLikesFromUsers().size(), film1.getLikesFromUsers().size());
+            }
+        });
+
+        return sortedFilmsByLikes;
+    }
+
+    public List<FilmDto> sortedByYear(List<FilmDto> filmsForSort) {
+        List<FilmDto> sortedFilmsByYear = new ArrayList<>(filmsForSort);
+
+        Collections.sort(sortedFilmsByYear, new Comparator<FilmDto>() {
+            @Override
+            public int compare(FilmDto film1, FilmDto film2) {
+                return film1.getReleaseDate().compareTo(film2.getReleaseDate());
+            }
+        });
+
+        return sortedFilmsByYear;
+    }
+
+    public List<FilmDto> getRecommendations(Integer userId) {
+        List<Integer> userFilms = likesFromUsersStorage.getLikedFilmsId(userId);
+        if (userFilms.isEmpty()) {
+            return new ArrayList<>();
+        }
+        log.info("Получаем фильмы, которые лайкнул текущий пользователь {}", userFilms);
+
+        Map<Integer, List<Integer>> allUserLikes = getAllUserLikes();
+
+        Integer similarTasteUserId = null;
+        int maxCommonLikes = 0;
+
+        for (Map.Entry<Integer, List<Integer>> entry : allUserLikes.entrySet()) {
+            Integer otherUserId = entry.getKey();
+            List<Integer> otherUserFilms = entry.getValue();
+
+            if (!otherUserId.equals(userId)) {
+                int commonLikes = (int) otherUserFilms.stream()
+                        .filter(userFilms::contains)
+                        .count();
+
+                if (commonLikes > maxCommonLikes) {
+                    maxCommonLikes = commonLikes;
+                    similarTasteUserId = otherUserId;
+                }
+            }
+        }
+
+        if (similarTasteUserId == null) {
+            log.info("Нет похожего пользователя на {}", userId);
+            return List.of();
+        }
+        log.info("Похожий пользователь {}", similarTasteUserId);
+
+        List<Integer> similarTasteUserFilms = allUserLikes.get(similarTasteUserId);
+        return similarTasteUserFilms.stream()
+                .filter(filmId -> !userFilms.contains(filmId))
+                .map(this::getFilmById)
+                .collect(Collectors.toList());
+    }
+
+    public List<FilmDto> getSearch(String query, String by) {
+        List<FilmDto> result;
+        if (query == null || by == null) {
+            result = filmDbStorage.findAll()
+                    .stream()
+                    .map(FilmMapper::mapToFilmDto)
+                    .toList();
+            return sortedByLikes(result);
+        } else if (by.contains("director") || by.contains("title")) {
+            return filmDbStorage.getSearch(query, by);
+        } else {
+            throw new InternalServerException("Произошла ошибка");
+        }
+    }
+
+    private Map<Integer, List<Integer>> getAllUserLikes() {
+        List<Integer> allUserIds = likesFromUsersStorage.getAllUserIds();
+
+        Map<Integer, List<Integer>> userLikes = new HashMap<>();
+        for (Integer userId : allUserIds) {
+            userLikes.put(userId, likesFromUsersStorage.getLikedFilmsId(userId));
+        }
+
+        return userLikes;
     }
 }
 
