@@ -22,7 +22,7 @@ public class EventService {
     private final UserStorage userStorage;
 
     public List<Event> getFeed(int userId) {
-        if(userStorage.findById(userId).isEmpty()) {
+        if (userStorage.findById(userId).isEmpty()) {
             log.error("Пользователя с id {} не существует", userId);
             throw new NotFoundException("Пользователя с id = " + userId + " не существует");
         }
