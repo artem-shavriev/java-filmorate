@@ -3,9 +3,7 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
-import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.ReviewsMark;
-import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.model.*;
 import ru.yandex.practicum.filmorate.storage.dal.FilmDbStorage;
 import ru.yandex.practicum.filmorate.storage.dal.ReviewsDbStorage;
 import ru.yandex.practicum.filmorate.storage.dal.UserDbStorage;
@@ -22,22 +20,36 @@ public class ReviewsService {
     private final ReviewsDbStorage reviewsDbStorage;
     private final FilmDbStorage filmDbStorage;
     private final UserDbStorage userDbStorage;
+    private final EventService eventService;
 
     public ReviewsDto createReviews(NewReviews newReviews) {
         validNotFoundFilm(newReviews.getFilmId());
         validNotFoundUser(newReviews.getUserId());
-        return reviewsDbStorage.createReviews(newReviews);
+
+        ReviewsDto createdReview = reviewsDbStorage.createReviews(newReviews);
+
+        eventService.createEvent(newReviews.getUserId(), EventType.REVIEW, EventOperation.ADD, createdReview.getReviewId());
+
+        return createdReview;
     }
+
 
     public ReviewsDto updateReviews(UpdateReviews updateReviews) {
         validNotFoundReviews(updateReviews.getReviewId());
         validNotFoundFilm(updateReviews.getFilmId());
         validNotFoundUser(updateReviews.getUserId());
-        return reviewsDbStorage.updateReviews(updateReviews);
+
+        ReviewsDto updatedReview = reviewsDbStorage.updateReviews(updateReviews);
+
+        eventService.createEvent(updateReviews.getUserId(), EventType.REVIEW, EventOperation.UPDATE, updatedReview.getReviewId());
+
+        return updatedReview;
     }
 
     public void deleteReviews(Integer id) {
+        ReviewsDto reviewsDto = validNotFoundReviews(id);
         reviewsDbStorage.deleteReviewsById(id);
+        eventService.createEvent(reviewsDto.getUserId(), EventType.REVIEW, EventOperation.REMOVE, reviewsDto.getReviewId());
     }
 
     public ReviewsDto getReviewsById(Integer id) {
@@ -56,6 +68,7 @@ public class ReviewsService {
     public void addLikeAndDislikeReviews(Integer reviewsId, Integer userId, String mark) {
         validNotFoundReviews(reviewsId);
         validNotFoundUser(userId);
+
         if (validNotFoundReviewsMark(reviewsId, userId).isEmpty()) {
             reviewsDbStorage.addLikeAndDislikeReviews(reviewsId, userId, mark);
         } else {
@@ -67,10 +80,12 @@ public class ReviewsService {
         reviewsDbStorage.deleteLikeAndDislikeReviews(reviewsId, userId);
     }
 
-    private void validNotFoundReviews(Integer reviewsId) {
+    private ReviewsDto validNotFoundReviews(Integer reviewsId) {
         Optional<ReviewsDto> reviews = Optional.ofNullable(reviewsDbStorage.getReviewsById(reviewsId));
         if (reviews.isEmpty()) {
             throw new NotFoundException("Отзыв с таким id " + reviewsId + " не найден");
+        } else {
+            return reviews.get();
         }
     }
 

@@ -9,6 +9,7 @@ import ru.yandex.practicum.filmorate.service.IdGenerator;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Optional;
 
 @Slf4j
 @Component
@@ -35,7 +36,7 @@ public class InMemoryUserStorage extends IdGenerator implements UserStorage {
                 throw new ValidationException("Электронная почта уже используется");
             }
         }
-        for (User u: usersMap.values()) {
+        for (User u : usersMap.values()) {
             if (u.getLogin().equals(user.getLogin())) {
                 throw new ValidationException("Такой логин уже существует.");
             }
@@ -64,7 +65,7 @@ public class InMemoryUserStorage extends IdGenerator implements UserStorage {
                     throw new ValidationException("Электронная почта уже используется");
                 }
             }
-            for (User u: usersMap.values()) {
+            for (User u : usersMap.values()) {
                 if (u.getLogin().equals(newUser.getLogin())) {
                     throw new ValidationException("Такой логин уже существует.");
                 }
@@ -89,5 +90,10 @@ public class InMemoryUserStorage extends IdGenerator implements UserStorage {
         }
         log.error("User с id = {} не найден", newUser.getId());
         throw new NotFoundException("User с id = " + newUser.getId() + " не найден");
+    }
+
+    @Override
+    public Optional<User> findById(int id) {
+        return Optional.empty();
     }
 }

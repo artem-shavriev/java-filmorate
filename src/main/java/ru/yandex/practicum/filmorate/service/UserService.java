@@ -5,6 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
+import ru.yandex.practicum.filmorate.model.EventOperation;
+import ru.yandex.practicum.filmorate.model.EventType;
 import ru.yandex.practicum.filmorate.model.FriendsIds;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.dal.FriendsIdsStorage;
@@ -25,6 +27,7 @@ import java.util.stream.Collectors;
 public class UserService {
     private final UserDbStorage userDbStorage;
     private final FriendsIdsStorage friendsIdsStorage;
+    private final EventService eventService;
 
     public UserDto addUser(NewUserRequest request) {
 
@@ -76,6 +79,7 @@ public class UserService {
                 .orElseThrow(() -> new NotFoundException("Пользователь не найден"));
 
         updateUser = userDbStorage.updateUser(updateUser);
+
         log.info("Пользователь c id: {} обновлен", request.getId());
 
         return UserMapper.mapToUserDto(updateUser);
@@ -92,7 +96,7 @@ public class UserService {
     public UserDto getUserById(Integer userId) {
         if (userDbStorage.findById(userId).isEmpty()) {
             log.error("Пользователь с id: {} не найден", userId);
-            throw  new NotFoundException("Пользователь с данным id не найден");
+            throw new NotFoundException("Пользователь с данным id не найден");
         }
         return UserMapper.mapToUserDto(userDbStorage.findById(userId).get());
     }
@@ -117,6 +121,8 @@ public class UserService {
         }
 
         friendsIdsStorage.addFriend(userId, friendId);
+
+        eventService.createEvent(userId, EventType.FRIEND, EventOperation.ADD, friendId);
 
         log.trace("Пользователь c id: {} добавил в друзья пользователя с id: {}", userId, friendId);
 
@@ -149,6 +155,8 @@ public class UserService {
         } else {
             friendsIdsStorage.deleteLFriend(friendId, userId);
         }
+
+        eventService.createEvent(userId, EventType.FRIEND, EventOperation.REMOVE, friendId);
 
         log.trace("Пользователь id: {} удалены из друзей у пользователя с id: {}", friendId, userId);
 

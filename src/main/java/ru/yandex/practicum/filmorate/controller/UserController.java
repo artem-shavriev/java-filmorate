@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import ru.yandex.practicum.filmorate.model.Event;
+import ru.yandex.practicum.filmorate.service.EventService;
 import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.service.UserService;
 import ru.yandex.practicum.filmorate.storage.dto.FilmDto;
@@ -24,6 +26,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserController {
     private final UserService userService;
+    private final EventService eventService;
     private final FilmService filmService;
 
     @GetMapping("/users")
@@ -65,6 +68,11 @@ public class UserController {
     @GetMapping("/users/{id}/friends/common/{otherId}")
     public List<UserDto> commonFriends(@PathVariable Integer id, @PathVariable Integer otherId) {
         return userService.commonFriends(id, otherId);
+    }
+
+    @GetMapping("/users/{id}/feed")
+    public List<Event> getFeed(@PathVariable int id) {
+        return eventService.getFeed(id);
     }
 
     @GetMapping("/users/{id}/recommendations")

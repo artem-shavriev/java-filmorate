@@ -6,22 +6,8 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.InternalServerException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
-import ru.yandex.practicum.filmorate.model.Director;
-import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.FilmDirector;
-import ru.yandex.practicum.filmorate.model.FilmGenre;
-import ru.yandex.practicum.filmorate.model.Genre;
-import ru.yandex.practicum.filmorate.model.LikesFromUsers;
-import ru.yandex.practicum.filmorate.model.Mpa;
-import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.dal.DirectorStorage;
-import ru.yandex.practicum.filmorate.storage.dal.FilmDbStorage;
-import ru.yandex.practicum.filmorate.storage.dal.FilmDirectorStorage;
-import ru.yandex.practicum.filmorate.storage.dal.FilmGenreStorage;
-import ru.yandex.practicum.filmorate.storage.dal.GenreStorage;
-import ru.yandex.practicum.filmorate.storage.dal.LikesFromUsersStorage;
-import ru.yandex.practicum.filmorate.storage.dal.MpaStorage;
-import ru.yandex.practicum.filmorate.storage.dal.UserDbStorage;
+import ru.yandex.practicum.filmorate.model.*;
+import ru.yandex.practicum.filmorate.storage.dal.*;
 import ru.yandex.practicum.filmorate.storage.dto.FilmDto;
 import ru.yandex.practicum.filmorate.storage.dto.NewFilmRequest;
 import ru.yandex.practicum.filmorate.storage.dto.UpdateFilmRequest;
@@ -42,21 +28,22 @@ public class FilmService {
     private final FilmGenreStorage filmGenreStorage;
     private final MpaStorage mpaStorage;
     private final GenreStorage genreStorage;
+    private final EventService eventService;
     private final DirectorStorage directorStorage;
     private final FilmDirectorStorage filmDirectorStorage;
     private static final LocalDate MIN_RELEASE_DATE = LocalDate.of(1895, 12, 28);
 
     public FilmDto addFilm(NewFilmRequest request) {
+
         if (request.getMpa() != null) {
             List<Mpa> mpaList = mpaStorage.findAll();
-            List<Integer> mpaIdsList = mpaList.stream().map(mpa -> mpa.getId()).toList();
+            List<Integer> mpaIdsList = mpaList.stream().map(Mpa::getId).toList();
 
             if (!mpaIdsList.contains(request.getMpa().getId())) {
                 throw new ValidationException("У рейтинга несуществующий id");
             }
 
             String mpaName = mpaStorage.findById(request.getMpa().getId()).get().getName();
-
             request.getMpa().setName(mpaName);
         }
 
@@ -65,20 +52,21 @@ public class FilmService {
         }
 
         if (request.getGenres() != null) {
-
             List<Genre> genresList = genreStorage.findAll();
             List<Integer> genresIdList = genresList.stream().map(Genre::getId).toList();
 
-            request.getGenres().stream().forEach(genre -> {
+            request.getGenres().forEach(genre -> {
                 if (!genresIdList.contains(genre.getId())) {
                     log.error("У фильма с названием: {} жанр с несуществующим id: {}", request.getName(), genre.getId());
                     throw new ValidationException("У одного из жанров фильма несуществующий id");
                 }
             });
 
-            List<Integer> requestGenresId = request.getGenres().stream().map(genre -> genre.getId()).toList();
+            List<Integer> requestGenresId = request.getGenres().stream().map(Genre::getId).toList();
             Set<Integer> uniqueGenresIds = new HashSet<>(requestGenresId);
-            List<Genre> uniqueGenresList = uniqueGenresIds.stream().map(id -> genreStorage.findById(id).get()).toList();
+            List<Genre> uniqueGenresList = uniqueGenresIds.stream()
+                    .map(id -> genreStorage.findById(id).get())
+                    .toList();
 
             for (Genre genre : uniqueGenresList) {
                 String genreName = genreStorage.findById(genre.getId()).get().getName();
@@ -104,10 +92,8 @@ public class FilmService {
             List<Genre> genres = film.getGenres();
             for (Genre genre : genres) {
                 FilmGenre filmGenre = new FilmGenre();
-
                 filmGenre.setFilmId(film.getId());
                 filmGenre.setGenreId(genre.getId());
-
                 filmGenreStorage.addGenre(filmGenre);
             }
         }
@@ -202,6 +188,7 @@ public class FilmService {
                 .orElseThrow(() -> new NotFoundException("Фильм не найден"));
 
         updateFilm = filmDbStorage.updateFilm(updateFilm);
+
         log.info("Фильм {} был обновлен.", updateFilm.getName());
 
         return FilmMapper.mapToFilmDto(updateFilm);
@@ -215,12 +202,8 @@ public class FilmService {
     }
 
     public FilmDto getFilmById(Integer filmId) {
-        if (filmDbStorage.findById(filmId).isEmpty()) {
-            log.error("Фильм с id: {} не найден", filmId);
-            throw  new NotFoundException("Фильм с данным id не найден");
-        }
-
-        return FilmMapper.mapToFilmDto(filmDbStorage.findById(filmId).get());
+        FilmDto film = FilmMapper.mapToFilmDto(filmDbStorage.findById(filmId).get());
+        return film;
     }
 
     public FilmDto likeFilm(Integer filmId, Integer userId) {
@@ -237,6 +220,8 @@ public class FilmService {
 
         LikesFromUsers like = likesFromUsersStorage.addLike(filmId, userId);
         getFilmById(filmId).getLikesFromUsers().add(like.getUserId());
+
+        eventService.createEvent(userId, EventType.LIKE, EventOperation.ADD, filmId);
 
         log.info("Пользовтель с idt {} лайкнул фильм с id {}.", userId, filmId);
 
@@ -258,12 +243,14 @@ public class FilmService {
         Film film = filmDbStorage.findById(filmId).get();
         Set<Integer> likes = film.getLikesFromUsers();
         if (!likes.contains(userId)) {
-            log.error("Пользовтель с id: {} еще не лайкал фильм с id: {}.", userId, filmId);
-            throw new NotFoundException("Данный пользовтаель еще не лайкал этот фильм.");
+            log.error("Пользователь с id: {} еще не лайкал фильм с id: {}.", userId, filmId);
+            throw new NotFoundException("Данный пользователь еще не лайкал этот фильм.");
         }
 
         likesFromUsersStorage.deleteLike(filmId, userId);
-        log.info("Лайк пользовтеля с id {} фильму с id {} был удален.", userId, filmId);
+        log.info("Лайк пользователя с id {} фильму с id {} был удален.", userId, filmId);
+
+        eventService.createEvent(userId, EventType.LIKE, EventOperation.REMOVE, filmId);
 
         return getFilmById(filmId);
     }

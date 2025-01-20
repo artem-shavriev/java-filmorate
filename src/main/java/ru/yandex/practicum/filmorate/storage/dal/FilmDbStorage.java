@@ -85,7 +85,7 @@ public class FilmDbStorage extends BaseStorage<Film> implements FilmStorage {
                     .map(FilmMapper::mapToFilmDto)
                     .toList();
         } else {
-            sql =  "SELECT f.FILM_ID, f.NAME, f.DESCRIPTION, f.DURATION, f.RELEASE_DATE, f.MPA_ID FROM FILM AS f " +
+            sql = "SELECT f.FILM_ID, f.NAME, f.DESCRIPTION, f.DURATION, f.RELEASE_DATE, f.MPA_ID FROM FILM AS f " +
                     "LEFT JOIN FILM_DIRECTOR  AS fd ON f.FILM_ID =  fd.FILM_ID " +
                     "LEFT JOIN DIRECTORS AS d ON fd.DIRECTOR_ID = d.DIRECTOR_ID " +
                     "WHERE " + replaced + " ILIKE '%" + query + "%' " +
