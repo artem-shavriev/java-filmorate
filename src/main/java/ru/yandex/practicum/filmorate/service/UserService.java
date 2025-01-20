@@ -9,7 +9,6 @@ import ru.yandex.practicum.filmorate.model.EventOperation;
 import ru.yandex.practicum.filmorate.model.EventType;
 import ru.yandex.practicum.filmorate.model.FriendsIds;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.EventStorage;
 import ru.yandex.practicum.filmorate.storage.dal.FriendsIdsStorage;
 import ru.yandex.practicum.filmorate.storage.dal.UserDbStorage;
 import ru.yandex.practicum.filmorate.storage.dto.NewUserRequest;
@@ -97,7 +96,7 @@ public class UserService {
     public UserDto getUserById(Integer userId) {
         if (userDbStorage.findById(userId).isEmpty()) {
             log.error("Пользователь с id: {} не найден", userId);
-            throw  new NotFoundException("Пользователь с данным id не найден");
+            throw new NotFoundException("Пользователь с данным id не найден");
         }
         return UserMapper.mapToUserDto(userDbStorage.findById(userId).get());
     }

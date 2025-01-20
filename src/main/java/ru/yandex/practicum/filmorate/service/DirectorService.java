@@ -44,7 +44,7 @@ public class DirectorService {
 
         if (existDirector.isEmpty()) {
             log.error("Режиссер с id {} не найден.", directorId);
-            throw new NotFoundException("Режиссер с id: " + directorId  + " не найден.");
+            throw new NotFoundException("Режиссер с id: " + directorId + " не найден.");
         }
 
         Director updatedDirector = directorStorage.updateDirector(directorForUpdate);
@@ -57,7 +57,7 @@ public class DirectorService {
 
         if (existDirector.isEmpty()) {
             log.error("Режиссер с id {} не найден.", directorId);
-            throw new NotFoundException("Режиссер с id: " + directorId  + " не найден.");
+            throw new NotFoundException("Режиссер с id: " + directorId + " не найден.");
         }
 
         Director director = findById(directorId);

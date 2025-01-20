@@ -36,7 +36,7 @@ public class InMemoryUserStorage extends IdGenerator implements UserStorage {
                 throw new ValidationException("Электронная почта уже используется");
             }
         }
-        for (User u: usersMap.values()) {
+        for (User u : usersMap.values()) {
             if (u.getLogin().equals(user.getLogin())) {
                 throw new ValidationException("Такой логин уже существует.");
             }
@@ -65,7 +65,7 @@ public class InMemoryUserStorage extends IdGenerator implements UserStorage {
                     throw new ValidationException("Электронная почта уже используется");
                 }
             }
-            for (User u: usersMap.values()) {
+            for (User u : usersMap.values()) {
                 if (u.getLogin().equals(newUser.getLogin())) {
                     throw new ValidationException("Такой логин уже существует.");
                 }

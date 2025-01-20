@@ -7,22 +7,7 @@ import ru.yandex.practicum.filmorate.exception.InternalServerException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.*;
-import ru.yandex.practicum.filmorate.model.Director;
-import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.FilmDirector;
-import ru.yandex.practicum.filmorate.model.FilmGenre;
-import ru.yandex.practicum.filmorate.model.Genre;
-import ru.yandex.practicum.filmorate.model.LikesFromUsers;
-import ru.yandex.practicum.filmorate.model.Mpa;
-import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.dal.DirectorStorage;
-import ru.yandex.practicum.filmorate.storage.dal.FilmDbStorage;
-import ru.yandex.practicum.filmorate.storage.dal.FilmDirectorStorage;
-import ru.yandex.practicum.filmorate.storage.dal.FilmGenreStorage;
-import ru.yandex.practicum.filmorate.storage.dal.GenreStorage;
-import ru.yandex.practicum.filmorate.storage.dal.LikesFromUsersStorage;
-import ru.yandex.practicum.filmorate.storage.dal.MpaStorage;
-import ru.yandex.practicum.filmorate.storage.dal.UserDbStorage;
+import ru.yandex.practicum.filmorate.storage.dal.*;
 import ru.yandex.practicum.filmorate.storage.dto.FilmDto;
 import ru.yandex.practicum.filmorate.storage.dto.NewFilmRequest;
 import ru.yandex.practicum.filmorate.storage.dto.UpdateFilmRequest;
@@ -211,7 +196,7 @@ public class FilmService {
 
     public List<FilmDto> getFilms() {
         log.info("Получен список фильмов.");
-        return  filmDbStorage.findAll().stream()
+        return filmDbStorage.findAll().stream()
                 .map(FilmMapper::mapToFilmDto)
                 .collect(Collectors.toList());
     }
