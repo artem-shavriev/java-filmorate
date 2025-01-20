@@ -141,6 +141,7 @@ public class FilmService {
             request.getMpa().setName(mpaName);
         }
 
+        filmGenreStorage.deleteFilmGenreByFilmId(request.getId());
         if (request.getGenres() != null) {
 
             List<Genre> genresList = genreStorage.findAll();
@@ -162,9 +163,21 @@ public class FilmService {
                 genre.setName(genreName);
             }
             request.setGenres(uniqueGenresList);
+
+            List<Genre> genres = request.getGenres();
+
+            for (Genre genre : genres) {
+                FilmGenre filmGenre = new FilmGenre();
+                filmGenre.setFilmId(request.getId());
+                filmGenre.setGenreId(genre.getId());
+                filmGenreStorage.addGenre(filmGenre);
+            }
         }
 
         if (request.getDirectors() != null) {
+
+            filmDirectorStorage.deleteFilmDirectorByFilmId(request.getId());
+
             List<Integer> directorsIdList = request.getDirectors().stream().map(dir -> dir.getId()).toList();
 
             List<Director> directorsListWithName = directorsIdList.stream().map(id ->
@@ -181,6 +194,8 @@ public class FilmService {
 
                 filmDirectorStorage.addFilmDirector(filmDirector);
             }
+        } else {
+            filmDirectorStorage.deleteFilmDirectorByFilmId(request.getId());
         }
 
         Film updateFilm = filmDbStorage.findById(request.getId())
@@ -202,6 +217,10 @@ public class FilmService {
     }
 
     public FilmDto getFilmById(Integer filmId) {
+        if (filmDbStorage.findById(filmId).isEmpty()) {
+            log.error("Фильм с id {} не найден.", filmId);
+            throw new NotFoundException("Фильм с данным id не найден.");
+        }
         FilmDto film = FilmMapper.mapToFilmDto(filmDbStorage.findById(filmId).get());
         return film;
     }
@@ -348,6 +367,10 @@ public class FilmService {
     }
 
     public List<FilmDto> getFilmsByDirector(Integer directorId) {
+        if (directorStorage.findById(directorId).isEmpty()) {
+            log.error("Директор с id {} не найден.", directorId);
+            throw new NotFoundException("Директор с данным id отсутствует");
+        }
         List<FilmDirector> filmDirectorsList = filmDirectorStorage.findFilmDirectorByDirectorId(directorId);
         List<Integer> findFilmIds = filmDirectorsList.stream().map(f -> f.getFilmId()).toList();
 
