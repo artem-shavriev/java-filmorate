@@ -202,6 +202,10 @@ public class FilmService {
     }
 
     public FilmDto getFilmById(Integer filmId) {
+        if (filmDbStorage.findById(filmId).isEmpty()) {
+            log.error("Фильм с id {} не найден.", filmId);
+            throw new NotFoundException("Фильм с данным id не найден.");
+        }
         FilmDto film = FilmMapper.mapToFilmDto(filmDbStorage.findById(filmId).get());
         return film;
     }
