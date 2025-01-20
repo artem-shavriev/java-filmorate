@@ -1,27 +1,31 @@
 package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Event;
 import ru.yandex.practicum.filmorate.model.EventOperation;
 import ru.yandex.practicum.filmorate.model.EventType;
-import ru.yandex.practicum.filmorate.storage.UserStorage;
 import ru.yandex.practicum.filmorate.storage.EventStorage;
+import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.time.Instant;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class EventService {
+    private static final Logger log = LoggerFactory.getLogger(EventService.class);
     private final EventStorage eventStorage;
     private final UserStorage userStorage;
 
     public List<Event> getFeed(int userId) {
-        Optional.ofNullable(userStorage.findById(userId))
-                .orElseThrow(() -> new NotFoundException("Пользователя с id = " + userId + " не существует"));
+        if (userStorage.findById(userId).isEmpty()) {
+            log.error("Пользователя с id {} не существует", userId);
+            throw new NotFoundException("Пользователя с id = " + userId + " не существует");
+        }
         return eventStorage.getFeed(userId);
     }
 
@@ -35,5 +39,6 @@ public class EventService {
                 .build();
 
         eventStorage.createEvent(event);
+        log.info("Создано событие {}", eventType);
     }
 }

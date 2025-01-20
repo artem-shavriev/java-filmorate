@@ -75,22 +75,28 @@ public class FilmDbStorage extends BaseStorage<Film> implements FilmStorage {
         String replaced = by.replace("director", "d.NAME").replace("title", "f.NAME");
         if (replaced.contains(",")) {
             String[] split = replaced.split(",");
-            sql = "SELECT f.FILM_ID, f.NAME, f.DESCRIPTION, f.DURATION, f.RELEASE_DATE, f.MPA_ID FROM FILM AS f " +
-                    "LEFT JOIN FILM_DIRECTOR  AS fd ON f.FILM_ID =  fd.FILM_ID " +
+            sql = "SELECT f.FILM_ID, f.NAME, f.DESCRIPTION, f.DURATION, f.RELEASE_DATE, f.MPA_ID, COUNT(l.USER_ID) AS likes " +
+                    "FROM FILM AS f " +
+                    "LEFT JOIN FILM_DIRECTOR AS fd ON f.FILM_ID = fd.FILM_ID " +
                     "LEFT JOIN DIRECTORS AS d ON fd.DIRECTOR_ID = d.DIRECTOR_ID " +
-                    "WHERE " + split[0] + " ILIKE '%" + query + "%' OR " + split[1] + " ILIKE '%" + query + "%' " +
-                    "GROUP BY f.FILM_ID";
-            return jdbc.query(sql, mapper::mapRow)
+                    "LEFT JOIN LIKES_FROM_USERS AS l ON f.FILM_ID = l.FILM_ID " +
+                    "WHERE " + split[0] + " ILIKE ? OR " + split[1] + " ILIKE ? " +
+                    "GROUP BY f.FILM_ID " +
+                    "ORDER BY likes DESC";
+            return jdbc.query(sql, mapper::mapRow, "%" + query + "%", "%" + query + "%")
                     .stream()
                     .map(FilmMapper::mapToFilmDto)
                     .toList();
         } else {
-            sql = "SELECT f.FILM_ID, f.NAME, f.DESCRIPTION, f.DURATION, f.RELEASE_DATE, f.MPA_ID FROM FILM AS f " +
-                    "LEFT JOIN FILM_DIRECTOR  AS fd ON f.FILM_ID =  fd.FILM_ID " +
+            sql = "SELECT f.FILM_ID, f.NAME, f.DESCRIPTION, f.DURATION, f.RELEASE_DATE, f.MPA_ID, COUNT(l.USER_ID) AS likes " +
+                    "FROM FILM AS f " +
+                    "LEFT JOIN FILM_DIRECTOR AS fd ON f.FILM_ID = fd.FILM_ID " +
                     "LEFT JOIN DIRECTORS AS d ON fd.DIRECTOR_ID = d.DIRECTOR_ID " +
-                    "WHERE " + replaced + " ILIKE '%" + query + "%' " +
-                    "GROUP BY f.FILM_ID";
-            return jdbc.query(sql, mapper::mapRow)
+                    "LEFT JOIN LIKES_FROM_USERS AS l ON f.FILM_ID = l.FILM_ID " +
+                    "WHERE " + replaced + " ILIKE ? " +
+                    "GROUP BY f.FILM_ID " +
+                    "ORDER BY likes DESC";
+            return jdbc.query(sql, mapper::mapRow, "%" + query + "%")
                     .stream()
                     .map(FilmMapper::mapToFilmDto)
                     .toList();

@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.storage.dal;
+package ru.yandex.practicum.filmorate.storage.dal.mappers;
 
 import org.springframework.jdbc.core.RowMapper;
 import ru.yandex.practicum.filmorate.model.Event;
