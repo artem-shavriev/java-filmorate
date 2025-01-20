@@ -39,6 +39,11 @@ public class FilmMapper {
     }
 
     public static Film updateFilmFields(Film film, UpdateFilmRequest request) {
+
+        if (request.hasGenres()) {
+            film.setGenres(request.getGenres());
+        }
+
         if (request.hasName()) {
             film.setName(request.getName());
         }
@@ -57,10 +62,6 @@ public class FilmMapper {
 
         if (request.hasMpa()) {
             film.setMpa(request.getMpa());
-        }
-
-        if (request.hasGenres()) {
-            film.setGenres(request.getGenres());
         }
 
         if (request.hasLikesFromUsers()) {

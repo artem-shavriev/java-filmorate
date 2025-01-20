@@ -141,6 +141,7 @@ public class FilmService {
             request.getMpa().setName(mpaName);
         }
 
+        filmGenreStorage.deleteFilmGenreByFilmId(request.getId());
         if (request.getGenres() != null) {
 
             List<Genre> genresList = genreStorage.findAll();
@@ -153,8 +154,6 @@ public class FilmService {
                 }
             });
 
-            filmGenreStorage.deleteFilmGenreByFilmId(request.getId());
-
             List<Integer> requestGenresId = request.getGenres().stream().map(genre -> genre.getId()).toList();
             Set<Integer> uniqueGenresIds = new HashSet<>(requestGenresId);
             List<Genre> uniqueGenresList = uniqueGenresIds.stream().map(id -> genreStorage.findById(id).get()).toList();
@@ -164,6 +163,15 @@ public class FilmService {
                 genre.setName(genreName);
             }
             request.setGenres(uniqueGenresList);
+
+            List<Genre> genres = request.getGenres();
+
+            for (Genre genre : genres) {
+                FilmGenre filmGenre = new FilmGenre();
+                filmGenre.setFilmId(request.getId());
+                filmGenre.setGenreId(genre.getId());
+                filmGenreStorage.addGenre(filmGenre);
+            }
         }
 
         if (request.getDirectors() != null) {
@@ -197,18 +205,6 @@ public class FilmService {
         updateFilm = filmDbStorage.updateFilm(updateFilm);
 
         log.info("Фильм {} был обновлен.", updateFilm.getName());
-
-        if (updateFilm.getGenres() != null) {
-            List<Genre> genres = updateFilm.getGenres();
-            for (Genre genre : genres) {
-                FilmGenre filmGenre = new FilmGenre();
-                filmGenre.setFilmId(updateFilm.getId());
-                filmGenre.setGenreId(genre.getId());
-                filmGenreStorage.addGenre(filmGenre);
-            }
-        } else {
-            filmGenreStorage.deleteFilmGenreByFilmId(updateFilm.getId());
-        }
 
         return FilmMapper.mapToFilmDto(updateFilm);
     }
