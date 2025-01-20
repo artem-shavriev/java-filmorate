@@ -153,6 +153,8 @@ public class FilmService {
                 }
             });
 
+            filmGenreStorage.deleteFilmGenreByFilmId(request.getId());
+
             List<Integer> requestGenresId = request.getGenres().stream().map(genre -> genre.getId()).toList();
             Set<Integer> uniqueGenresIds = new HashSet<>(requestGenresId);
             List<Genre> uniqueGenresList = uniqueGenresIds.stream().map(id -> genreStorage.findById(id).get()).toList();
@@ -165,6 +167,9 @@ public class FilmService {
         }
 
         if (request.getDirectors() != null) {
+
+            filmDirectorStorage.deleteFilmDirectorByFilmId(request.getId());
+
             List<Integer> directorsIdList = request.getDirectors().stream().map(dir -> dir.getId()).toList();
 
             List<Director> directorsListWithName = directorsIdList.stream().map(id ->
@@ -181,6 +186,8 @@ public class FilmService {
 
                 filmDirectorStorage.addFilmDirector(filmDirector);
             }
+        } else {
+            filmDirectorStorage.deleteFilmDirectorByFilmId(request.getId());
         }
 
         Film updateFilm = filmDbStorage.findById(request.getId())
@@ -199,6 +206,8 @@ public class FilmService {
                 filmGenre.setGenreId(genre.getId());
                 filmGenreStorage.addGenre(filmGenre);
             }
+        } else {
+            filmGenreStorage.deleteFilmGenreByFilmId(updateFilm.getId());
         }
 
         return FilmMapper.mapToFilmDto(updateFilm);
