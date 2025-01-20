@@ -191,6 +191,16 @@ public class FilmService {
 
         log.info("Фильм {} был обновлен.", updateFilm.getName());
 
+        if (updateFilm.getGenres() != null) {
+            List<Genre> genres = updateFilm.getGenres();
+            for (Genre genre : genres) {
+                FilmGenre filmGenre = new FilmGenre();
+                filmGenre.setFilmId(updateFilm.getId());
+                filmGenre.setGenreId(genre.getId());
+                filmGenreStorage.addGenre(filmGenre);
+            }
+        }
+
         return FilmMapper.mapToFilmDto(updateFilm);
     }
 
