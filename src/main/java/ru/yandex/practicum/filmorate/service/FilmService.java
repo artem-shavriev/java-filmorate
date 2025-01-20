@@ -371,6 +371,10 @@ public class FilmService {
     }
 
     public List<FilmDto> getFilmsByDirector(Integer directorId) {
+        if (directorStorage.findById(directorId).isEmpty()) {
+            log.error("Директор с id {} не найден.", directorId);
+            throw new NotFoundException("Директор с данным id отсутствует");
+        }
         List<FilmDirector> filmDirectorsList = filmDirectorStorage.findFilmDirectorByDirectorId(directorId);
         List<Integer> findFilmIds = filmDirectorsList.stream().map(f -> f.getFilmId()).toList();
 
