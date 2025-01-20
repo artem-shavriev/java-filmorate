@@ -18,8 +18,8 @@ public class User {
     @NotBlank
     @Email
     private String email;
-    private String login;
     @NotBlank
+    private String login;
     private String name;
     @NotNull
     @Past

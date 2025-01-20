@@ -46,11 +46,11 @@ public class UserDbStorage extends BaseStorage<User> implements UserStorage {
     }
 
     public User addUser(User user) {
-        String login;
-        if (user.getLogin() == null) {
-            login = user.getName() + "-" + user.getEmail();
-            user.setLogin(login);
-            log.warn("Логин не передан, он будет сгенирирован автоматически.");
+        String name;
+        if (user.getName() == null || user.getName().isBlank()) {
+            name = user.getLogin();
+            user.setName(name);
+            log.warn("Имя не передано, оно будет сгенирировано автоматически.");
         }
 
         int id = insert(INSERT_QUERY,
@@ -66,11 +66,11 @@ public class UserDbStorage extends BaseStorage<User> implements UserStorage {
     }
 
     public User updateUser(User user) {
-        String login;
-        if (user.getLogin() == null) {
-            login = user.getName() + "-" + user.getEmail();
-            user.setLogin(login);
-            log.warn("Логин не передан, он будет сгенирирован автоматически.");
+        String name;
+        if (user.getName() == null || user.getName().isBlank()) {
+            name = user.getLogin();
+            user.setName(name);
+            log.warn("Имя не передано, оно будет сгенирировано автоматически.");
         }
         update(UPDATE_QUERY,
                 user.getName(),
