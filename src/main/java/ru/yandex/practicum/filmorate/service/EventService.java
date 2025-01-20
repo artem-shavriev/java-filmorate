@@ -39,5 +39,6 @@ public class EventService {
                 .build();
 
         eventStorage.createEvent(event);
+        log.info("Создано событие {}", eventType);
     }
 }
