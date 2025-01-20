@@ -128,8 +128,6 @@ public class FilmService {
 
         log.info("Добавлен новый фильм {} с id: {}", film.getName(), film.getId());
 
-        eventService.createEvent(film.getId(), EventType.LIKE, EventOperation.ADD, film.getId());
-
         return FilmMapper.mapToFilmDto(film);
     }
 
@@ -205,6 +203,7 @@ public class FilmService {
                 .orElseThrow(() -> new NotFoundException("Фильм не найден"));
 
         updateFilm = filmDbStorage.updateFilm(updateFilm);
+
         log.info("Фильм {} был обновлен.", updateFilm.getName());
 
         return FilmMapper.mapToFilmDto(updateFilm);
@@ -237,6 +236,8 @@ public class FilmService {
         LikesFromUsers like = likesFromUsersStorage.addLike(filmId, userId);
         getFilmById(filmId).getLikesFromUsers().add(like.getUserId());
 
+        eventService.createEvent(userId, EventType.LIKE, EventOperation.ADD, filmId);
+
         log.info("Пользовтель с idt {} лайкнул фильм с id {}.", userId, filmId);
 
         return getFilmById(filmId);
@@ -264,10 +265,8 @@ public class FilmService {
         likesFromUsersStorage.deleteLike(filmId, userId);
         log.info("Лайк пользователя с id {} фильму с id {} был удален.", userId, filmId);
 
-        // Добавляем событие в ленту событий
         eventService.createEvent(userId, EventType.LIKE, EventOperation.REMOVE, filmId);
 
-        // Возвращаем обновленную информацию о фильме
         return getFilmById(filmId);
     }
 

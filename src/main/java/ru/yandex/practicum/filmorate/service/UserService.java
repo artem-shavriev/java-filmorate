@@ -5,8 +5,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
+import ru.yandex.practicum.filmorate.model.EventOperation;
+import ru.yandex.practicum.filmorate.model.EventType;
 import ru.yandex.practicum.filmorate.model.FriendsIds;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.EventStorage;
 import ru.yandex.practicum.filmorate.storage.dal.FriendsIdsStorage;
 import ru.yandex.practicum.filmorate.storage.dal.UserDbStorage;
 import ru.yandex.practicum.filmorate.storage.dto.NewUserRequest;
@@ -25,6 +28,7 @@ import java.util.stream.Collectors;
 public class UserService {
     private final UserDbStorage userDbStorage;
     private final FriendsIdsStorage friendsIdsStorage;
+    private final EventService eventService;
 
     public UserDto addUser(NewUserRequest request) {
 
@@ -76,6 +80,7 @@ public class UserService {
                 .orElseThrow(() -> new NotFoundException("Пользователь не найден"));
 
         updateUser = userDbStorage.updateUser(updateUser);
+
         log.info("Пользователь c id: {} обновлен", request.getId());
 
         return UserMapper.mapToUserDto(updateUser);
@@ -118,6 +123,8 @@ public class UserService {
 
         friendsIdsStorage.addFriend(userId, friendId);
 
+        eventService.createEvent(userId, EventType.FRIEND, EventOperation.ADD, friendId);
+
         log.trace("Пользователь c id: {} добавил в друзья пользователя с id: {}", userId, friendId);
 
         return getUserById(userId);
@@ -149,6 +156,8 @@ public class UserService {
         } else {
             friendsIdsStorage.deleteLFriend(friendId, userId);
         }
+
+        eventService.createEvent(userId, EventType.FRIEND, EventOperation.REMOVE, friendId);
 
         log.trace("Пользователь id: {} удалены из друзей у пользователя с id: {}", friendId, userId);
 
