@@ -59,6 +59,7 @@ public class ReviewsDbStorage {
     }
 
     public ReviewsDto updateReviews(UpdateReviews updateReviews) {
+        ReviewsDto oldReviews = getReviewsById(updateReviews.getReviewId());
         KeyHolder keyHolder = new GeneratedKeyHolder();
         Integer reviewsId;
         String updateReviewsSql = "UPDATE REVIEWS SET CONTENT = ?, IS_POSITIVE = ?, USER_ID = ?, FILM_ID = ?" +
@@ -68,8 +69,8 @@ public class ReviewsDbStorage {
             PreparedStatement stmt = connection.prepareStatement(updateReviewsSql, new String[]{"REVIEWS_ID"});
             stmt.setString(1, updateReviews.getContent());
             stmt.setBoolean(2, updateReviews.getIsPositive());
-            stmt.setInt(3, updateReviews.getUserId());
-            stmt.setInt(4, updateReviews.getFilmId());
+            stmt.setInt(3, oldReviews.getUserId());
+            stmt.setInt(4, oldReviews.getFilmId());
             stmt.setInt(5, updateReviews.getReviewId());
             return stmt;
         }, keyHolder);
@@ -82,8 +83,8 @@ public class ReviewsDbStorage {
                 .reviewId(updateReviews.getReviewId())
                 .content(updateReviews.getContent())
                 .isPositive(updateReviews.getIsPositive())
-                .userId(updateReviews.getUserId())
-                .filmId(updateReviews.getFilmId())
+                .userId(oldReviews.getUserId())
+                .filmId(oldReviews.getFilmId())
                 .useful(getUseful(updateReviews.getReviewId()))
                 .build();
     }
