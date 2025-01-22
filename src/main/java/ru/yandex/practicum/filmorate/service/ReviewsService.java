@@ -71,13 +71,18 @@ public class ReviewsService {
 
         if (validNotFoundReviewsMark(reviewsId, userId).isEmpty()) {
             reviewsDbStorage.addLikeAndDislikeReviews(reviewsId, userId, mark);
+
+            eventService.createEvent(userId, EventType.LIKE, EventOperation.ADD, reviewsId);
         } else {
             reviewsDbStorage.updateLikeAndDislikeReviews(reviewsId, userId, mark);
+            eventService.createEvent(userId, EventType.LIKE, EventOperation.UPDATE, reviewsId);
         }
     }
 
     public void deleteLikeAndDislikeReviews(Integer reviewsId, Integer userId) {
         reviewsDbStorage.deleteLikeAndDislikeReviews(reviewsId, userId);
+
+        eventService.createEvent(userId, EventType.LIKE, EventOperation.REMOVE, reviewsId);
     }
 
     private ReviewsDto validNotFoundReviews(Integer reviewsId) {

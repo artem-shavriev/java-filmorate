@@ -242,7 +242,7 @@ public class FilmService {
 
         eventService.createEvent(userId, EventType.LIKE, EventOperation.ADD, filmId);
 
-        log.info("Пользовтель с idt {} лайкнул фильм с id {}.", userId, filmId);
+        log.info("Пользовтель с id {} лайкнул фильм с id {}.", userId, filmId);
 
         return getFilmById(filmId);
     }
