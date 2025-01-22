@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.*;
@@ -14,8 +15,10 @@ import ru.yandex.practicum.filmorate.storage.dto.UpdateReviews;
 import java.util.List;
 import java.util.Optional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
+
 public class ReviewsService {
     private final ReviewsDbStorage reviewsDbStorage;
     private final FilmDbStorage filmDbStorage;
@@ -40,8 +43,8 @@ public class ReviewsService {
         validNotFoundUser(updateReviews.getUserId());
 
         ReviewsDto updatedReview = reviewsDbStorage.updateReviews(updateReviews);
-
-        eventService.createEvent(updateReviews.getUserId(), EventType.REVIEW, EventOperation.UPDATE, updatedReview.getReviewId());
+        log.info("UserId в обновленом отзыве {}", updateReviews.getUserId());
+        eventService.createEvent(updatedReview.getUserId(), EventType.REVIEW, EventOperation.UPDATE, updatedReview.getReviewId());
 
         return updatedReview;
     }
@@ -49,7 +52,7 @@ public class ReviewsService {
     public void deleteReviews(Integer id) {
         ReviewsDto reviewsDto = validNotFoundReviews(id);
         reviewsDbStorage.deleteReviewsById(id);
-        eventService.createEvent(reviewsDto.getUserId(), EventType.REVIEW, EventOperation.REMOVE, reviewsDto.getReviewId());
+        eventService.createEvent(reviewsDto.getUserId(), EventType.REVIEW, EventOperation.REMOVE, id);
     }
 
     public ReviewsDto getReviewsById(Integer id) {
@@ -71,18 +74,13 @@ public class ReviewsService {
 
         if (validNotFoundReviewsMark(reviewsId, userId).isEmpty()) {
             reviewsDbStorage.addLikeAndDislikeReviews(reviewsId, userId, mark);
-
-            eventService.createEvent(userId, EventType.LIKE, EventOperation.ADD, reviewsId);
         } else {
             reviewsDbStorage.updateLikeAndDislikeReviews(reviewsId, userId, mark);
-            eventService.createEvent(userId, EventType.LIKE, EventOperation.UPDATE, reviewsId);
         }
     }
 
     public void deleteLikeAndDislikeReviews(Integer reviewsId, Integer userId) {
         reviewsDbStorage.deleteLikeAndDislikeReviews(reviewsId, userId);
-
-        eventService.createEvent(userId, EventType.LIKE, EventOperation.REMOVE, reviewsId);
     }
 
     private ReviewsDto validNotFoundReviews(Integer reviewsId) {
