@@ -60,7 +60,6 @@ public class UserDbStorage extends BaseStorage<User> implements UserStorage {
                 user.getBirthday()
         );
         user.setId(id);
-        log.info("Создан новый пользователь c id: {}", user.getId());
 
         return user;
     }

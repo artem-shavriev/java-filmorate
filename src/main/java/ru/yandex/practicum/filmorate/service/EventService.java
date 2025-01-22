@@ -39,6 +39,6 @@ public class EventService {
                 .build();
 
         eventStorage.createEvent(event);
-        log.info("Создано событие {}", eventType);
+        log.info("Создано событие user id {} {} {} id {}", userId, eventOperation, eventType, entityId);
     }
 }

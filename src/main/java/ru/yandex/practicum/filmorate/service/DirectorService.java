@@ -64,7 +64,6 @@ public class DirectorService {
 
         Director director = findById(directorId);
 
-        filmDirectorStorage.deleteFilmDirectorByDirectorId(directorId);
         directorStorage.deleteDirector(directorId);
 
         return director;

@@ -59,34 +59,16 @@ public class ReviewsDbStorage {
     }
 
     public ReviewsDto updateReviews(UpdateReviews updateReviews) {
-        ReviewsDto oldReviews = getReviewsById(updateReviews.getReviewId());
-        KeyHolder keyHolder = new GeneratedKeyHolder();
-        Integer reviewsId;
-        String updateReviewsSql = "UPDATE REVIEWS SET CONTENT = ?, IS_POSITIVE = ?, USER_ID = ?, FILM_ID = ?" +
+        String updateReviewsSql = "UPDATE REVIEWS SET CONTENT = ?, IS_POSITIVE = ? " +
                 " WHERE REVIEWS_ID = ?";
 
-        int rows = jdbcTemplate.update(connection -> {
-            PreparedStatement stmt = connection.prepareStatement(updateReviewsSql, new String[]{"REVIEWS_ID"});
-            stmt.setString(1, updateReviews.getContent());
-            stmt.setBoolean(2, updateReviews.getIsPositive());
-            stmt.setInt(3, oldReviews.getUserId());
-            stmt.setInt(4, oldReviews.getFilmId());
-            stmt.setInt(5, updateReviews.getReviewId());
-            return stmt;
-        }, keyHolder);
-        if (Objects.nonNull(keyHolder.getKey())) {
-            reviewsId = keyHolder.getKey().intValue();
-        } else {
-            throw new NotFoundException("Ошибка обновления отзыва");
-        }
-        return ReviewsDto.builder()
-                .reviewId(updateReviews.getReviewId())
-                .content(updateReviews.getContent())
-                .isPositive(updateReviews.getIsPositive())
-                .userId(oldReviews.getUserId())
-                .filmId(oldReviews.getFilmId())
-                .useful(getUseful(updateReviews.getReviewId()))
-                .build();
+        jdbcTemplate.update(updateReviewsSql,
+                updateReviews.getContent(),
+                updateReviews.getIsPositive(),
+                updateReviews.getReviewId());
+
+        log.info("Обновлен существующий отзыв: {}", updateReviews.getReviewId());
+        return getReviewsById(updateReviews.getReviewId());
     }
 
     public void deleteReviewsById(Integer id) {

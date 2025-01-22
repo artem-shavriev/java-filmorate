@@ -154,9 +154,8 @@ public class UserService {
             log.trace("Данного пользователя нет в друзьях.");
         } else {
             friendsIdsStorage.deleteLFriend(friendId, userId);
+            eventService.createEvent(userId, EventType.FRIEND, EventOperation.REMOVE, friendId);
         }
-
-        eventService.createEvent(userId, EventType.FRIEND, EventOperation.REMOVE, friendId);
 
         log.trace("Пользователь id: {} удалены из друзей у пользователя с id: {}", friendId, userId);
 
@@ -214,15 +213,6 @@ public class UserService {
 
     public UserDto deleteUserById(Integer userForDeleteId) {
         UserDto userForDelete = getUserById(userForDeleteId);
-        List<UserDto> allUsers = getUsers();
-
-        userForDelete.getFriendsId().stream().forEach(id -> deleteFriend(userForDeleteId, id));
-
-        allUsers.stream().forEach(user -> {
-            if (user.getFriendsId().contains(userForDeleteId)) {
-                deleteFriend(user.getId(), userForDeleteId);
-            }
-        });
 
         userDbStorage.deleteUserById(userForDeleteId);
 
