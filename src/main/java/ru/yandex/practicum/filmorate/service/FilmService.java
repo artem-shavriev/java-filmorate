@@ -50,23 +50,39 @@ public class FilmService {
         }
 
         if (request.getGenres() != null) {
+            List<Genre> allGenres = genreStorage.findAll();
+            List<Integer> allGenresIds = allGenres.stream().map(genre -> genre.getId()).toList();
             List<Integer> requestGenresId =  request.getGenres().stream().map(genre -> genre.getId()).toList();
             Set<Integer> uniqueGenresIds = new HashSet<>(requestGenresId);
-            List<Genre> findGenreByUniqueIds = uniqueGenresIds.stream().map(id -> genreStorage.findById(id).get()).toList();
 
-            if(uniqueGenresIds.size() != findGenreByUniqueIds.size()) {
-                log.error("У фильма с названием: {} жанр с несуществующим id", request.getName());
-                throw new ValidationException("У одного из жанров фильма несуществующий id");
-            }
+            requestGenresId.forEach(id -> {
+                if (!allGenresIds.contains(id)) {
+                    log.error("У фильма с названием: {} жанр с несуществующим id {}", request.getName(), id);
+                    throw new ValidationException("У одного из жанров фильма несуществующий id");
+                }
+            });
+
+            List<Genre> findGenreByUniqueIds = new ArrayList<>();
+
+            allGenres.forEach(genre -> {
+                if (uniqueGenresIds.contains(genre.getId())) {
+                    findGenreByUniqueIds.add(genre);
+                }
+            });
 
             request.setGenres(findGenreByUniqueIds);
         }
 
         if (request.getDirectors() != null) {
-            List<Integer> directorsIdList = request.getDirectors().stream().map(dir -> dir.getId()).toList();
+            List<Director> allDirectors = directorStorage.findAll();
+            List<Integer> requestDirectorsIdList = request.getDirectors().stream().map(dir -> dir.getId()).toList();
 
-            List<Director> directorsListWithName = directorsIdList.stream().map(id ->
-                    directorStorage.findById(id).get()).toList();
+            List<Director> directorsListWithName = new ArrayList<>();
+            allDirectors.forEach(director -> {
+                if (requestDirectorsIdList.contains(director.getId())) {
+                    directorsListWithName.add(director);
+                }
+            });
 
             request.setDirectors(directorsListWithName);
         }
@@ -129,20 +145,27 @@ public class FilmService {
         filmGenreStorage.deleteFilmGenreByFilmId(request.getId());
 
         if (request.getGenres() != null) {
+            List<Genre> allGenres = genreStorage.findAll();
+            List<Integer> allGenresIds = allGenres.stream().map(genre -> genre.getId()).toList();
             List<Integer> requestGenresId =  request.getGenres().stream().map(genre -> genre.getId()).toList();
-            List<Integer> findIds = requestGenresId.stream().map(id -> genreStorage.findById(id).get().getId()).toList();
-
-            if(requestGenresId.size() != findIds.size()) {
-                log.error("У фильма с названием: {} жанр с несуществующим id", request.getName());
-                throw new ValidationException("У одного из жанров фильма несуществующий id");
-            }
-
             Set<Integer> uniqueGenresIds = new HashSet<>(requestGenresId);
-            List<Genre> uniqueGenresList = uniqueGenresIds.stream()
-                    .map(id -> genreStorage.findById(id).get())
-                    .toList();
 
-            request.setGenres(uniqueGenresList);
+            requestGenresId.forEach(id -> {
+                if (!allGenresIds.contains(id)) {
+                    log.error("У фильма с названием: {} жанр с несуществующим id {}", request.getName(), id);
+                    throw new ValidationException("У одного из жанров фильма несуществующий id");
+                }
+            });
+
+            List<Genre> findGenreByUniqueIds = new ArrayList<>();
+
+            allGenres.forEach(genre -> {
+                if (uniqueGenresIds.contains(genre.getId())) {
+                    findGenreByUniqueIds.add(genre);
+                }
+            });
+
+            request.setGenres(findGenreByUniqueIds);
 
             List<Genre> genres = request.getGenres();
 
@@ -155,13 +178,16 @@ public class FilmService {
         }
 
         if (request.getDirectors() != null) {
+            List<Director> allDirectors = directorStorage.findAll();
+            List<Integer> requestDirectorsIdList = request.getDirectors().stream().map(dir -> dir.getId()).toList();
 
-            filmDirectorStorage.deleteFilmDirectorByFilmId(request.getId());
+            List<Director> directorsListWithName = new ArrayList<>();
+            allDirectors.forEach(director -> {
+                if (requestDirectorsIdList.contains(director.getId())) {
+                    directorsListWithName.add(director);
+                }
+            });
 
-            List<Integer> directorsIdList = request.getDirectors().stream().map(dir -> dir.getId()).toList();
-
-            List<Director> directorsListWithName = directorsIdList.stream().map(id ->
-                    directorStorage.findById(id).get()).toList();
             request.setDirectors(directorsListWithName);
 
             List<Director> directorsList = request.getDirectors();

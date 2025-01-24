@@ -15,7 +15,6 @@ public class GenreStorage extends BaseStorage<Genre> {
     private static final String FIND_BY_FILM_ID_QUERY = "SELECT G.NAME, G.GENRE_ID FROM GENRE AS G " +
             "JOIN FILM_GENRE AS FG ON G.GENRE_ID = FG.GENRE_ID " +
             "WHERE FILM_ID = ?";
-
     public GenreStorage(JdbcTemplate jdbc, RowMapper<Genre> mapper) {
         super(jdbc, mapper);
     }
@@ -30,5 +29,7 @@ public class GenreStorage extends BaseStorage<Genre> {
 
     public List<Genre> findGenresByFilmId(Integer filmId) {
         return findMany(FIND_BY_FILM_ID_QUERY, filmId);
+
+
     }
 }
