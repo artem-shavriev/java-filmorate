@@ -17,6 +17,7 @@ import ru.yandex.practicum.filmorate.storage.dto.FilmDto;
 import ru.yandex.practicum.filmorate.storage.dto.NewFilmRequest;
 import ru.yandex.practicum.filmorate.storage.dto.UpdateFilmRequest;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -65,13 +66,14 @@ public class FilmController {
     @GetMapping("/films/director/{directorId}")
     public List<FilmDto> getDirectorFilmsSortedByYearOrLikes(@RequestParam String sortBy,
                                                              @PathVariable Integer directorId) {
-        List<FilmDto> filmsList = filmService.getFilmsByDirector(directorId);
+        List<FilmDto> filmsList = new ArrayList<>();
+
         if (sortBy.equals("year")) {
-            filmsList = filmService.sortedByYear(filmsList);
+            filmsList = filmService.getFilmsByDirectorSortByYear(directorId);
         }
 
         if (sortBy.equals("likes")) {
-            filmsList = filmService.sortedByLikes(filmsList);
+            filmsList = filmService.getFilmsByDirectorSortByLike(directorId);
         }
 
         return filmsList;
