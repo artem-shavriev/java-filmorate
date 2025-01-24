@@ -21,7 +21,6 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class FilmService {
-
     private final FilmDbStorage filmDbStorage;
     private final UserDbStorage userDbStorage;
     private final LikesFromUsersStorage likesFromUsersStorage;
@@ -52,7 +51,7 @@ public class FilmService {
         if (request.getGenres() != null) {
             List<Genre> allGenres = genreStorage.findAll();
             List<Integer> allGenresIds = allGenres.stream().map(genre -> genre.getId()).toList();
-            List<Integer> requestGenresId =  request.getGenres().stream().map(genre -> genre.getId()).toList();
+            List<Integer> requestGenresId = request.getGenres().stream().map(genre -> genre.getId()).toList();
             Set<Integer> uniqueGenresIds = new HashSet<>(requestGenresId);
 
             requestGenresId.forEach(id -> {
@@ -147,7 +146,7 @@ public class FilmService {
         if (request.getGenres() != null) {
             List<Genre> allGenres = genreStorage.findAll();
             List<Integer> allGenresIds = allGenres.stream().map(genre -> genre.getId()).toList();
-            List<Integer> requestGenresId =  request.getGenres().stream().map(genre -> genre.getId()).toList();
+            List<Integer> requestGenresId = request.getGenres().stream().map(genre -> genre.getId()).toList();
             Set<Integer> uniqueGenresIds = new HashSet<>(requestGenresId);
 
             requestGenresId.forEach(id -> {
@@ -281,48 +280,11 @@ public class FilmService {
     }
 
     public List<FilmDto> getPopularFilms(Integer count, Integer genreId, Integer year) {
-        List<Film> filmsList = filmDbStorage.findAll();
+        List<Film> films = filmDbStorage.findPopularFilms(count, genreId, year);
 
-        if (year != null) {
-            filmsList = filmsList.stream()
-                    .filter(film -> film.getReleaseDate().getYear() == year)
-                    .toList();
-        }
-
-        if (genreId != null) {
-            filmsList = filmsList.stream()
-                    .filter(film -> film.getGenres().stream().anyMatch(genre -> genre.getId().equals(genreId)))
-                    .toList();
-        }
-
-        if (count == null || count <= 0) {
-            count = filmsList.size();
-        }
-
-        List<Film> sortedFilmsByLikes = new ArrayList<>(filmsList);
-
-        Collections.sort(sortedFilmsByLikes, new Comparator<Film>() {
-            @Override
-            public int compare(Film film1, Film film2) {
-                return Integer.compare(film2.getLikesFromUsers().size(), film1.getLikesFromUsers().size());
-            }
-        });
-
-        if (sortedFilmsByLikes.size() > count) {
-            sortedFilmsByLikes = sortedFilmsByLikes.subList(0, count);
-        }
-
-        List<FilmDto> listOfPopularFilms = new ArrayList<>();
-        for (Film film : sortedFilmsByLikes) {
-            FilmDto filmDto = getFilmById(film.getId());
-            if (filmDto != null) {
-                listOfPopularFilms.add(filmDto);
-            }
-        }
-
-        log.info("Список наиболее популярных фильмов сформирован. Длина списка: {}", listOfPopularFilms.size());
-
-        return listOfPopularFilms;
+        return films.stream()
+                .map(FilmMapper::mapToFilmDto)
+                .collect(Collectors.toList());
     }
 
     public List<FilmDto> getCommonFilms(Integer userId, Integer friendId) {
@@ -352,7 +314,14 @@ public class FilmService {
             }
         });
 
-        List<FilmDto> commonFilms = commonFilmsId.stream().map(id -> getFilmById(id)).toList();
+        List<FilmDto> commonFilms = new ArrayList<>();
+
+        List<FilmDto> allFilms = getFilms();
+        allFilms.forEach(film -> {
+            if (commonFilmsId.contains(film.getId())) {
+                commonFilms.add(film);
+            }
+        });
 
         return commonFilms;
     }
@@ -372,83 +341,39 @@ public class FilmService {
         return filmForDelete;
     }
 
-    public List<FilmDto> getFilmsByDirector(Integer directorId) {
+    public List<FilmDto> getFilmsByDirectorSortByYear(Integer directorId) {
         if (directorStorage.findById(directorId).isEmpty()) {
             log.error("Директор с id {} не найден.", directorId);
             throw new NotFoundException("Директор с данным id отсутствует");
         }
-        List<FilmDirector> filmDirectorsList = filmDirectorStorage.findFilmDirectorByDirectorId(directorId);
-        List<Integer> findFilmIds = filmDirectorsList.stream().map(f -> f.getFilmId()).toList();
+        List<Film> findFilms = filmDbStorage.findByDirectorSortByYear(directorId);
 
-        List<FilmDto> findFilms = findFilmIds.stream().map(id -> getFilmById(id)).toList();
-
-        return findFilms;
+        return findFilms.stream()
+                .map(FilmMapper::mapToFilmDto)
+                .collect(Collectors.toList());
     }
 
-    public List<FilmDto> sortedByLikes(List<FilmDto> filmsForSort) {
-        List<FilmDto> sortedFilmsByLikes = new ArrayList<>(filmsForSort);
+    public List<FilmDto> getFilmsByDirectorSortByLike(Integer directorId) {
+        if (directorStorage.findById(directorId).isEmpty()) {
+            log.error("Директор с id {} не найден.", directorId);
+            throw new NotFoundException("Директор с данным id отсутствует");
+        }
+        List<Film> findFilms = filmDbStorage.findByDirectorSortByLike(directorId);
 
-        Collections.sort(sortedFilmsByLikes, new Comparator<FilmDto>() {
-            @Override
-            public int compare(FilmDto film1, FilmDto film2) {
-                return Integer.compare(film2.getLikesFromUsers().size(), film1.getLikesFromUsers().size());
-            }
-        });
-
-        return sortedFilmsByLikes;
-    }
-
-    public List<FilmDto> sortedByYear(List<FilmDto> filmsForSort) {
-        List<FilmDto> sortedFilmsByYear = new ArrayList<>(filmsForSort);
-
-        Collections.sort(sortedFilmsByYear, new Comparator<FilmDto>() {
-            @Override
-            public int compare(FilmDto film1, FilmDto film2) {
-                return film1.getReleaseDate().compareTo(film2.getReleaseDate());
-            }
-        });
-
-        return sortedFilmsByYear;
+        return findFilms.stream()
+                .map(FilmMapper::mapToFilmDto)
+                .collect(Collectors.toList());
     }
 
     public List<FilmDto> getRecommendations(Integer userId) {
-        List<Integer> userFilms = likesFromUsersStorage.getLikedFilmsId(userId);
-        if (userFilms.isEmpty()) {
+        List<Integer> newRecommendations = filmDbStorage.findUserWithSimilarLikes(userId);
+        if (newRecommendations.isEmpty()) {
             return new ArrayList<>();
         }
-        log.info("Получаем фильмы, которые лайкнул текущий пользователь {}", userFilms);
+        List<Film> films = filmDbStorage.getFilmsByIds(newRecommendations);
 
-        Map<Integer, List<Integer>> allUserLikes = getAllUserLikes();
-
-        Integer similarTasteUserId = null;
-        int maxCommonLikes = 0;
-
-        for (Map.Entry<Integer, List<Integer>> entry : allUserLikes.entrySet()) {
-            Integer otherUserId = entry.getKey();
-            List<Integer> otherUserFilms = entry.getValue();
-
-            if (!otherUserId.equals(userId)) {
-                int commonLikes = (int) otherUserFilms.stream()
-                        .filter(userFilms::contains)
-                        .count();
-
-                if (commonLikes > maxCommonLikes) {
-                    maxCommonLikes = commonLikes;
-                    similarTasteUserId = otherUserId;
-                }
-            }
-        }
-
-        if (similarTasteUserId == null) {
-            log.info("Нет похожего пользователя на {}", userId);
-            return List.of();
-        }
-        log.info("Похожий пользователь {}", similarTasteUserId);
-
-        List<Integer> similarTasteUserFilms = allUserLikes.get(similarTasteUserId);
-        return similarTasteUserFilms.stream()
-                .filter(filmId -> !userFilms.contains(filmId))
-                .map(this::getFilmById)
+        return films.stream()
+                .map(FilmMapper::mapToFilmDto)
                 .collect(Collectors.toList());
     }
 
@@ -459,7 +384,7 @@ public class FilmService {
                     .stream()
                     .map(FilmMapper::mapToFilmDto)
                     .toList();
-            return sortedByLikes(result);
+            return result;
         } else if (by.contains("director") || by.contains("title")) {
             return filmDbStorage.getSearch(query, by);
         } else {
