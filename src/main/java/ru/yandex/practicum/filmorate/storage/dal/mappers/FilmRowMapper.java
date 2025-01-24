@@ -13,7 +13,6 @@ import ru.yandex.practicum.filmorate.storage.dal.FilmDirectorStorage;
 import ru.yandex.practicum.filmorate.storage.dal.FilmGenreStorage;
 import ru.yandex.practicum.filmorate.storage.dal.GenreStorage;
 import ru.yandex.practicum.filmorate.storage.dal.LikesFromUsersStorage;
-import ru.yandex.practicum.filmorate.storage.dal.MpaStorage;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -28,7 +27,6 @@ public class FilmRowMapper implements RowMapper<Film> {
 
     private final FilmGenreStorage filmGenreStorage;
     private final GenreStorage genreStorage;
-    private final MpaStorage mpaStorage;
     private final LikesFromUsersStorage likesFromUsersStorage;
     private final FilmDirectorStorage filmDirectorStorage;
     private final DirectorStorage directorStorage;

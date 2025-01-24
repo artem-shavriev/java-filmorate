@@ -9,6 +9,7 @@ import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.dto.FilmDto;
 import ru.yandex.practicum.filmorate.storage.mapper.FilmMapper;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -32,10 +33,6 @@ public class FilmDbStorage extends BaseStorage<Film> implements FilmStorage {
 
     public Optional<Film> findById(Integer id) {
         return findOne(FIND_BY_ID_QUERY, id);
-    }
-
-    public Optional<Film> findByName(String name) {
-        return findOne(FIND_BY_NAME_QUERY, name);
     }
 
     public List<Film> findAll() {
@@ -107,5 +104,46 @@ public class FilmDbStorage extends BaseStorage<Film> implements FilmStorage {
                     .map(FilmMapper::mapToFilmDto)
                     .toList();
         }
+    }
+
+    public List<Film> findPopularFilms(Integer count, Integer genreId, Integer year) {
+        StringBuilder sql = new StringBuilder(
+                "SELECT f.*, m.MPA_NAME, COUNT(l.USER_ID) AS likes " +
+                        "FROM FILM AS f " +
+                        "LEFT JOIN MPA AS m ON f.MPA_ID = m.MPA_ID " +
+                        "LEFT JOIN FILM_GENRE AS fg ON f.FILM_ID = fg.FILM_ID " +
+                        "LEFT JOIN GENRE AS g ON fg.GENRE_ID = g.GENRE_ID " +
+                        "LEFT JOIN LIKES_FROM_USERS AS l ON f.FILM_ID = l.FILM_ID "
+        );
+
+        List<Object> result = new ArrayList<>();
+
+        String additionalParam;
+        if (sql.toString().contains("WHERE")) {
+            additionalParam = " AND ";
+        } else {
+            additionalParam = " WHERE ";
+        }
+
+        if (year != null) {
+            sql.append(additionalParam).append("YEAR(f.RELEASE_DATE) = ?");
+            result.add(year);
+            additionalParam = " AND ";
+        }
+
+        if (genreId != null) {
+            sql.append(additionalParam).append("g.GENRE_ID = ?");
+            result.add(genreId);
+        }
+
+        sql.append(" GROUP BY f.FILM_ID ")
+                .append(" ORDER BY likes DESC ");
+
+        if (count != null && count > 0) {
+            sql.append(" LIMIT ?");
+            result.add(count);
+        }
+
+        return jdbc.query(sql.toString(), mapper, result.toArray());
     }
 }

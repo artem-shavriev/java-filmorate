@@ -281,48 +281,12 @@ public class FilmService {
     }
 
     public List<FilmDto> getPopularFilms(Integer count, Integer genreId, Integer year) {
-        List<Film> filmsList = filmDbStorage.findAll();
+        List<Film> films = filmDbStorage.findPopularFilms(count, genreId, year);
 
-        if (year != null) {
-            filmsList = filmsList.stream()
-                    .filter(film -> film.getReleaseDate().getYear() == year)
-                    .toList();
-        }
-
-        if (genreId != null) {
-            filmsList = filmsList.stream()
-                    .filter(film -> film.getGenres().stream().anyMatch(genre -> genre.getId().equals(genreId)))
-                    .toList();
-        }
-
-        if (count == null || count <= 0) {
-            count = filmsList.size();
-        }
-
-        List<Film> sortedFilmsByLikes = new ArrayList<>(filmsList);
-
-        Collections.sort(sortedFilmsByLikes, new Comparator<Film>() {
-            @Override
-            public int compare(Film film1, Film film2) {
-                return Integer.compare(film2.getLikesFromUsers().size(), film1.getLikesFromUsers().size());
-            }
-        });
-
-        if (sortedFilmsByLikes.size() > count) {
-            sortedFilmsByLikes = sortedFilmsByLikes.subList(0, count);
-        }
-
-        List<FilmDto> listOfPopularFilms = new ArrayList<>();
-        for (Film film : sortedFilmsByLikes) {
-            FilmDto filmDto = getFilmById(film.getId());
-            if (filmDto != null) {
-                listOfPopularFilms.add(filmDto);
-            }
-        }
-
-        log.info("Список наиболее популярных фильмов сформирован. Длина списка: {}", listOfPopularFilms.size());
-
-        return listOfPopularFilms;
+        return films.stream()
+                .map(film -> getFilmById(film.getId()))
+                .filter(Objects::nonNull)
+                .toList();
     }
 
     public List<FilmDto> getCommonFilms(Integer userId, Integer friendId) {
@@ -352,7 +316,13 @@ public class FilmService {
             }
         });
 
-        List<FilmDto> commonFilms = commonFilmsId.stream().map(id -> getFilmById(id)).toList();
+        List<FilmDto> commonFilms = new ArrayList<>();
+
+        List<FilmDto> allFilms = getFilms();
+        allFilms.forEach(film -> {
+            if (commonFilmsId.contains(film.getId())) {
+                commonFilms.add(film);
+            }});
 
         return commonFilms;
     }
