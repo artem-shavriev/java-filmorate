@@ -14,7 +14,7 @@ public class MpaRowMapper implements RowMapper<Mpa> {
         Mpa mpa = new Mpa();
 
         mpa.setId(resultSet.getInt("MPA_ID"));
-        mpa.setName(resultSet.getString("NAME"));
+        mpa.setName(resultSet.getString("MPA_NAME"));
 
         return mpa;
     }

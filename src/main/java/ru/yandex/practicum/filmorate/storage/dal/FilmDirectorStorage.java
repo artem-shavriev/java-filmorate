@@ -15,7 +15,6 @@ public class FilmDirectorStorage extends BaseStorage<FilmDirector> {
     private static final String INSERT_QUERY = "MERGE INTO FILM_DIRECTOR (FILM_ID, DIRECTOR_ID) KEY (FILM_ID, DIRECTOR_ID) " +
             "VALUES (?, ?)";
     private static final String DELETE_BY_FILM_ID_QUERY = "DELETE FROM FILM_DIRECTOR WHERE FILM_ID = ?";
-    private static final String DELETE_BY_DIRECTOR_ID_QUERY = "DELETE FROM FILM_DIRECTOR WHERE DIRECTOR_ID = ?";
 
     public FilmDirectorStorage(JdbcTemplate jdbc, RowMapper<FilmDirector> mapper) {
         super(jdbc, mapper);
@@ -40,9 +39,5 @@ public class FilmDirectorStorage extends BaseStorage<FilmDirector> {
 
     public boolean deleteFilmDirectorByFilmId(Integer filmId) {
         return delete(DELETE_BY_FILM_ID_QUERY, filmId);
-    }
-
-    public boolean deleteFilmDirectorByDirectorId(Integer directorId) {
-        return delete(DELETE_BY_DIRECTOR_ID_QUERY, directorId);
     }
 }

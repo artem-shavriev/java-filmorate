@@ -15,9 +15,11 @@ import java.util.Optional;
 @Primary
 @Repository
 public class FilmDbStorage extends BaseStorage<Film> implements FilmStorage {
-    private static final String FIND_ALL_QUERY = "SELECT * FROM FILM";
-    private static final String FIND_BY_ID_QUERY = "SELECT * FROM FILM WHERE FILM_ID = ?";
-    private static final String FIND_BY_NAME_QUERY = "SELECT * FROM FILM WHERE NAME = ?";
+    private static final String FIND_ALL_QUERY = "SELECT * FROM FILM AS F JOIN MPA AS M ON M.MPA_ID = F.MPA_ID";
+    private static final String FIND_BY_ID_QUERY = "SELECT * FROM FILM AS F JOIN MPA AS M ON M.MPA_ID = F.MPA_ID " +
+            "WHERE F.FILM_ID = ?";
+    private static final String FIND_BY_NAME_QUERY = "SELECT * FROM FILM AS F JOIN MPA AS M ON M.MPA_ID = F.MPA_ID" +
+            "WHERE F.NAME = ?";
     private static final String INSERT_QUERY = "INSERT INTO FILM(NAME, DESCRIPTION, RELEASE_DATE, DURATION, MPA_ID)" +
             "VALUES (?, ?, ?, ?, ?)";
     private static final String UPDATE_QUERY = "UPDATE FILM SET NAME = ?, DESCRIPTION = ?, DURATION = ?, MPA_ID = ?," +
@@ -75,8 +77,10 @@ public class FilmDbStorage extends BaseStorage<Film> implements FilmStorage {
         String replaced = by.replace("director", "d.NAME").replace("title", "f.NAME");
         if (replaced.contains(",")) {
             String[] split = replaced.split(",");
-            sql = "SELECT f.FILM_ID, f.NAME, f.DESCRIPTION, f.DURATION, f.RELEASE_DATE, f.MPA_ID, COUNT(l.USER_ID) AS likes " +
+            sql = "SELECT f.FILM_ID, f.NAME, f.DESCRIPTION, f.DURATION, f.RELEASE_DATE, f.MPA_ID, M.MPA_NAME, " +
+                    "COUNT(l.USER_ID) AS likes " +
                     "FROM FILM AS f " +
+                    "LEFT JOIN MPA AS M ON f.MPA_ID = M.MPA_ID " +
                     "LEFT JOIN FILM_DIRECTOR AS fd ON f.FILM_ID = fd.FILM_ID " +
                     "LEFT JOIN DIRECTORS AS d ON fd.DIRECTOR_ID = d.DIRECTOR_ID " +
                     "LEFT JOIN LIKES_FROM_USERS AS l ON f.FILM_ID = l.FILM_ID " +
@@ -88,8 +92,10 @@ public class FilmDbStorage extends BaseStorage<Film> implements FilmStorage {
                     .map(FilmMapper::mapToFilmDto)
                     .toList();
         } else {
-            sql = "SELECT f.FILM_ID, f.NAME, f.DESCRIPTION, f.DURATION, f.RELEASE_DATE, f.MPA_ID, COUNT(l.USER_ID) AS likes " +
+            sql = "SELECT f.FILM_ID, f.NAME, f.DESCRIPTION, f.DURATION, f.RELEASE_DATE, f.MPA_ID, M.MPA_NAME, " +
+                    "COUNT(l.USER_ID) AS likes " +
                     "FROM FILM AS f " +
+                    "LEFT JOIN MPA AS M ON f.MPA_ID = M.MPA_ID " +
                     "LEFT JOIN FILM_DIRECTOR AS fd ON f.FILM_ID = fd.FILM_ID " +
                     "LEFT JOIN DIRECTORS AS d ON fd.DIRECTOR_ID = d.DIRECTOR_ID " +
                     "LEFT JOIN LIKES_FROM_USERS AS l ON f.FILM_ID = l.FILM_ID " +

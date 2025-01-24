@@ -34,17 +34,15 @@ public class FilmService {
     private static final LocalDate MIN_RELEASE_DATE = LocalDate.of(1895, 12, 28);
 
     public FilmDto addFilm(NewFilmRequest request) {
-
         if (request.getMpa() != null) {
-            List<Mpa> mpaList = mpaStorage.findAll();
-            List<Integer> mpaIdsList = mpaList.stream().map(Mpa::getId).toList();
+            int mpaId = request.getMpa().getId();
 
-            if (!mpaIdsList.contains(request.getMpa().getId())) {
+            if (mpaStorage.findById(mpaId).isPresent()) {
+                request.setMpa(mpaStorage.findById(mpaId).get());
+            } else {
+                log.error("У рейтинга несуществующий id {}", mpaId);
                 throw new ValidationException("У рейтинга несуществующий id");
             }
-
-            String mpaName = mpaStorage.findById(request.getMpa().getId()).get().getName();
-            request.getMpa().setName(mpaName);
         }
 
         if (request.getReleaseDate().isBefore(MIN_RELEASE_DATE)) {
@@ -52,27 +50,16 @@ public class FilmService {
         }
 
         if (request.getGenres() != null) {
-            List<Genre> genresList = genreStorage.findAll();
-            List<Integer> genresIdList = genresList.stream().map(Genre::getId).toList();
-
-            request.getGenres().forEach(genre -> {
-                if (!genresIdList.contains(genre.getId())) {
-                    log.error("У фильма с названием: {} жанр с несуществующим id: {}", request.getName(), genre.getId());
-                    throw new ValidationException("У одного из жанров фильма несуществующий id");
-                }
-            });
-
-            List<Integer> requestGenresId = request.getGenres().stream().map(Genre::getId).toList();
+            List<Integer> requestGenresId =  request.getGenres().stream().map(genre -> genre.getId()).toList();
             Set<Integer> uniqueGenresIds = new HashSet<>(requestGenresId);
-            List<Genre> uniqueGenresList = uniqueGenresIds.stream()
-                    .map(id -> genreStorage.findById(id).get())
-                    .toList();
+            List<Genre> findGenreByUniqueIds = uniqueGenresIds.stream().map(id -> genreStorage.findById(id).get()).toList();
 
-            for (Genre genre : uniqueGenresList) {
-                String genreName = genreStorage.findById(genre.getId()).get().getName();
-                genre.setName(genreName);
+            if(uniqueGenresIds.size() != findGenreByUniqueIds.size()) {
+                log.error("У фильма с названием: {} жанр с несуществующим id", request.getName());
+                throw new ValidationException("У одного из жанров фильма несуществующий id");
             }
-            request.setGenres(uniqueGenresList);
+
+            request.setGenres(findGenreByUniqueIds);
         }
 
         if (request.getDirectors() != null) {
@@ -94,6 +81,7 @@ public class FilmService {
                 FilmGenre filmGenre = new FilmGenre();
                 filmGenre.setFilmId(film.getId());
                 filmGenre.setGenreId(genre.getId());
+
                 filmGenreStorage.addGenre(filmGenre);
             }
         }
@@ -103,7 +91,6 @@ public class FilmService {
 
             for (Director director : directorsList) {
                 FilmDirector filmDirector = new FilmDirector();
-
                 filmDirector.setDirectorId(director.getId());
                 filmDirector.setFilmId(film.getId());
 
@@ -129,39 +116,32 @@ public class FilmService {
         }
 
         if (request.getMpa() != null) {
-            List<Mpa> mpaList = mpaStorage.findAll();
-            List<Integer> mpaIdsList = mpaList.stream().map(mpa -> mpa.getId()).toList();
+            int mpaId = request.getMpa().getId();
 
-            if (!mpaIdsList.contains(request.getMpa().getId())) {
+            if (mpaStorage.findById(mpaId).isPresent()) {
+                request.setMpa(mpaStorage.findById(mpaId).get());
+            } else {
+                log.error("У рейтинга несуществующий id {}", mpaId);
                 throw new ValidationException("У рейтинга несуществующий id");
             }
-
-            String mpaName = mpaStorage.findById(request.getMpa().getId()).get().getName();
-
-            request.getMpa().setName(mpaName);
         }
 
         filmGenreStorage.deleteFilmGenreByFilmId(request.getId());
+
         if (request.getGenres() != null) {
+            List<Integer> requestGenresId =  request.getGenres().stream().map(genre -> genre.getId()).toList();
+            List<Integer> findIds = requestGenresId.stream().map(id -> genreStorage.findById(id).get().getId()).toList();
 
-            List<Genre> genresList = genreStorage.findAll();
-            List<Integer> genresIdList = genresList.stream().map(Genre::getId).toList();
-
-            request.getGenres().stream().forEach(genre -> {
-                if (!genresIdList.contains(genre.getId())) {
-                    log.error("У фильма с названием: {} жанр с несуществующим id: {}", request.getName(), genre.getId());
-                    throw new ValidationException("У одного из жанров фильма несуществующий id");
-                }
-            });
-
-            List<Integer> requestGenresId = request.getGenres().stream().map(genre -> genre.getId()).toList();
-            Set<Integer> uniqueGenresIds = new HashSet<>(requestGenresId);
-            List<Genre> uniqueGenresList = uniqueGenresIds.stream().map(id -> genreStorage.findById(id).get()).toList();
-
-            for (Genre genre : uniqueGenresList) {
-                String genreName = genreStorage.findById(genre.getId()).get().getName();
-                genre.setName(genreName);
+            if(requestGenresId.size() != findIds.size()) {
+                log.error("У фильма с названием: {} жанр с несуществующим id", request.getName());
+                throw new ValidationException("У одного из жанров фильма несуществующий id");
             }
+
+            Set<Integer> uniqueGenresIds = new HashSet<>(requestGenresId);
+            List<Genre> uniqueGenresList = uniqueGenresIds.stream()
+                    .map(id -> genreStorage.findById(id).get())
+                    .toList();
+
             request.setGenres(uniqueGenresList);
 
             List<Genre> genres = request.getGenres();
