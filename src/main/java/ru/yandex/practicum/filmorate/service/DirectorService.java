@@ -6,7 +6,6 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.storage.dal.DirectorStorage;
-import ru.yandex.practicum.filmorate.storage.dal.FilmDirectorStorage;
 
 import java.util.List;
 import java.util.Optional;
@@ -16,7 +15,6 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class DirectorService {
     private final DirectorStorage directorStorage;
-    private final FilmDirectorStorage filmDirectorStorage;
 
     public List<Director> findAll() {
         return directorStorage.findAll();

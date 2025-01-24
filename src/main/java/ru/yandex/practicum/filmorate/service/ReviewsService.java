@@ -43,7 +43,7 @@ public class ReviewsService {
         validNotFoundUser(updateReviews.getUserId());
 
         ReviewsDto updatedReview = reviewsDbStorage.updateReviews(updateReviews);
-        log.info("UserId в обновленом отзыве {}", updateReviews.getUserId());
+
         eventService.createEvent(updatedReview.getUserId(), EventType.REVIEW, EventOperation.UPDATE, updatedReview.getReviewId());
 
         return updatedReview;
