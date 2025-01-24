@@ -365,55 +365,27 @@ public class FilmService {
                 .collect(Collectors.toList());
     }
 
-    public List<FilmDto> getRecommendations(Integer userId) {
-        /*List<Integer> userFilms = likesFromUsersStorage.getLikedFilmsId(userId);
-        if (userFilms.isEmpty()) {
+    /*public List<FilmDto> getRecommendations(Integer userId) {
+        List<Integer> newRecommendations = filmDbStorage.findFilmsLikedBySimilarUsers(userId);
+        if (newRecommendations.isEmpty()) {
             return new ArrayList<>();
         }
-            List<Film> recommendationFilmsList = filmDbStorage.recommendationForUser(userId);
+        List<Film> films = filmDbStorage.getFilmsByIds(newRecommendations);
 
-            return recommendationFilmsList.stream()
-                    .map(FilmMapper::mapToFilmDto)
-                    .collect(Collectors.toList());
-
+        return films.stream()
+                .map(FilmMapper::mapToFilmDto)
+                .collect(Collectors.toList());
     }*/
-        List<Integer> userFilms = likesFromUsersStorage.getLikedFilmsId(userId);
-        if (userFilms.isEmpty()) {
+
+    public List<FilmDto> getRecommendations(Integer userId) {
+        List<Integer> newRecommendations = filmDbStorage.findUserWithSimilarLikes(userId);
+        if (newRecommendations.isEmpty()) {
             return new ArrayList<>();
         }
-        log.info("Получаем фильмы, которые лайкнул текущий пользователь {}", userFilms);
+        List<Film> films = filmDbStorage.getFilmsByIds(newRecommendations);
 
-        Map<Integer, List<Integer>> allUserLikes = getAllUserLikes();
-
-        Integer similarTasteUserId = null;
-        int maxCommonLikes = 0;
-
-        for (Map.Entry<Integer, List<Integer>> entry : allUserLikes.entrySet()) {
-            Integer otherUserId = entry.getKey();
-            List<Integer> otherUserFilms = entry.getValue();
-
-            if (!otherUserId.equals(userId)) {
-                int commonLikes = (int) otherUserFilms.stream()
-                        .filter(userFilms::contains)
-                        .count();
-
-                if (commonLikes > maxCommonLikes) {
-                    maxCommonLikes = commonLikes;
-                    similarTasteUserId = otherUserId;
-                }
-            }
-        }
-
-        if (similarTasteUserId == null) {
-            log.info("Нет похожего пользователя на {}", userId);
-            return List.of();
-        }
-        log.info("Похожий пользователь {}", similarTasteUserId);
-
-        List<Integer> similarTasteUserFilms = allUserLikes.get(similarTasteUserId);
-        return similarTasteUserFilms.stream()
-                .filter(filmId -> !userFilms.contains(filmId))
-                .map(this::getFilmById)
+        return films.stream()
+                .map(FilmMapper::mapToFilmDto)
                 .collect(Collectors.toList());
     }
 
