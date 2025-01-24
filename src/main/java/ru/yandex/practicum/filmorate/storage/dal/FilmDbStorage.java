@@ -176,40 +176,6 @@ public class FilmDbStorage extends BaseStorage<Film> implements FilmStorage {
         return jdbc.query(sqlQueryStatement, mapper, sqlArgs.toArray());
     }
 
-    /*public List<Integer> findFilmsLikedBySimilarUsers(Integer userId) {
-        String sql = "SELECT DISTINCT l.FILM_ID " +
-                "FROM LIKES_FROM_USERS l " +
-                "WHERE l.USER_ID IN (" +
-                "  SELECT DISTINCT l2.USER_ID " +
-                "  FROM LIKES_FROM_USERS l2 " +
-                "  WHERE l2.FILM_ID IN (SELECT FILM_ID FROM LIKES_FROM_USERS WHERE USER_ID = ?) " +
-                "  AND l2.USER_ID != ? " +
-                ") " +
-                "AND l.FILM_ID NOT IN (SELECT FILM_ID FROM LIKES_FROM_USERS WHERE USER_ID = ?)";
-
-        return jdbc.queryForList(sql, Integer.class, userId, userId, userId);
-    }
-
-    public List<Film> getFilmsByIds(List<Integer> filmIds) {
-        String inClause = String.join(",", Collections.nCopies(filmIds.size(), "?"));
-
-        String sqlQueryStatement = "SELECT f.FILM_ID, f.NAME, f.DESCRIPTION, f.RELEASE_DATE, f.DURATION, " +
-                "m.MPA_ID, m.MPA_NAME, COUNT(l.USER_ID) AS likes " +
-                "FROM FILM f " +
-                "LEFT JOIN MPA m ON f.MPA_ID = m.MPA_ID " +
-                "LEFT JOIN FILM_GENRE fg ON f.FILM_ID = fg.FILM_ID " +
-                "LEFT JOIN GENRE g ON fg.GENRE_ID = g.GENRE_ID " +
-                "LEFT JOIN LIKES_FROM_USERS l ON f.FILM_ID = l.FILM_ID ";
-
-        sqlQueryStatement += "WHERE f.FILM_ID IN (" + inClause + ") ";
-
-        sqlQueryStatement += "GROUP BY f.FILM_ID ORDER BY likes DESC";
-
-        List<Object> sqlArgs = new ArrayList<>(filmIds);
-
-        return jdbc.query(sqlQueryStatement, mapper::mapRow, sqlArgs.toArray());
-    }*/
-
     public List<Integer> findUserWithSimilarLikes(Integer userId) {
         String sqlGetLikes = "SELECT FILM_ID FROM LIKES_FROM_USERS WHERE USER_ID = ?";
 
