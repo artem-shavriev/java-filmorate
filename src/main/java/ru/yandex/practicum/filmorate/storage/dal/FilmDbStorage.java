@@ -10,11 +10,12 @@ import ru.yandex.practicum.filmorate.storage.dto.FilmDto;
 import ru.yandex.practicum.filmorate.storage.mapper.FilmMapper;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Primary
 @Repository
@@ -176,10 +177,11 @@ public class FilmDbStorage extends BaseStorage<Film> implements FilmStorage {
         return jdbc.query(sqlQueryStatement, mapper, sqlArgs.toArray());
     }
 
-    public List<Integer> findUserWithSimilarLikes(Integer userId) {
+    public Integer findUserWithSimilarLikes(Integer userId) {
         String sqlGetLikes = "SELECT FILM_ID FROM LIKES_FROM_USERS WHERE USER_ID = ?";
 
         List<Integer> currentUserLikes = jdbc.queryForList(sqlGetLikes, Integer.class, userId);
+        Set<Integer> currentUserLikesSet = new HashSet<>(currentUserLikes);
 
         String sqlFindSimilar = "SELECT l2.USER_ID, COUNT(*) AS common_likes " +
                 "FROM LIKES_FROM_USERS l2 " +
@@ -194,44 +196,57 @@ public class FilmDbStorage extends BaseStorage<Film> implements FilmStorage {
         List<Map<String, Object>> result = jdbc.queryForList(sqlFindSimilar, userId, userId);
 
         if (result.isEmpty()) {
-            return Collections.emptyList();
+            return null;
         }
 
         Map<String, Object> row = result.get(0);
         Integer similarUserId = (Integer) row.get("USER_ID");
 
         List<Integer> similarUserLikes = jdbc.queryForList(sqlGetLikes, Integer.class, similarUserId);
+        Set<Integer> similarUserLikesSet = new HashSet<>(similarUserLikes);
 
-
-        if (currentUserLikes.size() > similarUserLikes.size()) {
-            return Collections.emptyList();
+        if (currentUserLikesSet.containsAll(similarUserLikesSet)) {
+            return null;
         }
 
-        if (new HashSet<>(currentUserLikes).equals(new HashSet<>(similarUserLikes))) {
-            return Collections.emptyList();
-        }
-
-        return Collections.singletonList(similarUserId);
+        return similarUserId;
     }
 
 
-    public List<Film> getFilmsByIds(List<Integer> filmIds) {
-        String inClause = String.join(",", Collections.nCopies(filmIds.size(), "?"));
+    public List<Film> getFilmsByUserIdExcude(Integer userId, List<Integer> excludedFilmIds) {
+        StringBuilder sqlQueryStatement = new StringBuilder(
+                "SELECT f.FILM_ID, f.NAME, f.DESCRIPTION, f.RELEASE_DATE, f.DURATION, " +
+                        "m.MPA_ID, m.MPA_NAME, COUNT(l.USER_ID) AS likes " +
+                        "FROM FILM f " +
+                        "LEFT JOIN MPA m ON f.MPA_ID = m.MPA_ID " +
+                        "LEFT JOIN FILM_GENRE fg ON f.FILM_ID = fg.FILM_ID " +
+                        "LEFT JOIN GENRE g ON fg.GENRE_ID = g.GENRE_ID " +
+                        "LEFT JOIN LIKES_FROM_USERS l ON f.FILM_ID = l.FILM_ID " +
+                        "WHERE l.USER_ID = ?"
+        );
 
-        String sqlQueryStatement = "SELECT f.FILM_ID, f.NAME, f.DESCRIPTION, f.RELEASE_DATE, f.DURATION, " +
-                "m.MPA_ID, m.MPA_NAME, COUNT(l.USER_ID) AS likes " +
+        List<Object> sqlArgs = new ArrayList<>();
+        sqlArgs.add(userId);
+
+        if (excludedFilmIds != null && !excludedFilmIds.isEmpty()) {
+            String inClause = excludedFilmIds.stream()
+                    .map(id -> "?")
+                    .collect(Collectors.joining(", "));
+            sqlQueryStatement.append(" AND f.FILM_ID NOT IN (").append(inClause).append(")");
+            sqlArgs.addAll(excludedFilmIds);
+        }
+
+        sqlQueryStatement.append(" GROUP BY f.FILM_ID ORDER BY likes DESC");
+
+        return jdbc.query(sqlQueryStatement.toString(), mapper::mapRow, sqlArgs.toArray());
+    }
+
+    public List<Integer> getFilmIdsByUserId(Integer userId) {
+        String sqlQueryStatement = "SELECT f.FILM_ID " +
                 "FROM FILM f " +
-                "LEFT JOIN MPA m ON f.MPA_ID = m.MPA_ID " +
-                "LEFT JOIN FILM_GENRE fg ON f.FILM_ID = fg.FILM_ID " +
-                "LEFT JOIN GENRE g ON fg.GENRE_ID = g.GENRE_ID " +
-                "LEFT JOIN LIKES_FROM_USERS l ON f.FILM_ID = l.FILM_ID ";
+                "LEFT JOIN LIKES_FROM_USERS l ON f.FILM_ID = l.FILM_ID " +
+                "WHERE l.USER_ID = ?";
 
-        sqlQueryStatement += "WHERE f.FILM_ID IN (" + inClause + ") ";
-
-        sqlQueryStatement += "GROUP BY f.FILM_ID ORDER BY likes DESC";
-
-        List<Object> sqlArgs = new ArrayList<>(filmIds);
-
-        return jdbc.query(sqlQueryStatement, mapper::mapRow, sqlArgs.toArray());
+        return jdbc.queryForList(sqlQueryStatement, Integer.class, userId);
     }
 }

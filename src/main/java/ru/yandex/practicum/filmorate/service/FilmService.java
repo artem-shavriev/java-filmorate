@@ -366,13 +366,16 @@ public class FilmService {
     }
 
     public List<FilmDto> getRecommendations(Integer userId) {
-        List<Integer> newRecommendations = filmDbStorage.findUserWithSimilarLikes(userId);
-        if (newRecommendations.isEmpty()) {
+        Integer newRecommendation = filmDbStorage.findUserWithSimilarLikes(userId);
+        if (newRecommendation == null) {
             return new ArrayList<>();
         }
-        List<Film> films = filmDbStorage.getFilmsByIds(newRecommendations);
 
-        return films.stream()
+        List<Integer> currentUserFilmIds = filmDbStorage.getFilmIdsByUserId(userId);
+
+        List<Film> recommendedFilms = filmDbStorage.getFilmsByUserIdExcude(newRecommendation, currentUserFilmIds);
+
+        return recommendedFilms.stream()
                 .map(FilmMapper::mapToFilmDto)
                 .collect(Collectors.toList());
     }
