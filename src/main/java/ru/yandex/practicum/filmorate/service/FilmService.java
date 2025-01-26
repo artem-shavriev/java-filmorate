@@ -33,10 +33,10 @@ public class FilmService {
     private static final LocalDate MIN_RELEASE_DATE = LocalDate.of(1895, 12, 28);
 
     public FilmDto addFilm(NewFilmRequest request) {
-        if (request.getMpa() != null) {
+        if (request.getMpa() != null || request.getMpa().getId() != null) {
             int mpaId = request.getMpa().getId();
 
-            Optional<Mpa> mpa = Optional.ofNullable(mpaStorage.findById(mpaId).get());
+            Optional<Mpa> mpa = mpaStorage.findById(mpaId);
             if (mpa.isPresent()) {
                 request.setMpa(mpa.get());
             } else {
