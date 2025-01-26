@@ -36,7 +36,7 @@ public class FilmService {
         if (request.getMpa() != null) {
             int mpaId = request.getMpa().getId();
 
-            Optional<Mpa> mpa = mpaStorage.findById(mpaId);
+            Optional<Mpa> mpa = Optional.ofNullable(mpaStorage.findById(mpaId).get());
             if (mpa.isPresent()) {
                 request.setMpa(mpa.get());
             } else {
