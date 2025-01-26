@@ -5,6 +5,7 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.model.Director;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -48,5 +49,11 @@ public class DirectorStorage extends BaseStorage<Director> {
 
     public boolean deleteDirector(Integer directorId) {
         return delete(DELETE_QUERY, directorId);
+    }
+
+    public List<Director> findDirectorsByIds(List<Integer> directorIds) {
+        String inClause = String.join(",", Collections.nCopies(directorIds.size(), "?"));
+        String query = "SELECT * FROM DIRECTORS WHERE DIRECTOR_ID IN (" + inClause + ")";
+        return findMany(query, directorIds.toArray());
     }
 }
