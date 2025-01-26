@@ -33,7 +33,7 @@ public class FilmService {
     private static final LocalDate MIN_RELEASE_DATE = LocalDate.of(1895, 12, 28);
 
     public FilmDto addFilm(NewFilmRequest request) {
-        if (request.getMpa() != null || request.getMpa().getId() != null) {
+        if (request.getMpa() != null) {
             int mpaId = request.getMpa().getId();
 
             Optional<Mpa> mpa = mpaStorage.findById(mpaId);
@@ -41,7 +41,7 @@ public class FilmService {
                 request.setMpa(mpa.get());
             } else {
                 log.error("У рейтинга несуществующий id {}", mpaId);
-                throw new ValidationException("У рейтинга несуществующий id");
+                throw new NotFoundException("У рейтинга несуществующий id");
             }
         }
 
@@ -58,7 +58,7 @@ public class FilmService {
 
             if (uniqueGenres.size() != uniqueGenresIdsList.size()) {
                 log.error("У фильма с названием: жанр с несуществующим id");
-                throw new ValidationException("У одного из жанров фильма несуществующий id");
+                throw new NotFoundException("У одного из жанров фильма несуществующий id");
             }
 
             request.setGenres(uniqueGenres);
