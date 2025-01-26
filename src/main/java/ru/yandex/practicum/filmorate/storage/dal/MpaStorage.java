@@ -24,4 +24,8 @@ public class MpaStorage extends BaseStorage<Mpa> {
     public Optional<Mpa> findById(Integer id) {
         return findOne(FIND_BY_ID_QUERY, id);
     }
+
+    public boolean existsById(Integer id) {
+        return findById(id).isPresent();
+    }
 }

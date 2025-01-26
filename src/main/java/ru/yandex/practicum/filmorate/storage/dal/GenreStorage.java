@@ -5,6 +5,7 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.model.Genre;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -30,5 +31,11 @@ public class GenreStorage extends BaseStorage<Genre> {
 
     public List<Genre> findGenresByFilmId(Integer filmId) {
         return findMany(FIND_BY_FILM_ID_QUERY, filmId);
+    }
+
+    public List<Genre> findGenresByIds(List<Integer> genreIds) {
+        String inClause = String.join(",", Collections.nCopies(genreIds.size(), "?"));
+        String query = "SELECT * FROM GENRE WHERE GENRE_ID IN (" + inClause + ")";
+        return findMany(query, genreIds.toArray());
     }
 }
