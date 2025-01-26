@@ -52,7 +52,7 @@ public class FilmService {
         if (request.getGenres() != null) {
             List<Integer> requestGenresId = request.getGenres().stream().map(genre -> genre.getId()).toList();
             Set<Integer> uniqueGenresIds = new HashSet<>(requestGenresId);
-            List<Integer> uniqueGenresIdsList= new ArrayList<>(uniqueGenresIds);
+            List<Integer> uniqueGenresIdsList = new ArrayList<>(uniqueGenresIds);
 
             List<Genre> uniqueGenres = genreStorage.findGenresByIds(uniqueGenresIdsList);
 
@@ -131,7 +131,7 @@ public class FilmService {
         if (request.getGenres() != null) {
             List<Integer> requestGenresId = request.getGenres().stream().map(genre -> genre.getId()).toList();
             Set<Integer> uniqueGenresIds = new HashSet<>(requestGenresId);
-            List<Integer> uniqueGenresIdsList= new ArrayList<>(uniqueGenresIds);
+            List<Integer> uniqueGenresIdsList = new ArrayList<>(uniqueGenresIds);
 
             List<Genre> uniqueGenres = genreStorage.findGenresByIds(uniqueGenresIdsList);
 
