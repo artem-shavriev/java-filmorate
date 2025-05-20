@@ -23,6 +23,7 @@ public class UserDbStorage extends BaseStorage<User> implements UserStorage {
             "WHERE USER_ID = ?";
     private static final String FIND_BY_EMAIL_QUERY = "SELECT * FROM USER_ WHERE EMAIL = ?";
     private static final String FIND_BY_LOGIN_QUERY = "SELECT * FROM USER_ WHERE LOGIN = ?";
+    private static final String DELETE_QUERY = "DELETE FROM USER_ WHERE USER_ID = ?";
 
     public UserDbStorage(JdbcTemplate jdbc, RowMapper<User> mapper) {
         super(jdbc, mapper);
@@ -45,11 +46,11 @@ public class UserDbStorage extends BaseStorage<User> implements UserStorage {
     }
 
     public User addUser(User user) {
-        String login;
-        if (user.getLogin() == null) {
-            login = user.getName() + "-" + user.getEmail();
-            user.setLogin(login);
-            log.warn("Логин не передан, он будет сгенирирован автоматически.");
+        String name;
+        if (user.getName() == null || user.getName().isBlank()) {
+            name = user.getLogin();
+            user.setName(name);
+            log.warn("Имя не передано, оно будет сгенирировано автоматически.");
         }
 
         int id = insert(INSERT_QUERY,
@@ -59,17 +60,16 @@ public class UserDbStorage extends BaseStorage<User> implements UserStorage {
                 user.getBirthday()
         );
         user.setId(id);
-        log.info("Создан новый пользователь c id: {}", user.getId());
 
         return user;
     }
 
     public User updateUser(User user) {
-        String login;
-        if (user.getLogin() == null) {
-            login = user.getName() + "-" + user.getEmail();
-            user.setLogin(login);
-            log.warn("Логин не передан, он будет сгенирирован автоматически.");
+        String name;
+        if (user.getName() == null || user.getName().isBlank()) {
+            name = user.getLogin();
+            user.setName(name);
+            log.warn("Имя не передано, оно будет сгенирировано автоматически.");
         }
         update(UPDATE_QUERY,
                 user.getName(),
@@ -81,5 +81,9 @@ public class UserDbStorage extends BaseStorage<User> implements UserStorage {
 
         log.info("Пользователь c id: {} обновлен", user.getId());
         return user;
+    }
+
+    public boolean deleteUserById(Integer userId) {
+        return delete(DELETE_QUERY, userId);
     }
 }

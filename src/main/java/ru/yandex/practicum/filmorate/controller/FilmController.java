@@ -17,6 +17,7 @@ import ru.yandex.practicum.filmorate.storage.dto.FilmDto;
 import ru.yandex.practicum.filmorate.storage.dto.NewFilmRequest;
 import ru.yandex.practicum.filmorate.storage.dto.UpdateFilmRequest;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -56,7 +57,41 @@ public class FilmController {
     }
 
     @GetMapping("/films/popular")
-    public List<FilmDto> getPopularFilms(@RequestParam(defaultValue = "10") int count) {
-        return filmService.getPopularFilms(count);
+    public List<FilmDto> getPopularFilms(@RequestParam(defaultValue = "10") Integer count,
+                                         @RequestParam(required = false, name = "genreId") Integer genreId,
+                                         @RequestParam(required = false, name = "year") Integer year) {
+        return filmService.getPopularFilms(count, genreId, year);
+    }
+
+    @GetMapping("/films/director/{directorId}")
+    public List<FilmDto> getDirectorFilmsSortedByYearOrLikes(@RequestParam String sortBy,
+                                                             @PathVariable Integer directorId) {
+        List<FilmDto> filmsList = new ArrayList<>();
+
+        if (sortBy.equals("year")) {
+            filmsList = filmService.getFilmsByDirectorSortByYear(directorId);
+        }
+
+        if (sortBy.equals("likes")) {
+            filmsList = filmService.getFilmsByDirectorSortByLike(directorId);
+        }
+
+        return filmsList;
+    }
+
+    @GetMapping("/films/common")
+    public List<FilmDto> getCommonFilms(@RequestParam Integer userId, @RequestParam Integer friendId) {
+        return filmService.getCommonFilms(userId, friendId);
+    }
+
+    @GetMapping("/films/search")
+    public List<FilmDto> getSearch(@RequestParam(required = false, name = "query") String query,
+                                   @RequestParam(required = false, name = "by") String by) {
+        return filmService.getSearch(query, by);
+    }
+
+    @DeleteMapping("/films/{filmId}")
+    public FilmDto deleteFilmById(@PathVariable Integer filmId) {
+        return filmService.deleteFilmById(filmId);
     }
 }

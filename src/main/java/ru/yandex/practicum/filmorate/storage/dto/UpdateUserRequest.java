@@ -16,8 +16,8 @@ public class UpdateUserRequest {
     @NotBlank
     @Email
     private String email;
-    private String login;
     @NotBlank
+    private String login;
     private String name;
     @NotNull
     @Past

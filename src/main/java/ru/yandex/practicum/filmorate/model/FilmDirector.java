@@ -9,7 +9,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class FriendsIds {
-    private Integer userId;
-    private Integer friendId;
+public class FilmDirector {
+    private Integer filmId;
+    private Integer directorId;
 }

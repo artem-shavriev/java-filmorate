@@ -13,6 +13,7 @@ public class FilmGenreStorage extends BaseStorage<FilmGenre> {
     private static final String FIND_BY_FILM_ID_QUERY = "SELECT * FROM FILM_GENRE WHERE FILM_ID = ?";
     private static final String INSERT_QUERY = "INSERT INTO FILM_GENRE (FILM_ID, GENRE_ID)" +
             "VALUES (?, ?)";
+    private static final String DELETE_BY_FILM_ID_QUERY = "DELETE FROM FILM_GENRE WHERE FILM_ID = ?";
 
     public FilmGenreStorage(JdbcTemplate jdbc, RowMapper<FilmGenre> mapper) {
         super(jdbc, mapper);
@@ -23,12 +24,14 @@ public class FilmGenreStorage extends BaseStorage<FilmGenre> {
     }
 
     public void addGenre(FilmGenre genre) {
-
         update(INSERT_QUERY, genre.getFilmId(), genre.getGenreId());
-
     }
 
     public List<FilmGenre> findGenresByFilmId(Integer filmId) {
         return findMany(FIND_BY_FILM_ID_QUERY, filmId);
+    }
+
+    public boolean deleteFilmGenreByFilmId(Integer filmId) {
+        return delete(DELETE_BY_FILM_ID_QUERY, filmId);
     }
 }
