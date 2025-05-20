@@ -71,7 +71,7 @@ Backend-сервис для работы с фильмами и пользова
 | `POST` | `/users` | Create new user | `{"email": "user@mail.com", "login": "user123", "name": "John", "birthday": "1990-01-01"}` |
 | `PUT` | `/users` | Update user | Same as POST |
 
-#####🔍 Get Users
+##### 🔍 Get Users
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
@@ -81,7 +81,7 @@ Backend-сервис для работы с фильмами и пользова
 | `GET` | `/users/{id}/feed` | Get users feed |
 | `GET` | `/users/{id}/recommendations` | Get users recommendations |
 
-#####👫 Friends
+##### 👫 Friends
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
@@ -91,7 +91,7 @@ Backend-сервис для работы с фильмами и пользова
 | `GET` | `/users/{id}/friends/common/{otherId}` | Get common friends |
 
 ###  Reviews Controller
-#####📝 Basic operations with reviews
+##### 📝 Basic operations with reviews
 
 | Метод  | Эндпоинт               | Описание                             | Тело запроса                                                                 |
 |--------|-------------------------|--------------------------------------|------------------------------------------------------------------------------|
@@ -145,7 +145,7 @@ Backend-сервис для работы с фильмами и пользова
 | `GET`  | `/mpa`     | Получить список всех возрастных рейтингов     | -         |
 | `GET`  | `/mpa/{id}`| Получить возрастной рейтинг по ID             | `id`      |
 
-##🔄 Status Codes
+## 🔄 Status Codes
 200 OK - Successful operation
 
 201 Created - Resource created
